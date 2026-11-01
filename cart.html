@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>購物車結算 - TSSC13TH</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <!-- 頂部導覽列 (統一排版) -->
+  <header>
+    <div class="nav-brand">
+      <img src="tpshcmcsc.png" alt="TSS 標誌" onerror="this.src='tpshcmcsc.png'">
+      <span>TSSC13TH 公投與周邊專區</span>
+    </div>
+    <nav class="nav-links">
+      <a href="index.html">首頁與通知</a>
+      <a href="cart.html" class="active">🛒 購物車結算</a>
+      <a href="query.html">📋 查詢我的訂單</a>
+      <a href="admin.html">⚙️ 管理員後台</a>
+    </nav>
+  </header>
+
+  <div class="container">
+    <div class="card">
+      <h2>🛒 您的預購購物車結算</h2>
+      
+      <!-- 購物車商品列表區 -->
+      <div id="cartItemsContainer">載入中...</div>
+      
+      <!-- 結算表單區塊 (當購物車有商品時顯示) -->
+      <div id="checkoutFormContainer" style="display:none; margin-top: 24px; border-top: 2px solid #e5e7eb; padding-top: 20px;">
+        <h3>📝 填寫結算與實名驗證資料</h3>
+        <form onsubmit="submitCheckout(event)">
+          <div class="form-group">
+            <label for="studentEmail">學校官方信箱 (7位學號)：</label>
+            <input type="email" id="studentEmail" required placeholder="1234567@tshcmc.edu.vn" pattern="^\d{7}@tshcmc\.edu\.vn$">
+            <small>⚠️ 必須使用 7 位數字學號之學校官方信箱（@tshcmc.edu.vn）進行結算。</small>
+          </div>
+          
+          <div class="form-group">
+            <label for="studentName">真實姓名 / 班級座號：</label>
+            <input type="text" id="studentName" required placeholder="例如：Nguyen Van A (12A1)">
+          </div>
+
+          <button type="submit" id="submitBtn" class="submit-btn">🚀 確認送出所有購物車訂單</button>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // 正式綁定您的 GAS 網頁應用程式網址
+    const GAS_API_URL = "https://script.google.com/macros/s/AKfycbx7o4EJKoFsiJojM3FfS0pqj8n77mrdDR318Srn7DRy0kkFjMvogprtnHD0loSKqcB0/exec";
+
+    window.onload = renderCart;
+
+    // 格式化越盾金額
+    function formatVND(amount) {
+      return new Intl.NumberFormat('vi-VN').format(amount) + ' ₫';
+    }
+
+    // 渲染購物車內容
+    function renderCart() {
+      let cart = JSON.parse(localStorage.getItem('tss_cart') || '[]');
+      const container = document.getElementById('cartItemsContainer');
+      const checkoutBox = document.getElementById('checkoutFormContainer');
+
+      if (cart.length === 0) {
+        container.innerHTML = `<div class="empty-state">購物車目前是空的，快去首頁選購吧！</div>`;
+        checkoutBox.style.display = 'none';
+        return;
+      }
+
+      checkoutBox.style.display = 'block';
+      let grandTotal = 0;
+
+      container.innerHTML = `
+        <div style="display: flex; flex-direction: column; gap: 12px;">
+          ${cart.map((item, index) => {
+            let itemTotal = Number(item.price) * item.quantity;
+            grandTotal += itemTotal;
+            return `
+              <div style="display:flex; justify-content:space-between; align-items:center; padding:12px; background:#f9fafb; border:1px solid #e5e7eb; border-radius:8px;">
+                <div style="display:flex; align-items:center; gap:12px;">
+                  <img src="${item.img1 || 'tpshcmcsc.png'}" alt="圖" style="width:50px; height:50px; object-fit:cover; border-radius:6px;">
+                  <div>
+                    <strong>${item.title}</strong><br>
+                    <small style="color:#6b7280;">單價：${formatVND(item.price)} | 數量：${item.quantity}</small>
+                  </div>
+                </div>
+                <div style="display:flex; align-items:center; gap:16px;">
+                  <span style="font-weight:bold; color:#0284c7;">${formatVND(itemTotal)}</span>
+                  <button type="button" onclick="removeItem(${index})" style="background:#ef4444; color:#fff; border:none; padding:6px 12px; border-radius:6px; cursor:pointer; font-size:0.85rem;">移除</button>
+                </div>
+              </div>
+            `;
+          }).join('')}
+          <div style="text-align:right; font-size:1.2rem; font-weight:bold; margin-top:12px; color:#111827;">
+            總金額合計：<span style="color:#0284c7;">${formatVND(grandTotal)}</span>
+          </div>
+        </div>
+      `;
+    }
+
+    // 移除單一商品
+    function removeItem(index) {
+      let cart = JSON.parse(localStorage.getItem('tss_cart') || '[]');
+      cart.splice(index, 1);
+      localStorage.setItem('tss_cart', JSON.stringify(cart));
+      renderCart();
+    }
+
+    // 提交結算
+    async function submitCheckout(e) {
+      e.preventDefault();
+      const email = document.getElementById('studentEmail').value.trim();
+      const name = document.getElementById('studentName').value.trim();
+      let cart = JSON.parse(localStorage.getItem('tss_cart') || '[]');
+
+      const strictEmailRegex = /^\d{7}@tshcmc\.edu\.vn$/;
+      if (!strictEmailRegex.test(email)) {
+        alert('格式錯誤！必須使用「7位數字學號 + @tshcmc.edu.vn」進行結算。');
+        return;
+      }
+
+      if (cart.length === 0) {
+        alert('購物車是空的！');
+        return;
+      }
+
+      const btn = document.getElementById('submitBtn');
+      btn.disabled = true;
+      btn.innerText = "正在送出訂單...";
+
+      try {
+        // 迴圈將購物車每一項商品透過 submitOrder 送至後端
+        for (let item of cart) {
+          await fetch(GAS_API_URL, {
+            method: "POST",
+            body: JSON.stringify({
+              action: "submitOrder",
+              productId: item.product_id,
+              email: email,
+              name: name,
+              quantity: item.quantity,
+              remark: "購物車批次結算"
+            })
+          });
+        }
+
+        alert('🎉 恭喜！您的所有預購訂單已成功送出！');
+        localStorage.removeItem('tss_cart'); // 清空購物車
+        location.href = "query.html"; // 引導至查詢頁面
+      } catch (err) {
+        alert('送出訂單發生網路錯誤，請稍後再試。');
+        btn.disabled = false;
+        btn.innerText = "🚀 確認送出所有購物車訂單";
+      }
+    }
+  </script>
+</body>
+</html>
