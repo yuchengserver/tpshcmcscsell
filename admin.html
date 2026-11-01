@@ -6,7 +6,7 @@
   <title>TSS13TH 周邊商城 - 管理員後台</title>
   <link rel="stylesheet" href="style.css">
   <style>
-    /* 統計數據儀表板樣式 (配合白底主題) */
+    /* 統計數據儀表板樣式 */
     .dashboard-grid { 
       display: grid; 
       grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); 
@@ -21,54 +21,29 @@
       box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
       text-align: center; 
     }
-    .stat-card .label {
-      font-size: 0.9rem;
-      color: #6b7280;
-      font-weight: 500;
-    }
-    .stat-card .num { 
-      font-size: 1.6rem; 
-      font-weight: bold; 
-      color: #0284c7; 
-      margin-top: 6px; 
-    }
+    .stat-card .label { font-size: 0.9rem; color: #6b7280; font-weight: 500; }
+    .stat-card .num { font-size: 1.6rem; font-weight: bold; color: #0284c7; margin-top: 6px; }
     
-    /* 按鈕與選單調整 */
+    /* 按鈕樣式 */
     .btn-export { 
-      background-color: #166534; 
-      color: #ffffff; 
-      border: none; 
-      padding: 8px 16px; 
-      border-radius: 6px; 
-      cursor: pointer; 
-      font-weight: bold; 
-      font-size: 0.9rem;
-      transition: background 0.2s;
+      background-color: #166534; color: #fff; border: none; padding: 8px 16px; 
+      border-radius: 6px; cursor: pointer; font-weight: bold; font-size: 0.9rem; transition: background 0.2s; 
     }
-    .btn-export:hover { 
-      background-color: #15803d; 
+    .btn-export:hover { background-color: #15803d; }
+    
+    .btn-print { 
+      background-color: #2563eb; color: #fff; border: none; padding: 8px 16px; 
+      border-radius: 6px; cursor: pointer; font-weight: bold; font-size: 0.9rem; transition: background 0.2s; 
     }
-    .status-select { 
-      background: #ffffff; 
-      color: #374151; 
-      border: 1px solid #d1d5db; 
-      padding: 4px 8px; 
-      border-radius: 4px; 
-      font-size: 0.85rem;
-    }
-    .stock-input {
-      width: 70px; 
-      padding: 4px 6px; 
-      background: #ffffff; 
-      color: #111827; 
-      border: 1px solid #d1d5db; 
-      border-radius: 4px;
-    }
+    .btn-print:hover { background-color: #1d4ed8; }
+
+    .status-select { background: #fff; color: #374151; border: 1px solid #d1d5db; padding: 4px 8px; border-radius: 4px; font-size: 0.85rem; }
+    .stock-input { width: 70px; padding: 4px 6px; background: #fff; color: #111; border: 1px solid #d1d5db; border-radius: 4px; }
   </style>
 </head>
 <body>
 
-  <!-- 頂部導覽列 (與全站統一清爽風格，黑色會徽圖示) -->
+  <!-- 頂部導覽列 -->
   <header>
     <div class="nav-brand">
       <img src="tpshcmcsc.png" alt="TSSC13TH 標誌" style="filter: brightness(0) saturate(100%);">
@@ -107,7 +82,7 @@
         <div class="form-grid">
           <div class="form-group">
             <label for="prodTitle">商品名稱：</label>
-            <input type="text" id="prodTitle" required placeholder="例如：TSSC 13th 紀念帽T">
+            <input type="text" id="prodTitle" required placeholder="例如：TSS 13th 紀念帽T">
           </div>
           <div class="form-group">
             <label for="prodPrice">價格 (越盾 VND)：</label>
@@ -159,11 +134,14 @@
       </div>
     </div>
 
-    <!-- 4. 全表單訂單管理與 CSV 匯出 -->
+    <!-- 4. 全表單訂單管理、CSV 匯出與列印繳費單 -->
     <div class="admin-card">
-      <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:2px solid #e5e7eb; padding-bottom:10px; margin-bottom:16px;">
-        <h2 style="border:none; margin:0; padding:0;">📊 結構化訂單匯整與動態狀態管理</h2>
-        <button onclick="exportOrdersToCSV()" class="btn-export">📥 匯出 Excel / CSV 報表</button>
+      <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:2px solid #e5e7eb; padding-bottom:10px; margin-bottom:16px; flex-wrap:wrap; gap:10px;">
+        <h2 style="border:none; margin:0; padding:0;">📊 結構化訂單匯整與列印中心</h2>
+        <div style="display:flex; gap:8px;">
+          <button onclick="printClassSlips()" class="btn-print">🖨️ 依照班級列印繳費單</button>
+          <button onclick="exportOrdersToCSV()" class="btn-export">📥 匯出 Excel / CSV</button>
+        </div>
       </div>
 
       <div style="overflow-x: auto;">
@@ -188,7 +166,6 @@
   </div>
 
   <script>
-    // 正式綁定您的 GAS 網頁應用程式網址
     const GAS_API_URL = "https://script.google.com/macros/s/AKfycbx7o4EJKoFsiJojM3FfS0pqj8n77mrdDR318Srn7DRy0kkFjMvogprtnHD0loSKqcB0/exec";
     let globalOrdersData = [];
 
@@ -303,6 +280,120 @@
         method: "POST",
         body: JSON.stringify({ action: "updateProduct", productId: productId, newStatus: newStatus })
       });
+    }
+
+    // 🖨️ 依照班級分類並產生列印繳費單
+    function printClassSlips() {
+      if (globalOrdersData.length === 0) {
+        alert("目前沒有可列印的訂單數據！");
+        return;
+      }
+
+      // 從姓名欄位解析班級 (例如支援 "Nguyen Van A (12A1)" 或括號內的格式)
+      let classGroups = {};
+      globalOrdersData.forEach(o => {
+        let match = o.name.match(/\(([^)]+)\)/);
+        let className = match ? match[1].trim().toUpperCase() : "未分類班級";
+        if (!classGroups[className]) {
+          classGroups[className] = [];
+        }
+        classGroups[className].push(o);
+      });
+
+      // 建立列印專用視窗
+      let printWindow = window.open('', '_blank');
+      let htmlContent = `
+        <!DOCTYPE html>
+        <html lang="zh-Hant">
+        <head>
+          <meta charset="UTF-8">
+          <title>TSSC13TH 各班繳費單</title>
+          <style>
+            body { font-family: sans-serif; color: #111; margin: 0; padding: 20px; font-size: 14px; }
+            .class-page { page-break-after: always; margin-bottom: 40px; }
+            .class-page:last-child { page-break-after: avoid; }
+            h2 { border-bottom: 2px solid #000; padding-bottom: 6px; margin-bottom: 15px; display: flex; justify-content: space-between; }
+            table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+            th, td { border: 1px solid #333; padding: 8px 10px; text-align: left; }
+            th { background-color: #f3f4f6; }
+            .summary { margin-top: 15px; font-weight: bold; text-align: right; }
+            .sign-box { margin-top: 30px; display: flex; justify-content: space-between; font-size: 0.9rem; }
+            @media print {
+              .no-print { display: none; }
+            }
+          </style>
+        </head>
+        <body>
+          <div class="no-print" style="text-align: right; margin-bottom: 20px;">
+            <button onclick="window.print()" style="padding: 10px 20px; background: #2563eb; color: #fff; border: none; border-radius: 6px; cursor: pointer; font-size: 1rem; font-weight: bold;">🖨️ 直接列印全部繳費單</button>
+          </div>
+      `;
+
+      // 依班級迴圈產生區塊
+      for (let className in classGroups) {
+        let orders = classGroups[className];
+        let classTotal = 0;
+
+        htmlContent += `
+          <div class="class-page">
+            <h2>
+              <span>TSSC13TH 周邊預購繳費清單 - 班級：${className}</span>
+              <span style="font-size: 0.9rem; font-weight: normal;">列印日期：${new Date().toLocaleDateString()}</span>
+            </h2>
+            <table>
+              <thead>
+                <tr>
+                  <th>序號</th>
+                  <th>學生姓名</th>
+                  <th>學號信箱</th>
+                  <th>預購品項與備註</th>
+                  <th>數量</th>
+                  <th>應繳金額 (VND)</th>
+                  <th>繳費簽收 / 備註</th>
+                </tr>
+              </thead>
+              <tbody>
+        `;
+
+        orders.forEach((o, index) => {
+          classTotal += Number(o.total_price);
+          // 移除姓名後方的括號班級讓表格乾淨一點
+          let cleanName = o.name.replace(/\([^)]+\)/g, '').trim();
+          htmlContent += `
+            <tr>
+              <td>${index + 1}</td>
+              <td><strong>${cleanName}</strong></td>
+              <td><small>${o.email}</small></td>
+              <td>${o.product_title} <br><span style="color:#666; font-size:0.8rem;">${o.remark || ''}</span></td>
+              <td style="text-align:center;">${o.quantity}</td>
+              <td><strong>${Number(o.total_price).toLocaleString()} ₫</strong></td>
+              <td></td>
+            </tr>
+          `;
+        });
+
+        htmlContent += `
+              </tbody>
+            </table>
+            <div class="summary">
+              本班總計人數：${orders.length} 人 | 本班應收總金額：<span style="color:#0284c7; font-size:1.1rem;">${classTotal.toLocaleString()} ₫</span>
+            </div>
+            <div class="sign-box">
+              <div>班級負責人簽名：____________________</div>
+              <div>財務長複核：____________________</div>
+              <div>備註：請於收齊款項後交予學生會財務。</div>
+            </div>
+          </div>
+        `;
+      }
+
+      htmlContent += `
+        </body>
+        </html>
+      `;
+
+      printWindow.document.write(htmlContent);
+      printWindow.document.close();
     }
 
     function exportOrdersToCSV() {
