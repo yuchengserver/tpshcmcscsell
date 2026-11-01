@@ -22,8 +22,10 @@
     .modal-card select, .modal-card input { width: 100%; padding: 8px 12px; border: 1px solid #d1d5db; border-radius: 6px; font-size: 1rem; }
     .modal-actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px; }
     .btn-cancel { background: #9ca3af; color: white; border: none; padding: 8px 16px; border-radius: 6px; cursor: pointer; font-weight: bold; }
-    .btn-confirm { background: #2563eb; color: white; border: none; padding: 8px 16px; border-radius: 6px; cursor: pointer; font-weight: bold; }
-    .btn-confirm:hover { background: #1d4ed8; }
+    .btn-cart { background: #0284c7; color: white; border: none; padding: 8px 16px; border-radius: 6px; cursor: pointer; font-weight: bold; }
+    .btn-cart:hover { background: #0284c7; }
+    .btn-buy-now { background: #166534; color: white; border: none; padding: 8px 16px; border-radius: 6px; cursor: pointer; font-weight: bold; }
+    .btn-buy-now:hover { background: #15803d; }
   </style>
 </head>
 <body>
@@ -73,7 +75,7 @@
 
   </div>
 
-  <!-- 🛒 加入購物車數量與選項互動彈窗容器 -->
+  <!-- 🛒 互動彈窗容器 -->
   <div id="modalContainer"></div>
 
   <script>
@@ -129,10 +131,15 @@
 
     function createCardHTML(p, isOpen) {
       const imgSrc = p.img1 ? p.img1 : 'tpshcmcsc.png';
-      // 轉換成安全的 JSON 格式帶入函式中
       const encodedProduct = encodeURIComponent(JSON.stringify(p));
+      
       const actionButton = isOpen 
-        ? `<button onclick='openAddToCartModal("${encodedProduct}")' class="buy-btn">加入購物車</button>`
+        ? `
+            <div style="display:flex; gap:6px;">
+              <button onclick='openActionModal("${encodedProduct}", "cart")' class="buy-btn" style="background:#0284c7; padding:6px 10px; font-size:0.85rem;">加入購物車</button>
+              <button onclick='openActionModal("${encodedProduct}", "buyNow")' class="buy-btn" style="background:#166534; padding:6px 10px; font-size:0.85rem;">立即購買</button>
+            </div>
+          `
         : `<button class="buy-btn" style="background:#9ca3af; cursor:not-allowed;" disabled>敬請期待</button>`;
 
       return `
@@ -153,12 +160,11 @@
       `;
     }
 
-    // 팝업：開啟加入購物車數量與選項設定視窗
-    function openAddToCartModal(encodedProduct) {
+    // 彈窗：讓使用者選擇數量與規格（支援「加入購物車」或「立即購買」導向）
+    function openActionModal(encodedProduct, mode) {
       const product = JSON.parse(decodeURIComponent(encodedProduct));
       const modalContainer = document.getElementById('modalContainer');
 
-      // 解析後台傳來的規格選項 (以逗號隔開)
       let optionsHtml = '';
       if (product.options && product.options.trim() !== "") {
         let optArray = product.options.split(',').map(o => o.trim());
@@ -174,10 +180,14 @@
         optionsHtml = `<input type="hidden" id="modalOption" value="預設">`;
       }
 
+      let actionBtnHtml = mode === 'buyNow' 
+        ? `<button type="button" class="btn-buy-now" onclick='confirmBuyNow(${JSON.stringify(product)})'>🚀 立即結算下單</button>`
+        : `<button type="button" class="btn-cart" onclick='confirmAddToCart(${JSON.stringify(product)})'>🛒 確認加入購物車</button>`;
+
       modalContainer.innerHTML = `
         <div class="modal-overlay" onclick="closeModal(event)">
           <div class="modal-card" onclick="event.stopPropagation()">
-            <h3>🛒 加入購物車 - ${product.title}</h3>
+            <h3>${mode === 'buyNow' ? '⚡ 立即購買' : '🛒 加入購物車'} - ${product.title}</h3>
             <p style="color: #6b7280; font-size: 0.9rem; margin-bottom: 16px;">單價：${formatVND(product.price)}</p>
             
             ${optionsHtml}
@@ -189,7 +199,7 @@
 
             <div class="modal-actions">
               <button type="button" class="btn-cancel" onclick="closeModal()">取消</button>
-              <button type="button" class="btn-confirm" onclick='confirmAddToCart(${JSON.stringify(product)})'>確認加入</button>
+              ${actionBtnHtml}
             </div>
           </div>
         </div>
@@ -200,7 +210,7 @@
       document.getElementById('modalContainer').innerHTML = '';
     }
 
-    // 確認加入購物車（支援數量與選項）
+    // 確認加入購物車
     function confirmAddToCart(product) {
       const qtyInput = document.getElementById('modalQuantity');
       const optionInput = document.getElementById('modalOption');
@@ -214,24 +224,39 @@
       }
 
       let cart = JSON.parse(localStorage.getItem('tss_cart') || '[]');
-      
-      // 檢查購物車內是否已存在「相同商品 ID」且「相同規格」的品項
       let existing = cart.find(item => item.product_id === product.product_id && (item.selected_option || '預設') === selectedOption);
       
       if (existing) {
         existing.quantity += quantity;
       } else {
-        cart.push({ 
-          ...product, 
-          quantity: quantity, 
-          selected_option: selectedOption 
-        });
+        cart.push({ ...product, quantity: quantity, selected_option: selectedOption });
       }
 
       localStorage.setItem('tss_cart', JSON.stringify(cart));
       updateCartCount();
       closeModal();
       alert(`成功將「${product.title} (${selectedOption})」x ${quantity} 加入購物車！`);
+    }
+
+    // ⚡ 立即購買導向：清空目前購物車或直接覆蓋，並導向 cart.html 進行結算
+    function confirmBuyNow(product) {
+      const qtyInput = document.getElementById('modalQuantity');
+      const optionInput = document.getElementById('modalOption');
+      
+      const quantity = parseInt(qtyInput.value) || 1;
+      const selectedOption = optionInput ? optionInput.value : '預設';
+
+      if (quantity < 1) {
+        alert('購買數量至少須為 1 件！');
+        return;
+      }
+
+      // 建立單獨的快閃結算購物車（或直接把該筆物件塞入購物車並導向）
+      let cart = [{ ...product, quantity: quantity, selected_option: selectedOption }];
+      localStorage.setItem('tss_cart', JSON.stringify(cart));
+
+      // 直接導向購物車結算頁面
+      location.href = "cart.html";
     }
 
     function updateCartCount() {
