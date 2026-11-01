@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TSS13TH 周邊商城</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <!-- 頂部導覽列 -->
+  <header>
+    <div class="nav-brand">
+      <img src="tpshcmcsc.png" alt="TSS 標誌">
+      <span>TSS13TH 活動報名與周邊商城專區</span>
+    </div>
+    <nav class="nav-links">
+      <a href="index.html" class="active">首頁與通知</a>
+      <a href="buy.html">查詢我的訂單</a>
+      <a href="admin.html">管理員後台</a>
+    </nav>
+  </header>
+
+  <div class="container">
+
+    <!-- 規範提示區塊 -->
+    <div class="notice-box">
+      <h3>📌 周邊商城與購買規則</h3>
+      <ul>
+        <li><strong>身份驗證：</strong>本平台全面採用學校官方信箱（@tshcmc.edu.vn）進行實名驗證。</li>
+        <li><strong>防重複提交：</strong>每一位同學針對同一項商品僅能提交一次訂單。</li>
+        <li><strong>價格貨幣：</strong>所有商品價格均以越盾（VND / ₫）計價，請確認金額後進行匯款與填單。</li>
+      </ul>
+    </div>
+
+    <!-- 即時搜尋列 -->
+    <div class="search-bar-container">
+      <input type="text" id="searchInput" placeholder="🔍 輸入關鍵字搜尋周邊商品..." oninput="filterProducts()">
+    </div>
+
+    <!-- 目前開放中項目 -->
+    <div class="section-title">✨ 目前開放中的項目</div>
+    <div id="openProductsGrid" class="product-grid">
+      <div class="empty-state">載入中...</div>
+    </div>
+
+    <!-- 即將開始 / 預告中項目 -->
+    <div class="section-title">⏳ 即將開始 / 預告中</div>
+    <div id="upcomingProductsGrid" class="product-grid">
+      <div class="empty-state">目前暫無預告項目。</div>
+    </div>
+
+  </div>
+
+  <script>
+    // ⚠️ 請替換成您部署 GAS 後端取得的網頁應用程式網址 (Web App URL)
+    const GAS_API_URL = "YOUR_GAS_WEB_APP_URL_HERE";
+
+    let allProducts = [];
+
+    // 格式化越盾金額 (例如: 150000 -> 150.000 ₫)
+    function formatVND(amount) {
+      return new Intl.NumberFormat('vi-VN').format(amount) + ' ₫';
+    }
+
+    // 載入商品資料
+    async function fetchProducts() {
+      try {
+        const response = await fetch(`${GAS_API_URL}?action=getProducts`);
+        const result = await response.json();
+        
+        if (result.status === "success") {
+          allProducts = result.data;
+          renderProducts(allProducts);
+        } else {
+          document.getElementById('openProductsGrid').innerHTML = `<div class="empty-state">載入商品失敗：${result.message}</div>`;
+        }
+      } catch (error) {
+        console.error("無法連線至後端：", error);
+        // 若尚未串接 GAS，顯示預設空白狀態
+        document.getElementById('openProductsGrid').innerHTML = `<div class="empty-state">目前暫無項目。</div>`;
+        document.getElementById('upcomingProductsGrid').innerHTML = `<div class="empty-state">目前暫無項目。</div>`;
+      }
+    }
+
+    // 渲染商品列表
+    function renderProducts(products) {
+      const openGrid = document.getElementById('openProductsGrid');
+      const upcomingGrid = document.getElementById('upcomingProductsGrid');
+
+      const openList = products.filter(p => p.status === '開放中');
+      const upcomingList = products.filter(p => p.status === '預告中' || p.status === '即將開始');
+
+      // 渲染開放中
+      if (openList.length === 0) {
+        openGrid.innerHTML = `<div class="empty-state">目前暫無項目。</div>`;
+      } else {
+        openGrid.innerHTML = openList.map(p => createCardHTML(p)).join('');
+      }
+
+      // 渲染預告中
+      if (upcomingList.length === 0) {
+        upcomingGrid.innerHTML = `<div class="empty-state">目前暫無項目。</div>`;
+      } else {
+        upcomingGrid.innerHTML = upcomingList.map(p => createCardHTML(p)).join('');
+      }
+    }
+
+    // 建立單張商品卡片 HTML
+    function createCardHTML(p) {
+      const imgSrc = p.img1 ? p.img1 : 'tpshcmcsc.png';
+      return `
+        <div class="product-card">
+          <div class="product-img-container">
+            <img src="${imgSrc}" alt="${p.title}" onerror="this.onerror=null; this.src='tpshcmcsc.png';">
+            <div class="product-badge">庫存: ${p.stock}</div>
+          </div>
+          <div class="product-content">
+            <h4 class="product-title">${p.title}</h4>
+            <p class="product-desc">${p.description || '無詳細說明'}</p>
+            <div class="product-footer">
+              <span class="product-price">${formatVND(p.price)}</span>
+              <a href="buy.html?id=${p.product_id}" class="buy-btn">立即購買</a>
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    // 搜尋過濾功能
+    function filterProducts() {
+      const keyword = document.getElementById('searchInput').value.toLowerCase();
+      const filtered = allProducts.filter(p => 
+        p.title.toLowerCase().includes(keyword) || 
+        (p.description && p.description.toLowerCase().includes(keyword))
+      );
+      renderProducts(filtered);
+    }
+
+    // 頁面載入時抓取資料
+    window.onload = fetchProducts;
+  </script>
+</body>
+</html>
