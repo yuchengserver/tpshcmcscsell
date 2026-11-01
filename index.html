@@ -3,21 +3,22 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>TSS13TH 周邊商城</title>
+  <title>TSSC13TH 公投與周邊專區</title>
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-  <!-- 頂部導覽列 -->
+  <!-- 頂部導覽列 (符合最新設計排版) -->
   <header>
     <div class="nav-brand">
-      <img src="tpshcmcsc.png" alt="TSS 標誌">
-      <span>TSS13TH 活動報名與周邊商城專區</span>
+      <img src="tpshcmcsc.png" alt="TSS 標誌" onerror="this.src='tpshcmcsc.png'">
+      <span>TSSC13TH 公投專區</span>
     </div>
     <nav class="nav-links">
       <a href="index.html" class="active">首頁與通知</a>
-      <a href="buy.html">查詢我的訂單</a>
-      <a href="admin.html">管理員後台</a>
+      <a href="cart.html">🛒 購物車結算 (<span id="cartCount">0</span>)</a>
+      <a href="query.html">📋 查詢我的訂單</a>
+      <a href="admin.html">⚙️ 管理員後台</a>
     </nav>
   </header>
 
@@ -25,11 +26,11 @@
 
     <!-- 規範提示區塊 -->
     <div class="notice-box">
-      <h3>📌 周邊商城與購買規則</h3>
+      <h3>📌 公投與意見投遞規則</h3>
       <ul>
-        <li><strong>身份驗證：</strong>本平台全面採用學校官方信箱（@tshcmc.edu.vn）進行實名驗證。</li>
-        <li><strong>防重複提交：</strong>每一位同學針對同一項商品僅能提交一次訂單。</li>
-        <li><strong>價格貨幣：</strong>所有商品價格均以越盾（VND / ₫）計價，請確認金額後進行匯款與填單。</li>
+        <li><strong>實名驗證：</strong>為確保公平性，本平台全面採用學校官方信箱（@tshcmc.edu.vn）進行身分驗證。</li>
+        <li><strong>隱私保護：</strong>所有訂單與查詢皆需透過信箱與 6 位數安全驗證碼解鎖，確保最高隱私。</li>
+        <li><strong>價格貨幣：</strong>所有商品價格均以越盾（VND / ₫）計價，請確認金額後進行選購與結算。</li>
       </ul>
     </div>
 
@@ -63,6 +64,12 @@
       return new Intl.NumberFormat('vi-VN').format(amount) + ' ₫';
     }
 
+    // 頁面載入時抓取資料並更新購物車數量
+    window.onload = function() {
+      fetchProducts();
+      updateCartCount();
+    };
+
     // 載入商品資料
     async function fetchProducts() {
       try {
@@ -94,20 +101,24 @@
       if (openList.length === 0) {
         openGrid.innerHTML = `<div class="empty-state">目前暫無項目。</div>`;
       } else {
-        openGrid.innerHTML = openList.map(p => createCardHTML(p)).join('');
+        openGrid.innerHTML = openList.map(p => createCardHTML(p, true)).join('');
       }
 
-      // 渲染預告中
+      // 渲染預告中 (預告中不可加入購物車)
       if (upcomingList.length === 0) {
         upcomingGrid.innerHTML = `<div class="empty-state">目前暫無項目。</div>`;
       } else {
-        upcomingGrid.innerHTML = upcomingList.map(p => createCardHTML(p)).join('');
+        upcomingGrid.innerHTML = upcomingList.map(p => createCardHTML(p, false)).join('');
       }
     }
 
-    // 建立單張商品卡片 HTML
-    function createCardHTML(p) {
+    // 建立單張商品卡片 HTML (開放中顯示加入購物車，預告中顯示敬請期待)
+    function createCardHTML(p, isOpen) {
       const imgSrc = p.img1 ? p.img1 : 'tpshcmcsc.png';
+      const actionButton = isOpen 
+        ? `<button onclick='addToCart(${JSON.stringify(p)})' class="buy-btn">加入購物車</button>`
+        : `<button class="buy-btn" style="background:#9ca3af; cursor:not-allowed;" disabled>敬請期待</button>`;
+
       return `
         <div class="product-card">
           <div class="product-img-container">
@@ -119,11 +130,32 @@
             <p class="product-desc">${p.description || '無詳細說明'}</p>
             <div class="product-footer">
               <span class="product-price">${formatVND(p.price)}</span>
-              <a href="buy.html?id=${p.product_id}" class="buy-btn">立即購買</a>
+              ${actionButton}
             </div>
           </div>
         </div>
       `;
+    }
+
+    // 加入購物車功能 (使用 LocalStorage 暫存)
+    function addToCart(product) {
+      let cart = JSON.parse(localStorage.getItem('tss_cart') || '[]');
+      let existing = cart.find(item => item.product_id === product.product_id);
+      if (existing) {
+        existing.quantity += 1;
+      } else {
+        cart.push({ ...product, quantity: 1 });
+      }
+      localStorage.setItem('tss_cart', JSON.stringify(cart));
+      updateCartCount();
+      alert(`成功將「${product.title}」加入購物車！`);
+    }
+
+    // 更新導覽列購物車徽章數字
+    function updateCartCount() {
+      let cart = JSON.parse(localStorage.getItem('tss_cart') || '[]');
+      let total = cart.reduce((sum, item) => sum + item.quantity, 0);
+      document.getElementById('cartCount').innerText = total;
     }
 
     // 搜尋過濾功能
@@ -135,9 +167,6 @@
       );
       renderProducts(filtered);
     }
-
-    // 頁面載入時抓取資料
-    window.onload = fetchProducts;
   </script>
 </body>
 </html>

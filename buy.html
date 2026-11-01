@@ -3,48 +3,47 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>TSS13TH 周邊商城 - 預購填單</title>
+  <title>商品預購與填單 - TSSC13TH</title>
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-  <!-- 頂部導覽列 -->
+  <!-- 頂部導覽列 (統一設計排版) -->
   <header>
     <div class="nav-brand">
-      <img src="tpshcmcsc.png" alt="TSS 標誌">
-      <span>TSS13TH 周邊商城專區</span>
+      <img src="tpshcmcsc.png" alt="標誌" onerror="this.src='tpshcmcsc.png'">
+      <span>TSSC13TH 公投專區</span>
     </div>
     <nav class="nav-links">
       <a href="index.html">首頁與通知</a>
-      <a href="buy.html" class="active">查詢我的訂單 / 預購</a>
-      <a href="admin.html">管理員後台</a>
+      <a href="cart.html">🛒 購物車結算</a>
+      <a href="query.html">📋 查詢我的訂單</a>
+      <a href="admin.html">⚙️ 管理員後台</a>
     </nav>
   </header>
 
   <div class="container">
-
-    <!-- 預購填單區塊 -->
-    <div class="card">
-      <h2>📝 商品預購與下單填寫</h2>
+    <div class="card" style="max-width: 800px; margin: 0 auto;">
+      <h2>📝 單品預購與快速下單填寫</h2>
       
       <!-- 動態載入所選商品資訊 -->
-      <div id="selectedProductContainer" class="product-summary">
+      <div id="selectedProductContainer" class="product-summary" style="margin-top: 20px;">
         <img id="previewImg" src="tpshcmcsc.png" alt="商品圖片" onerror="this.onerror=null; this.src='tpshcmcsc.png';">
         <div class="product-info">
           <h3 id="previewTitle">載入中或未選擇特定商品...</h3>
-          <p id="previewDesc">請從首頁點選「立即購買」進入此頁面，或在下方自行選擇商品。</p>
+          <p id="previewDesc">請從首頁瀏覽商品，或在此確認您選購的單品資訊。</p>
           <div id="previewPrice" class="price">-- ₫</div>
         </div>
       </div>
 
-      <form id="orderForm" onsubmit="submitOrder(event)">
+      <form id="orderForm" onsubmit="submitOrder(event)" style="margin-top: 20px;">
         <!-- 隱藏的商品 ID -->
         <input type="hidden" id="productId" name="productId">
 
         <div class="form-group">
           <label for="studentEmail">學校官方信箱 (7位數字學號)：</label>
           <input type="email" id="studentEmail" required placeholder="例如：1234567@tshcmc.edu.vn" pattern="^\d{7}@tshcmc\.edu\.vn$">
-          <small>⚠️ 必須使用 7 位數字學號之學校官方信箱（例如：<code>1234567@tshcmc.edu.vn</code>）進行實名驗證與防刷單檢查。</small>
+          <small>⚠️ 必須使用 7 位數字學號之學校官方信箱進行實名驗證與防刷單檢查。</small>
         </div>
 
         <div class="form-group">
@@ -70,20 +69,6 @@
         <button type="submit" id="submitBtn" class="submit-btn">🚀 確認送出預購訂單</button>
       </form>
     </div>
-
-    <!-- 即時動態訂單查詢與追蹤區塊 -->
-    <div class="card">
-      <h2>🔍 即時動態訂單查詢與追蹤</h2>
-      <div class="form-group">
-        <label for="queryEmail">輸入您的 7 位數字學校信箱查詢：</label>
-        <div style="display: flex; gap: 8px;">
-          <input type="email" id="queryEmail" placeholder="1234567@tshcmc.edu.vn" pattern="^\d{7}@tshcmc\.edu\.vn$">
-          <button type="button" onclick="queryOrders()" style="padding: 10px 20px; background: #4b5563; color: #fff; border: none; border-radius: 6px; cursor: pointer;">查詢</button>
-        </div>
-      </div>
-      <div id="queryResult" style="margin-top: 16px;"></div>
-    </div>
-
   </div>
 
   <script>
@@ -104,6 +89,9 @@
       if (prodId) {
         document.getElementById('productId').value = prodId;
         await loadProductDetails(prodId);
+      } else {
+        document.getElementById('previewTitle').innerText = "未指定特定商品";
+        document.getElementById('previewDesc').innerText = "建議您直接至首頁瀏覽商品或使用購物車結算。";
       }
     };
 
@@ -139,6 +127,12 @@
     async function submitOrder(e) {
       e.preventDefault();
       const email = document.getElementById('studentEmail').value.trim();
+      const productId = document.getElementById('productId').value;
+
+      if (!productId) {
+        alert('尚未選擇任何商品，請返回首頁重新選擇！');
+        return;
+      }
       
       const strictEmailRegex = /^\d{7}@tshcmc\.edu\.vn$/;
       if (!strictEmailRegex.test(email)) {
@@ -148,7 +142,7 @@
 
       const orderData = {
         action: "submitOrder",
-        productId: document.getElementById('productId').value,
+        productId: productId,
         email: email,
         name: document.getElementById('studentName').value,
         quantity: document.getElementById('quantity').value,
@@ -167,46 +161,14 @@
         const result = await response.json();
         alert(result.message);
         if(result.status === "success") {
-          location.reload();
+          // 提交成功後引導至查詢頁面
+          location.href = "query.html";
         }
       } catch (err) {
         alert("提交發生錯誤，請檢查網路連線。");
       } finally {
         btn.disabled = false;
         btn.innerText = "🚀 確認送出預購訂單";
-      }
-    }
-
-    // 即時動態訂單查詢與追蹤
-    async function queryOrders() {
-      const email = document.getElementById('queryEmail').value.trim();
-      const strictEmailRegex = /^\d{7}@tshcmc\.edu\.vn$/;
-      
-      if (!strictEmailRegex.test(email)) {
-        alert('請輸入正確的 7 位數字學校信箱格式進行查詢！');
-        return;
-      }
-      
-      const resDiv = document.getElementById('queryResult');
-      resDiv.innerHTML = "查詢中...";
-
-      try {
-        const response = await fetch(`${GAS_API_URL}?action=queryOrders&email=${encodeURIComponent(email)}`);
-        const result = await response.json();
-        
-        if(result.status === "success" && result.data.length > 0) {
-          resDiv.innerHTML = result.data.map(o => `
-            <div style="background:#f3f4f6; padding:12px; border-radius:6px; margin-bottom:8px; font-size:0.9rem; border-left: 4px solid #0284c7;">
-              <strong>訂單編號：</strong>${o.order_id}<br>
-              <strong>預購商品：</strong>${o.title} | <strong>數量：</strong>${o.quantity}<br>
-              <strong>處理狀態：</strong><span style="color: #166534; font-weight: bold;">${o.status}</span>
-            </div>
-          `).join('');
-        } else {
-          resDiv.innerHTML = "<div class='empty-state' style='padding: 16px; font-size: 0.9rem;'>目前查無此信箱的預購紀錄。</div>";
-        }
-      } catch (e) {
-        resDiv.innerHTML = "<p style='color:red;'>查詢失敗，請稍後再試。</p>";
       }
     }
   </script>
