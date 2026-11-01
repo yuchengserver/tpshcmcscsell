@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TSS13TH 周邊商城 - 管理員後台</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <!-- 頂部導覽列 -->
+  <header>
+    <div class="nav-brand">
+      <img src="tpshcmcsc.png" alt="TSS 標誌">
+      <span>TSS13TH 周邊商城後台</span>
+    </div>
+    <nav class="nav-links">
+      <a href="index.html">首頁與通知</a>
+      <a href="buy.html">查詢我的訂單</a>
+      <a href="admin.html" class="active">管理員後台</a>
+    </nav>
+  </header>
+
+  <div class="container">
+
+    <!-- 商品上架表單區塊 -->
+    <div class="admin-card">
+      <h2>🛍️ 新增與上架周邊商品</h2>
+      
+      <form id="productForm" onsubmit="handleProductSubmit(event)">
+        <div class="form-grid">
+          <div class="form-group">
+            <label for="prodTitle">商品名稱：</label>
+            <input type="text" id="prodTitle" required placeholder="例如：TSS 13th 紀念帽T">
+          </div>
+
+          <div class="form-group">
+            <label for="prodPrice">價格 (越盾 VND)：</label>
+            <input type="number" id="prodPrice" min="0" step="500" required placeholder="例如：150000">
+            <small>單位：₫ (VND)</small>
+          </div>
+
+          <div class="form-group">
+            <label for="prodStock">限量 / 庫存數量：</label>
+            <input type="number" id="prodStock" min="1" required placeholder="例如：50">
+          </div>
+
+          <div class="form-group">
+            <label for="prodStatus">上架狀態：</label>
+            <select id="prodStatus">
+              <option value="開放中">目前開放中</option>
+              <option value="預告中">即將開始 / 預告中</option>
+              <option value="已完售">已完售</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>商品圖片連結 (最多 3 張)：</label>
+          <input type="url" id="img1" placeholder="主圖 URL (必填 - 建議填入圖片網址)" required style="margin-bottom: 8px;">
+          <input type="url" id="img2" placeholder="副圖 1 URL (選填)" style="margin-bottom: 8px;">
+          <input type="url" id="img3" placeholder="副圖 2 URL (選填)">
+        </div>
+
+        <div class="form-group full-width">
+          <label for="prodDesc">商品簡介與規格說明：</label>
+          <textarea id="prodDesc" rows="3" placeholder="請輸入材質、尺寸對照或詳細說明..."></textarea>
+        </div>
+
+        <button type="submit" id="submitBtn" class="action-btn">🚀 確認上架商品</button>
+      </form>
+    </div>
+
+    <!-- 現有商品清單與管理區塊 -->
+    <div class="admin-card">
+      <h2>📋 現有商城商品清單</h2>
+      <div style="overflow-x: auto;">
+        <table class="product-table">
+          <thead>
+            <tr>
+              <th>主圖</th>
+              <th>商品名稱</th>
+              <th>價格 (VND)</th>
+              <th>庫存</th>
+              <th>狀態</th>
+            </tr>
+          </thead>
+          <tbody id="adminProductTableBody">
+            <tr>
+              <td colspan="5" style="text-align: center; color: #6b7280;">載入中...</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+  </div>
+
+  <script>
+    // ⚠️ 請替換成您部署 GAS 後端取得的網頁應用程式網址 (Web App URL)
+    const GAS_API_URL = "YOUR_GAS_WEB_APP_URL_HERE";
+
+    // 格式化越盾金額
+    function formatVND(amount) {
+      return new Intl.NumberFormat('vi-VN').format(amount) + ' ₫';
+    }
+
+    // 頁面載入時抓取現有商品
+    window.onload = function() {
+      loadAdminProducts();
+    };
+
+    // 抓取並渲染後台商品列表
+    async function loadAdminProducts() {
+      const tbody = document.getElementById('adminProductTableBody');
+      try {
+        const response = await fetch(`${GAS_API_URL}?action=getProducts`);
+        const result = await response.json();
+        
+        if (result.status === "success" && result.data.length > 0) {
+          tbody.innerHTML = result.data.map(p => `
+            <tr>
+              <td><img src="${p.img1 || 'tpshcmcsc.png'}" alt="商品圖" onerror="this.onerror=null; this.src='tpshcmcsc.png';"></td>
+              <td><strong>${p.title}</strong><br><small style="color:#6b7280;">${p.product_id}</small></td>
+              <td style="color:#0284c7; font-weight:bold;">${formatVND(p.price)}</td>
+              <td>${p.stock}</td>
+              <td><span style="padding:2px 8px; border-radius:4px; font-size:0.8rem; background:${p.status === '開放中' ? '#dcfce7; color:#166534;' : '#f3f4f6; color:#374151;'}">${p.status}</span></td>
+            </tr>
+          `).join('');
+        } else {
+          tbody.innerHTML = `<tr><td colspan="5" style="text-align: center; color: #6b7280;">目前尚無任何上架商品。</td></tr>`;
+        }
+      } catch (error) {
+        console.error("載入失敗", error);
+        tbody.innerHTML = `<tr><td colspan="5" style="text-align: center; color: #ef4444;">無法連線至後端載入資料。</td></tr>`;
+      }
+    }
+
+    // 提交商品上架
+    async function handleProductSubmit(e) {
+      e.preventDefault();
+      
+      const productData = {
+        action: "addProduct",
+        title: document.getElementById('prodTitle').value,
+        price: document.getElementById('prodPrice').value,
+        stock: document.getElementById('prodStock').value,
+        status: document.getElementById('prodStatus').value,
+        img1: document.getElementById('img1').value,
+        img2: document.getElementById('img2').value,
+        img3: document.getElementById('img3').value,
+        description: document.getElementById('prodDesc').value
+      };
+
+      const btn = document.getElementById('submitBtn');
+      btn.disabled = true;
+      btn.innerText = "上架中...";
+
+      try {
+        const response = await fetch(GAS_API_URL, {
+          method: "POST",
+          body: JSON.stringify(productData)
+        });
+        const result = await response.json();
+        
+        alert(result.message);
+        if (result.status === "success") {
+          document.getElementById('productForm').reset();
+          loadAdminProducts(); // 重新整理列表
+        }
+      } catch (err) {
+        alert("上架發生錯誤，請檢查網路或 GAS 網址。");
+      } finally {
+        btn.disabled = false;
+        btn.innerText = "🚀 確認上架商品";
+      }
+    }
+  </script>
+</body>
+</html>

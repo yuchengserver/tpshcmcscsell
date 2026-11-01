@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TSS13TH 周邊商城 - 預購填單</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <!-- 頂部導覽列 -->
+  <header>
+    <div class="nav-brand">
+      <img src="tpshcmcsc.png" alt="TSS 標誌">
+      <span>TSS13TH 周邊商城專區</span>
+    </div>
+    <nav class="nav-links">
+      <a href="index.html">首頁與通知</a>
+      <a href="buy.html" class="active">查詢我的訂單 / 預購</a>
+      <a href="admin.html">管理員後台</a>
+    </nav>
+  </header>
+
+  <div class="container">
+
+    <!-- 預購填單區塊 -->
+    <div class="card">
+      <h2>📝 商品預購與下單填寫</h2>
+      
+      <!-- 動態載入所選商品資訊 -->
+      <div id="selectedProductContainer" class="product-summary">
+        <img id="previewImg" src="tpshcmcsc.png" alt="商品圖片" onerror="this.onerror=null; this.src='tpshcmcsc.png';">
+        <div class="product-info">
+          <h3 id="previewTitle">載入中或未選擇特定商品...</h3>
+          <p id="previewDesc">請從首頁點選「立即購買」進入此頁面，或在下方自行選擇商品。</p>
+          <div id="previewPrice" class="price">-- ₫</div>
+        </div>
+      </div>
+
+      <form id="orderForm" onsubmit="submitOrder(event)">
+        <!-- 隱藏的商品 ID -->
+        <input type="hidden" id="productId" name="productId">
+
+        <div class="form-group">
+          <label for="studentEmail">學校官方信箱 (Email)：</label>
+          <input type="email" id="studentEmail" required placeholder="sXXXXXX@tshcmc.edu.vn" pattern=".+@tshcmc\.edu\.vn">
+          <small>⚠️ 必須使用學校官方信箱（@tshcmc.edu.vn）進行實名驗證與防重複提交檢查。</small>
+        </div>
+
+        <div class="form-group">
+          <label for="studentName">真實姓名 / 班級座號：</label>
+          <input type="text" id="studentName" required placeholder="例如：Nguyen Van A (12A1)">
+        </div>
+
+        <div class="form-group">
+          <label for="quantity">購買數量：</label>
+          <input type="number" id="quantity" min="1" value="1" required onchange="calculateTotal()">
+        </div>
+
+        <div class="form-group">
+          <label>總金額試算 (越盾 VND)：</label>
+          <div id="totalPriceDisplay" style="font-size: 1.2rem; font-weight: bold; color: #0284c7; padding: 6px 0;">0 ₫</div>
+        </div>
+
+        <div class="form-group">
+          <label for="remark">備註說明 (尺寸/顏色等選填)：</label>
+          <textarea id="remark" rows="2" placeholder="例如：尺寸 L、顏色黑色..."></textarea>
+        </div>
+
+        <button type="submit" id="submitBtn" class="submit-btn">🚀 確認送出預購訂單</button>
+      </form>
+    </div>
+
+    <!-- 訂單查詢區塊 -->
+    <div class="card">
+      <h2>🔍 查詢我的訂單狀態</h2>
+      <div class="form-group">
+        <label for="queryEmail">輸入您的學校信箱查詢：</label>
+        <div style="display: flex; gap: 8px;">
+          <input type="email" id="queryEmail" placeholder="sXXXXXX@tshcmc.edu.vn">
+          <button type="button" onclick="queryOrders()" style="padding: 10px 20px; background: #4b5563; color: #fff; border: none; border-radius: 6px; cursor: pointer;">查詢</button>
+        </div>
+      </div>
+      <div id="queryResult" style="margin-top: 16px;"></div>
+    </div>
+
+  </div>
+
+  <script>
+    // ⚠️ 請替換成您部署 GAS 後端取得的網頁應用程式網址 (Web App URL)
+    const GAS_API_URL = "YOUR_GAS_WEB_APP_URL_HERE";
+    let currentProductPrice = 0;
+
+    // 格式化越盾
+    function formatVND(amount) {
+      return new Intl.NumberFormat('vi-VN').format(amount) + ' ₫';
+    }
+
+    // 取得網址列參數（接收從首頁傳來的商品 ID）
+    window.onload = async function() {
+      const urlParams = new URLSearchParams(window.location.search);
+      const prodId = urlParams.get('id');
+
+      if (prodId) {
+        document.getElementById('productId').value = prodId;
+        await loadProductDetails(prodId);
+      }
+    };
+
+    // 從後端撈取指定商品細節
+    async function loadProductDetails(prodId) {
+      try {
+        const response = await fetch(`${GAS_API_URL}?action=getProducts`);
+        const result = await response.json();
+        if (result.status === "success") {
+          const product = result.data.find(p => p.product_id === prodId);
+          if (product) {
+            document.getElementById('previewTitle').innerText = product.title;
+            document.getElementById('previewDesc').innerText = product.description || '';
+            document.getElementById('previewImg').src = product.img1 || 'tpshcmcsc.png';
+            currentProductPrice = Number(product.price);
+            document.getElementById('previewPrice').innerText = formatVND(currentProductPrice);
+            calculateTotal();
+          }
+        }
+      } catch (e) {
+        console.error("載入商品資訊失敗", e);
+      }
+    }
+
+    // 計算總金額
+    function calculateTotal() {
+      const qty = document.getElementById('quantity').value || 1;
+      const total = currentProductPrice * qty;
+      document.getElementById('totalPriceDisplay').innerText = formatVND(total);
+    }
+
+    // 送出訂單
+    async function submitOrder(e) {
+      e.preventDefault();
+      const email = document.getElementById('studentEmail').value;
+      
+      if (!email.endsWith('@tshcmc.edu.vn')) {
+        alert('必須使用學校官方信箱（@tshcmc.edu.vn）才能提交預購！');
+        return;
+      }
+
+      const orderData = {
+        action: "submitOrder",
+        productId: document.getElementById('productId').value,
+        email: email,
+        name: document.getElementById('studentName').value,
+        quantity: document.getElementById('quantity').value,
+        remark: document.getElementById('remark').value
+      };
+
+      const btn = document.getElementById('submitBtn');
+      btn.disabled = true;
+      btn.innerText = "提交中...";
+
+      try {
+        const response = await fetch(GAS_API_URL, {
+          method: "POST",
+          body: JSON.stringify(orderData)
+        });
+        const result = await response.json();
+        alert(result.message);
+        if(result.status === "success") {
+          location.reload();
+        }
+      } catch (err) {
+        alert("提交發生錯誤，請稍後再試。");
+      } finally {
+        btn.disabled = false;
+        btn.innerText = "🚀 確認送出預購訂單";
+      }
+    }
+
+    // 查詢訂單
+    async function queryOrders() {
+      const email = document.getElementById('queryEmail').value;
+      if (!email) {
+        alert('請輸入信箱');
+        return;
+      }
+      const resDiv = document.getElementById('queryResult');
+      resDiv.innerHTML = "查詢中...";
+
+      try {
+        const response = await fetch(`${GAS_API_URL}?action=queryOrders&email=${encodeURIComponent(email)}`);
+        const result = await response.json();
+        if(result.status === "success" && result.data.length > 0) {
+          resDiv.innerHTML = result.data.map(o => `
+            <div style="background:#f3f4f6; padding:10px; border-radius:6px; margin-bottom:8px; font-size:0.9rem;">
+              <strong>商品：</strong>${o.title} | <strong>數量：</strong>${o.quantity} | <strong>狀態：</strong>${o.status}
+            </div>
+          `).join('');
+        } else {
+          resDiv.innerHTML = "<p style='color:#6b7280;'>查無此信箱的預購紀錄。</p>";
+        }
+      } catch (e) {
+        resDiv.innerHTML = "<p style='color:red;'>查詢失敗</p>";
+      }
+    }
+  </script>
+</body>
+</html>
