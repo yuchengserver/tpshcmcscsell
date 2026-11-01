@@ -3,122 +3,48 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>TSS13TH 周邊商城 - 管理員後台</title>
+  <title>TSS13TH 周邊商城 - 高效後台管理中心</title>
   <link rel="stylesheet" href="style.css">
   <style>
-    /* 這裡覆蓋 style.css 中的通用樣式，將後台改成黑色主題 */
-    
-    /* 1. 將頂部導覽列改成黑色背景，文字與會徽改成白色 */
-    header {
-      background: #1a1a1a !important; /* 黑色背景 */
-      border-bottom: 1px solid #333 !important;
-    }
-    .nav-brand span {
-      color: #ffffff !important; /* 白色文字 */
-    }
-    .nav-links a {
-      color: #aaaaaa !important; /* 深灰色文字 */
-    }
-    .nav-links a.active, .nav-links a:hover {
-      background-color: #333333 !important;
-      color: #ffffff !important;
-    }
-    
-    /* 2. 移除原會徽圖片，使用 CSS 建立黑色實心圓會徽 */
-    .nav-brand img {
-      display: none; /* 隱藏原圖 */
-    }
+    /* 黑色主題覆蓋樣式 */
+    body { background-color: #121212; color: #eeeeee; }
+    header { background: #1a1a1a !important; border-bottom: 1px solid #333 !important; }
+    .nav-brand span { color: #ffffff !important; }
+    .nav-links a { color: #aaaaaa !important; }
+    .nav-links a.active, .nav-links a:hover { background-color: #333333 !important; color: #ffffff !important; }
+    .nav-brand img { display: none; }
     .nav-brand::before {
-      content: '';
-      display: block;
-      height: 32px;
-      width: 32px;
-      background-color: #ffffff; /* 黑色主題下的白色圓 */
-      border-radius: 50%;
-      margin-right: 12px;
+      content: ''; display: block; height: 32px; width: 32px;
+      background-color: #ffffff; border-radius: 50%; margin-right: 12px;
     }
-
-    /* 3. 將主要卡片與表單背景改成深灰色，文字改成白色 */
-    body {
-      background-color: #121212; /* 更深的黑色背景 */
-      color: #eeeeee;
-    }
-    .admin-card {
-      background: #1a1a1a !important; /* 深灰色卡片 */
-      border: 1px solid #333 !important;
-      color: #eeeeee;
-    }
-    .admin-card h2 {
-      color: #ffffff;
-      border-bottom: 2px solid #333;
-    }
-    .form-group label {
-      color: #aaaaaa;
-    }
+    .admin-card { background: #1a1a1a !important; border: 1px solid #333 !important; color: #eeeeee; }
+    .admin-card h2 { color: #ffffff; border-bottom: 2px solid #333; }
+    .form-group label { color: #aaaaaa; }
     .form-group input, .form-group select, .form-group textarea {
-      background-color: #262626; /* 輸入框背景 */
-      border: 1px solid #333;
-      color: #ffffff;
+      background-color: #262626; border: 1px solid #333; color: #ffffff;
     }
-    .form-group input:focus, .form-group select:focus, .form-group textarea:focus {
-      border-color: #ffffff; /* 聚焦時白色邊框 */
-    }
-
-    /* 4. 將確認送出按鈕改成純黑色與白色文字 */
-    .action-btn {
-      background-color: #000000 !important; /* 純黑色按鈕 */
-      color: #ffffff !important; /* 白色文字 */
-    }
-    .action-btn:hover {
-      background-color: #262626 !important; /* 滑過時變成深灰 */
-    }
-
-    /* 5. 表格與空白狀態樣式調整 */
-    .product-table th {
-      background-color: #262626;
-      color: #ffffff;
-      border: 1px solid #333;
-    }
-    .product-table td {
-      border: 1px solid #333;
-    }
-    .empty-state {
-      background: #1a1a1a;
-      border: 1px dashed #333;
-      color: #aaaaaa;
-    }
+    .action-btn { background-color: #000000 !important; color: #ffffff !important; }
+    .action-btn:hover { background-color: #262626 !important; }
+    .btn-export { background-color: #166534; color: #fff; border: none; padding: 8px 16px; border-radius: 6px; cursor: pointer; font-weight: bold; }
+    .btn-export:hover { background-color: #15803d; }
     
-    /* 6. 錯誤與成功提示樣式 */
-    .error-notice {
-      background-color: #450a0a;
-      color: #fecaca;
-      border: 1px solid #7f1d1d;
-      padding: 12px;
-      border-radius: 8px;
-      margin-bottom: 16px;
-      font-size: 0.9rem;
-      display: none; /* 預設隱藏 */
-    }
-    .success-notice {
-      background-color: #052e16;
-      color: #b91c1c;
-      border: 1px solid #166534;
-      padding: 12px;
-      border-radius: 8px;
-      margin-bottom: 16px;
-      font-size: 0.9rem;
-      display: none;
-    }
+    /* 統計數據儀表板 */
+    .dashboard-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; margin-bottom: 24px; }
+    .stat-card { background: #262626; padding: 16px; border-radius: 8px; border: 1px solid #333; text-align: center; }
+    .stat-card .num { font-size: 1.5rem; font-weight: bold; color: #38bdf8; margin-top: 4px; }
+    
+    /* 表格控制 */
+    .product-table th { background-color: #262626; color: #ffffff; border: 1px solid #333; }
+    .product-table td { border: 1px solid #333; }
+    .status-select { background: #121212; color: #fff; border: 1px solid #444; padding: 4px 8px; border-radius: 4px; }
   </style>
 </head>
 <body>
 
-  <!-- 頂部導覽列 -->
   <header>
     <div class="nav-brand">
-      <!-- 圖片已隱藏，由 CSS ::before 產生黑色會徽 -->
       <img src="tpshcmcsc.png" alt="TSS 標誌">
-      <span>TSS13TH 周邊商城後台</span>
+      <span>TSS13TH 微型 SaaS 後台管理系統</span>
     </div>
     <nav class="nav-links">
       <a href="index.html">首頁與通知</a>
@@ -129,76 +55,102 @@
 
   <div class="container">
 
-    <!-- 成功與錯誤提示區塊 (用於處理連線問題提示) -->
-    <div id="successNotice" class="success-notice">✅ 商品上架成功！</div>
-    <div id="errorNotice" class="error-notice">❌ 載入失敗或連線逾時。請檢查網路、GAS API 網址，或確認 GAS 專案已重新部署並「公開存取」。</div>
+    <!-- 1. 即時數據統計儀表板 -->
+    <div class="dashboard-grid">
+      <div class="stat-card">
+        <div>總預購訂單數</div>
+        <div id="statTotalOrders" class="num">0 筆</div>
+      </div>
+      <div class="stat-card">
+        <div>預計總營收 (VND)</div>
+        <div id="statTotalRevenue" class="num" style="color:#4ade80;">0 ₫</div>
+      </div>
+      <div class="stat-card">
+        <div>待付款核銷數</div>
+        <div id="statPendingOrders" class="num" style="color:#fbbf24;">0 筆</div>
+      </div>
+    </div>
 
-    <!-- 商品上架表單區塊 -->
+    <!-- 2. 商品上架與庫存控管區塊 -->
     <div class="admin-card">
-      <h2>🛍️ 新增與上架周邊商品</h2>
-      
+      <h2>🛍️ 周邊商品上架與動態庫存設定</h2>
       <form id="productForm" onsubmit="handleProductSubmit(event)">
         <div class="form-grid">
           <div class="form-group">
             <label for="prodTitle">商品名稱：</label>
             <input type="text" id="prodTitle" required placeholder="例如：TSS 13th 紀念帽T">
           </div>
-
           <div class="form-group">
             <label for="prodPrice">價格 (越盾 VND)：</label>
-            <input type="number" id="prodPrice" min="0" step="500" required placeholder="例如：150000">
-            <small>單位：₫ (VND)</small>
+            <input type="number" id="prodPrice" min="0" step="500" required placeholder="150000">
           </div>
-
           <div class="form-group">
-            <label for="prodStock">限量 / 庫存數量：</label>
-            <input type="number" id="prodStock" min="1" required placeholder="例如：50">
+            <label for="prodStock">限量庫存數量：</label>
+            <input type="number" id="prodStock" min="1" required placeholder="50">
           </div>
-
           <div class="form-group">
             <label for="prodStatus">上架狀態：</label>
             <select id="prodStatus">
               <option value="開放中">目前開放中</option>
               <option value="預告中">即將開始 / 預告中</option>
-              <option value="已完售">已完售</option>
+              <option value="已完售">已完售 / 下架</option>
             </select>
           </div>
         </div>
-
         <div class="form-group">
-          <label>商品圖片連結 (最多 3 張)：</label>
-          <input type="url" id="img1" placeholder="主圖 URL (必填 - 建議填入圖片網址)" required style="margin-bottom: 8px;">
-          <input type="url" id="img2" placeholder="副圖 1 URL (選填)" style="margin-bottom: 8px;">
-          <input type="url" id="img3" placeholder="副圖 2 URL (選填)">
+          <label>圖片連結 (主圖必填)：</label>
+          <input type="url" id="img1" placeholder="主圖 URL" required style="margin-bottom:8px;">
         </div>
-
         <div class="form-group full-width">
-          <label for="prodDesc">商品簡介與規格說明：</label>
-          <textarea id="prodDesc" rows="3" placeholder="請輸入材質、尺寸對照或詳細說明..."></textarea>
+          <label for="prodDesc">規格與說明：</label>
+          <textarea id="prodDesc" rows="2" placeholder="材質、尺寸說明..."></textarea>
         </div>
-
-        <button type="submit" id="submitBtn" class="action-btn">🚀 確認上架商品</button>
+        <button type="submit" id="submitBtn" class="action-btn">🚀 新增/上架周邊商品</button>
       </form>
     </div>
 
-    <!-- 現有商品清單與管理區塊 -->
+    <!-- 3. 商品清單管理區塊 -->
     <div class="admin-card">
-      <h2>📋 現有商城商品清單</h2>
+      <h2>📋 目前上架商品控管</h2>
       <div style="overflow-x: auto;">
         <table class="product-table">
           <thead>
             <tr>
-              <th>主圖</th>
+              <th>ID</th>
               <th>商品名稱</th>
               <th>價格 (VND)</th>
-              <th>庫存</th>
-              <th>狀態</th>
+              <th>彈性庫存</th>
+              <th>狀態調整</th>
             </tr>
           </thead>
           <tbody id="adminProductTableBody">
+            <tr><td colspan="5" style="text-align:center;">載入中...</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- 4. 全表單訂單管理與 CSV 匯出 -->
+    <div class="admin-card">
+      <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:2px solid #333; padding-bottom:10px; margin-bottom:16px;">
+        <h2 style="border:none; margin:0; padding:0;">📊 結構化訂單匯整與動態狀態管理</h2>
+        <button onclick="exportOrdersToCSV()" class="btn-export">📥 匯出 Excel / CSV 報表</button>
+      </div>
+
+      <div style="overflow-x: auto;">
+        <table class="product-table">
+          <thead>
             <tr>
-              <td colspan="5" style="text-align: center; color: #aaaaaa;">載入中...</td>
+              <th>訂單編號</th>
+              <th>訂購者資訊</th>
+              <th>預購商品</th>
+              <th>數量 / 總額</th>
+              <th>下單時間</th>
+              <th>即時狀態變更</th>
             </tr>
+          </thead>
+          <tbody id="adminOrderTableBody">
+            <tr><td colspan="6" style="text-align:center;">載入訂單數據中...</td></tr>
           </tbody>
         </table>
       </div>
@@ -207,69 +159,159 @@
   </div>
 
   <script>
-    // ⚠️ 請替換成您部署 GAS 後端取得的網頁應用程式網址 (Web App URL)
-    const GAS_API_URL = "YOUR_GAS_WEB_APP_URL_HERE";
+    // 正式綁定您的 GAS 網頁應用程式網址
+    const GAS_API_URL = "https://script.google.com/macros/s/AKfycbx7o4EJKoFsiJojM3FfS0pqj8n77mrdDR318Srn7DRy0kkFjMvogprtnHD0loSKqcB0/exec";
+    let globalOrdersData = [];
 
-    // 格式化越盾金額 (越盾計價)
     function formatVND(amount) {
       return new Intl.NumberFormat('vi-VN').format(amount) + ' ₫';
     }
 
-    // 頁面載入時抓取現有商品
     window.onload = function() {
       loadAdminProducts();
+      loadAllOrders();
     };
 
-    // 抓取並渲染後台商品列表 (強化錯誤處理)
     async function loadAdminProducts() {
       const tbody = document.getElementById('adminProductTableBody');
-      const errorNotice = document.getElementById('errorNotice');
-      
-      errorNotice.style.display = 'none'; // 先隱藏錯誤提示
-
       try {
-        // 設定 8 秒連線逾時，避免畫面卡死
-        const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 8000);
-        
-        const response = await fetch(`${GAS_API_URL}?action=getProducts`, { signal: controller.signal });
-        clearTimeout(timeoutId);
-        
-        const result = await response.json();
-        
+        const res = await fetch(`${GAS_API_URL}?action=getProducts`);
+        const result = await res.json();
         if (result.status === "success" && result.data.length > 0) {
           tbody.innerHTML = result.data.map(p => `
             <tr>
-              <td><img src="${p.img1 || 'tpshcmcsc.png'}" alt="商品圖" onerror="this.onerror=null; this.src='tpshcmcsc.png';"></td>
-              <td><strong>${p.title}</strong><br><small style="color:#aaaaaa;">${p.product_id}</small></td>
-              <td style="color:#ffffff; font-weight:bold;">${formatVND(p.price)}</td>
-              <td>${p.stock}</td>
-              <td><span style="padding:2px 8px; border-radius:4px; font-size:0.8rem; background:${p.status === '開放中' ? '#052e16; color:#a3e635;' : '#262626; color:#aaaaaa;'}">${p.status}</span></td>
+              <td><small>${p.product_id}</small></td>
+              <td><strong>${p.title}</strong></td>
+              <td>${formatVND(p.price)}</td>
+              <td>
+                <input type="number" value="${p.stock}" style="width:70px; padding:4px; background:#121212; color:#fff; border:1px solid #444;" onchange="updateProductStock('${p.product_id}', this.value)">
+              </td>
+              <td>
+                <select class="status-select" onchange="updateProductStatus('${p.product_id}', this.value)">
+                  <option value="開放中" ${p.status === '開放中' ? 'selected' : ''}>開放中</option>
+                  <option value="預告中" ${p.status === '預告中' ? 'selected' : ''}>預告中</option>
+                  <option value="已完售" ${p.status === '已完售' ? 'selected' : ''}>已完售</option>
+                </select>
+              </td>
             </tr>
           `).join('');
         } else {
-          tbody.innerHTML = `<tr><td colspan="5" class="empty-state">目前尚無任何上架商品。</td></tr>`;
+          tbody.innerHTML = `<tr><td colspan="5" style="text-align:center;">目前無上架商品。</td></tr>`;
         }
-      } catch (error) {
-        console.error("載入失敗", error);
-        tbody.innerHTML = `<tr><td colspan="5" style="text-align: center; color: #ef4444;">❌ 無法連線至後端載入資料。</td></tr>`;
-        
-        // 顯示連線失敗提示區塊
-        errorNotice.style.display = 'block';
-        errorNotice.innerText = `❌ 無法連線至後端。可能原因：網路問題、GAS URL 錯誤、或 GAS 未重新部署為「公開存取」。`;
+      } catch (e) {
+        tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; color:red;">連線失敗。</td></tr>`;
       }
     }
 
-    // 提交商品上架 (黑色按鈕、強化錯誤處理)
+    async function loadAllOrders() {
+      const tbody = document.getElementById('adminOrderTableBody');
+      try {
+        const res = await fetch(`${GAS_API_URL}?action=getAllOrders`);
+        const result = await res.json();
+        
+        if (result.status === "success") {
+          globalOrdersData = result.data;
+          
+          let totalRev = 0;
+          let pendingCount = 0;
+          globalOrdersData.forEach(o => {
+            totalRev += Number(o.total_price || 0);
+            if (o.status === '待付款') pendingCount++;
+          });
+          
+          document.getElementById('statTotalOrders').innerText = globalOrdersData.length + " 筆";
+          document.getElementById('statTotalRevenue').innerText = formatVND(totalRev);
+          document.getElementById('statPendingOrders').innerText = pendingCount + " 筆";
+
+          if (globalOrdersData.length > 0) {
+            tbody.innerHTML = globalOrdersData.map(o => `
+              <tr>
+                <td><small>${o.order_id}</small></td>
+                <td><strong>${o.name}</strong><br><small style="color:#aaa;">${o.email}</small></td>
+                <td>${o.product_title}<br><small style="color:#aaa;">${o.remark || '無備註'}</small></td>
+                <td>${o.quantity} 件<br><strong style="color:#38bdf8;">${formatVND(o.total_price)}</strong></td>
+                <td><small>${o.timestamp}</small></td>
+                <td>
+                  <select class="status-select" onchange="changeOrderStatus('${o.order_id}', this.value)">
+                    <option value="待付款" ${o.status === '待付款' ? 'selected' : ''}>待付款</option>
+                    <option value="已付款" ${o.status === '已付款' ? 'selected' : ''}>已付款</option>
+                    <option value="已取貨" ${o.status === '已取貨' ? 'selected' : ''}>已取貨</option>
+                    <option value="已取消" ${o.status === '已取消' ? 'selected' : ''}>已取消</option>
+                  </select>
+                </td>
+              </tr>
+            `).join('');
+          } else {
+            tbody.innerHTML = `<tr><td colspan="6" style="text-align:center;">尚無預購訂單紀錄。</td></tr>`;
+          }
+        }
+      } catch (e) {
+        tbody.innerHTML = `<tr><td colspan="6" style="text-align:center; color:red;">訂單載入失敗。</td></tr>`;
+      }
+    }
+
+    async function changeOrderStatus(orderId, newStatus) {
+      try {
+        const res = await fetch(GAS_API_URL, {
+          method: "POST",
+          body: JSON.stringify({ action: "updateOrderStatus", orderId: orderId, newStatus: newStatus })
+        });
+        const result = await res.json();
+        alert(result.message);
+        loadAllOrders();
+      } catch (e) { alert("狀態更新失敗！"); }
+    }
+
+    async function updateProductStock(productId, newStock) {
+      await fetch(GAS_API_URL, {
+        method: "POST",
+        body: JSON.stringify({ action: "updateProduct", productId: productId, newStock: newStock })
+      });
+    }
+
+    async function updateProductStatus(productId, newStatus) {
+      await fetch(GAS_API_URL, {
+        method: "POST",
+        body: JSON.stringify({ action: "updateProduct", productId: productId, newStatus: newStatus })
+      });
+    }
+
+    function exportOrdersToCSV() {
+      if (globalOrdersData.length === 0) {
+        alert("目前沒有可匯出的訂單數據！");
+        return;
+      }
+      
+      let csvContent = "\uFEFF";
+      csvContent += "訂單編號,學號信箱,姓名/班級,商品名稱,預購數量,總金額(VND),備註,下單時間,訂單狀態\n";
+      
+      globalOrdersData.forEach(o => {
+        let row = [
+          `"${o.order_id}"`,
+          `"${o.email}"`,
+          `"${o.name}"`,
+          `"${o.product_title}"`,
+          o.quantity,
+          o.total_price,
+          `"${o.remark || ''}"`,
+          `"${o.timestamp}"`,
+          `"${o.status}"`
+        ];
+        csvContent += row.join(",") + "\n";
+      });
+
+      const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+      const link = document.createElement("a");
+      const url = URL.createObjectURL(blob);
+      link.setAttribute("href", url);
+      link.setAttribute("download", `TSS13TH_Orders_Export_${new Date().toISOString().slice(0,10)}.csv`);
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    }
+
     async function handleProductSubmit(e) {
       e.preventDefault();
-      
-      const errorNotice = document.getElementById('errorNotice');
-      const successNotice = document.getElementById('successNotice');
-      
-      errorNotice.style.display = 'none';
-      successNotice.style.display = 'none';
-
       const productData = {
         action: "addProduct",
         title: document.getElementById('prodTitle').value,
@@ -277,45 +319,14 @@
         stock: document.getElementById('prodStock').value,
         status: document.getElementById('prodStatus').value,
         img1: document.getElementById('img1').value,
-        img2: document.getElementById('img2').value,
-        img3: document.getElementById('img3').value,
         description: document.getElementById('prodDesc').value
       };
-
-      const btn = document.getElementById('submitBtn');
-      btn.disabled = true;
-      btn.innerText = "上架中...";
-
-      try {
-        // 設定 10 秒提交逾時
-        const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 10000);
-
-        const response = await fetch(GAS_API_URL, {
-          method: "POST",
-          body: JSON.stringify(productData),
-          signal: controller.signal
-        });
-        clearTimeout(timeoutId);
-        
-        const result = await response.json();
-        
-        if (result.status === "success") {
-          successNotice.style.display = 'block';
-          successNotice.innerText = `✅ 商品上架成功！ID: ${result.productId}`;
-          document.getElementById('productForm').reset();
-          loadAdminProducts(); // 重新整理列表
-        } else {
-          errorNotice.style.display = 'block';
-          errorNotice.innerText = `❌ 上架失敗：${result.message}`;
-        }
-      } catch (err) {
-        console.error("提交錯誤", err);
-        errorNotice.style.display = 'block';
-        errorNotice.innerText = `❌ 連線錯誤或逾時。請檢查 GAS 網址與專案部署狀態。`;
-      } finally {
-        btn.disabled = false;
-        btn.innerText = "🚀 確認上架商品";
+      const res = await fetch(GAS_API_URL, { method: "POST", body: JSON.stringify(productData) });
+      const result = await res.json();
+      alert(result.message);
+      if (result.status === "success") {
+        document.getElementById('productForm').reset();
+        loadAdminProducts();
       }
     }
   </script>

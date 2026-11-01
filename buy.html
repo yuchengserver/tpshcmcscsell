@@ -8,7 +8,7 @@
 </head>
 <body>
 
-  <!-- 頂部導覽列 (響應式分流佈局) -->
+  <!-- 頂部導覽列 -->
   <header>
     <div class="nav-brand">
       <img src="tpshcmcsc.png" alt="TSS 標誌">
@@ -43,7 +43,6 @@
 
         <div class="form-group">
           <label for="studentEmail">學校官方信箱 (7位數字學號)：</label>
-          <!-- 強制限制必須為 7 位數字開頭結尾為 @tshcmc.edu.vn -->
           <input type="email" id="studentEmail" required placeholder="例如：1234567@tshcmc.edu.vn" pattern="^\d{7}@tshcmc\.edu\.vn$">
           <small>⚠️ 必須使用 7 位數字學號之學校官方信箱（例如：<code>1234567@tshcmc.edu.vn</code>）進行實名驗證與防刷單檢查。</small>
         </div>
@@ -88,11 +87,11 @@
   </div>
 
   <script>
-    // ⚠️ 請替換成您部署 GAS 後端取得的網頁應用程式網址 (Web App URL)
-    const GAS_API_URL = "YOUR_GAS_WEB_APP_URL_HERE";
+    // 正式綁定您的 GAS 網頁應用程式網址
+    const GAS_API_URL = "https://script.google.com/macros/s/AKfycbx7o4EJKoFsiJojM3FfS0pqj8n77mrdDR318Srn7DRy0kkFjMvogprtnHD0loSKqcB0/exec";
     let currentProductPrice = 0;
 
-    // 格式化越盾金額 (vi-VN)
+    // 格式化越盾金額
     function formatVND(amount) {
       return new Intl.NumberFormat('vi-VN').format(amount) + ' ₫';
     }
@@ -141,7 +140,6 @@
       e.preventDefault();
       const email = document.getElementById('studentEmail').value.trim();
       
-      // 嚴格檢查是否為 7 位數字開頭 @tshcmc.edu.vn
       const strictEmailRegex = /^\d{7}@tshcmc\.edu\.vn$/;
       if (!strictEmailRegex.test(email)) {
         alert('格式錯誤！必須使用「7位數字學號 + @tshcmc.edu.vn」（例如：1234567@tshcmc.edu.vn）才能提交預購。');
@@ -205,7 +203,6 @@
             </div>
           `).join('');
         } else {
-          // 優雅的空白狀態（Empty State）處理
           resDiv.innerHTML = "<div class='empty-state' style='padding: 16px; font-size: 0.9rem;'>目前查無此信箱的預購紀錄。</div>";
         }
       } catch (e) {
