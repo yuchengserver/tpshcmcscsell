@@ -5,6 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>查詢我的訂單 - TSSC13TH</title>
   <link rel="stylesheet" href="style.css">
+  <!-- 引入 Google Sign-In SDK -->
+  <script src="https://accounts.google.com/gsi/client" async defer></script>
 </head>
 <body>
 
@@ -23,103 +25,128 @@
   </header>
 
   <div class="container">
-    <div class="card" style="max-width: 600px; margin: 0 auto;">
+    <div class="card" style="max-width: 650px; margin: 0 auto;">
       <h2>🔒 訂單安全登入與查詢</h2>
-      <p style="font-size: 0.9rem; color: #6b7280;">為保障個人隱私，查詢訂單須透過學校官方信箱（@tshcmc.edu.vn）發送並輸入 6 位數安全驗證碼後方可解鎖。</p>
+      <p style="font-size: 0.9rem; color: #6b7280;">為保障個人隱私，查詢訂單須透過學校官方帳號（@tshcmc.edu.vn）進行 Google 一鍵實名登入。</p>
 
-      <!-- 步驟一：輸入信箱索取驗證碼 -->
-      <div id="step1" class="form-group" style="margin-top: 20px;">
-        <label>學校官方信箱 (7位學號)：</label>
-        <input type="email" id="loginEmail" placeholder="1234567@tshcmc.edu.vn" pattern="^\d{7}@tshcmc\.edu\.vn$">
-        <small>⚠️ 必須輸入 7 位數字學號之學校官方信箱接收驗證碼。</small>
-        <button type="button" onclick="sendCode()" class="submit-btn" style="margin-top: 12px;">📨 發送安全驗證碼</button>
-      </div>
+      <!-- 🔐 Google 身分驗證區塊 -->
+      <div id="authBox" style="margin-top: 20px; padding: 20px; background: #f3f4f6; border-radius: 8px; border: 1px solid #e5e7eb;">
+        <div id="notLoggedIn" style="text-align: center;">
+          <p style="margin-bottom: 12px; font-weight: bold; color: #374151;">請使用學校官方 Google 帳號登入以查詢訂單：</p>
+          <div id="g_id_onload" 
+               data-client_id="434067788519-6s6r01fhhtn2d5200hmu2aqsh9v6dtoh.apps.googleusercontent.com" 
+               data-callback="handleCredentialResponse" 
+               data-auto_prompt="false">
+          </div>
+          <div class="g_id_signin" data-type="standard" data-size="large" data-theme="outline" data-text="sign_in_with" data-shape="rectangular" data-logo_alignment="left"></div>
+          <small style="display:block; margin-top:8px; color:#6b7280;">⚠️ 必須使用 7 位數字學號之 @tshcmc.edu.vn 信箱。</small>
+        </div>
 
-      <!-- 步驟二：輸入驗證碼登入 -->
-      <div id="step2" style="display:none; margin-top: 20px;">
-        <div class="form-group">
-          <label>輸入收到的 6 位數驗證碼：</label>
-          <input type="text" id="loginCode" maxlength="6" placeholder="例如：482910">
-          <button type="button" onclick="verifyAndLogin()" class="submit-btn" style="margin-top: 12px; background: #166534;">🔓 驗證並解鎖訂單</button>
+        <div id="isLoggedIn" style="display:none; justify-content:space-between; align-items:center;">
+          <div>
+            <small style="color: #6b7280;">已驗證學校帳號：</small><br>
+            <strong id="verifiedEmailDisplay" style="color: #166534; font-size: 1.05rem;"></strong>
+          </div>
+          <button type="button" onclick="logout()" style="padding: 6px 12px; background: #ef4444; color: #fff; border: none; border-radius: 6px; cursor: pointer; font-size: 0.85rem;">切換帳號</button>
         </div>
       </div>
 
-      <!-- 訂單結果呈現區 (高隱私保護) -->
+      <!-- 訂單結果呈現區 -->
       <div id="orderResultContainer" style="margin-top: 24px;"></div>
     </div>
   </div>
 
   <script>
-    // 正式綁定您的 GAS 網頁應用程式網址
     const GAS_API_URL = "https://script.google.com/macros/s/AKfycbx7o4EJKoFsiJojM3FfS0pqj8n77mrdDR318Srn7DRy0kkFjMvogprtnHD0loSKqcB0/exec";
-    let targetEmail = "";
 
-    // 1. 發送驗證碼
-    async function sendCode() {
-      targetEmail = document.getElementById('loginEmail').value.trim();
-      const strictEmailRegex = /^\d{7}@tshcmc\.edu\.vn$/;
-      if (!strictEmailRegex.test(targetEmail)) {
-        alert('格式錯誤！必須為 7 位學號開頭之 @tshcmc.edu.vn 信箱。');
-        return;
-      }
-
-      alert('正在發送驗證碼至您的信箱，請稍候...');
-      try {
-        const res = await fetch(GAS_API_URL, {
-          method: "POST",
-          body: JSON.stringify({ action: "sendVerifyCode", email: targetEmail })
-        });
-        const result = await res.json();
-        alert(result.message);
-        if (result.status === "success") {
-          document.getElementById('step1').style.display = 'none';
-          document.getElementById('step2').style.display = 'block';
-        }
-      } catch (e) {
-        alert('發送失敗，請檢查網路連線。');
-      }
+    function formatVND(amount) {
+      return new Intl.NumberFormat('vi-VN').format(amount) + ' ₫';
     }
 
-    // 2. 驗證代碼並解鎖私密訂單
-    async function verifyAndLogin() {
-      const code = document.getElementById('loginCode').value.trim();
-      if (code.length !== 6) {
-        alert('請輸入完整的 6 位數驗證碼！');
+    window.onload = function() {
+      let savedEmail = localStorage.getItem('tss_logged_email');
+      if (savedEmail) {
+        setAuthenticatedEmail(savedEmail);
+        fetchUserOrders(savedEmail);
+      }
+    };
+
+    // Google OAuth 驗證邏輯
+    function handleCredentialResponse(response) {
+      const responsePayload = parseJwt(response.credential);
+      const email = responsePayload.email;
+
+      const studentRegex = /^\d{7}@tshcmc\.edu\.vn$/;
+      const isAdmin = (email === "yucheng.server@gmail.com");
+
+      if (!studentRegex.test(email) && !isAdmin) {
+        alert('【身分拒絕】本系統僅限使用學校官方信箱（@tshcmc.edu.vn）登入查詢！');
         return;
       }
 
+      localStorage.setItem('tss_logged_email', email);
+      setAuthenticatedEmail(email);
+      fetchUserOrders(email);
+    }
+
+    function parseJwt(token) {
+      var base64Url = token.split('.')[1];
+      var base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+      var jsonPayload = decodeURIComponent(atob(base64).split('').map(function(c) {
+          return '%' + ('0' + c.charCodeAt(0).toString(16)).slice(-2);
+      }).join(''));
+      return JSON.parse(jsonPayload);
+    }
+
+    function setAuthenticatedEmail(email) {
+      document.getElementById('notLoggedIn').style.display = 'none';
+      document.getElementById('isLoggedIn').style.display = 'flex';
+      document.getElementById('verifiedEmailDisplay').innerText = email;
+    }
+
+    function logout() {
+      localStorage.removeItem('tss_logged_email');
+      document.getElementById('notLoggedIn').style.display = 'block';
+      document.getElementById('isLoggedIn').style.display = 'none';
+      document.getElementById('orderResultContainer').innerHTML = "";
+    }
+
+    // 撈取指定 Email 的預購訂單
+    async function fetchUserOrders(email) {
       const resDiv = document.getElementById('orderResultContainer');
-      resDiv.innerHTML = "驗證中...";
+      resDiv.innerHTML = `<div style="text-align:center; color:#6b7280; padding:12px;">🔍 正在從後端系統檢索您的預購紀錄...</div>`;
 
       try {
-        const res = await fetch(`${GAS_API_URL}?action=verifyLogin&email=${encodeURIComponent(targetEmail)}&code=${code}`);
+        const res = await fetch(`${GAS_API_URL}?action=getUserOrders&email=${encodeURIComponent(email)}`);
         const result = await res.json();
 
         if (result.status === "success") {
-          document.getElementById('step2').style.display = 'none';
-          if (result.data.length === 0) {
-            resDiv.innerHTML = `<div class="empty-state">驗證成功！目前查無您的預購訂單紀錄。</div>`;
+          if (!result.data || result.data.length === 0) {
+            resDiv.innerHTML = `<div class="empty-state">✅ 身分驗證通過！目前查無「${email}」的預購訂單紀錄。</div>`;
           } else {
             resDiv.innerHTML = `
-              <h3 style="color:#166534; border-bottom:1px solid #ddd; padding-bottom:8px; margin-bottom:16px;">✅ 驗證成功！您的私密訂單列表：</h3>
+              <h3 style="color:#166534; border-bottom:1px solid #ddd; padding-bottom:8px; margin-bottom:16px;">📦 您的預購訂單列表 (${result.data.length} 筆)：</h3>
               ${result.data.map(o => `
                 <div style="background:#f9fafb; border:1px solid #e5e7eb; padding:16px; border-radius:8px; margin-bottom:12px;">
-                  <strong>訂單編號：</strong>${o.order_id}<br>
-                  <strong>預購商品：</strong>${o.title}<br>
-                  <strong>購買數量：</strong>${o.quantity} 件<br>
-                  <strong>總金額：</strong><span style="color:#0284c7; font-weight:bold;">${Number(o.total_price).toLocaleString()} ₫</span><br>
-                  <strong>處理狀態：</strong><span style="color:#166534; font-weight:bold;">${o.status}</span><br>
-                  <small style="color:#6b7280;">下單時間：${o.timestamp}</small>
+                  <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+                    <strong style="color:#111827;">訂單編號：${o.order_id}</strong>
+                    <span style="padding:4px 10px; background:#e0f2fe; color:#0369a1; border-radius:12px; font-weight:bold; font-size:0.85rem;">${o.status}</span>
+                  </div>
+                  <div><strong>預購品項：</strong>${o.product_title || o.title}</div>
+                  <div><strong>選擇規格：</strong><span style="color:#059669; font-weight:bold;">${o.selected_option || '預設'}</span></div>
+                  <div><strong>預購數量：</strong>${o.quantity} 件</div>
+                  <div><strong>應繳總金額：</strong><span style="color:#0284c7; font-weight:bold; font-size:1.1rem;">${formatVND(o.total_price)}</span></div>
+                  ${o.remark ? `<div style="color:#6b7280; font-size:0.85rem; margin-top:4px;">備註：${o.remark}</div>` : ''}
+                  <small style="color:#9ca3af; display:block; margin-top:8px;">下單時間：${o.timestamp}</small>
                 </div>
               `).join('')}
             `;
           }
         } else {
-          alert(result.message);
-          resDiv.innerHTML = "";
+          resDiv.innerHTML = `<div class="empty-state" style="color:#ef4444;">查詢失敗：${result.message}</div>`;
         }
       } catch (e) {
-        resDiv.innerHTML = `<p style="color:red;">驗證過程發生網路錯誤。</p>`;
+        resDiv.innerHTML = `<div class="empty-state" style="color:#ef4444;">查詢過程發生網路錯誤，請重新整理頁面試試。</div>`;
       }
     }
   </script>

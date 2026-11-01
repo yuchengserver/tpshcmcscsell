@@ -75,7 +75,7 @@
       </div>
     </div>
 
-    <!-- 2. 商品上架與庫存控管區塊 -->
+    <!-- 2. 商品上架與庫存控管區塊 (含選項設定) -->
     <div class="admin-card">
       <h2>🛍️ 周邊商品上架與動態庫存設定</h2>
       <form id="productForm" onsubmit="handleProductSubmit(event)">
@@ -101,10 +101,18 @@
             </select>
           </div>
         </div>
+
+        <div class="form-group">
+          <label for="prodOptions">商品規格選項 (選填，多個選項請用半角逗號隔開)：</label>
+          <input type="text" id="prodOptions" placeholder="例如：S, M, L, XL 或 黑色, 白色, 藍色">
+          <small style="color: #6b7280;">⚠️ 若填寫選項，學生在選購時將會看到下拉選單供其挑選規格。</small>
+        </div>
+
         <div class="form-group">
           <label>圖片連結 (主圖必填)：</label>
           <input type="url" id="img1" placeholder="主圖 URL" required style="margin-bottom:8px;">
         </div>
+
         <div class="form-group full-width">
           <label for="prodDesc">規格與說明：</label>
           <textarea id="prodDesc" rows="2" placeholder="材質、尺寸說明..."></textarea>
@@ -123,12 +131,13 @@
               <th>ID</th>
               <th>商品名稱</th>
               <th>價格 (VND)</th>
+              <th>可選規格</th>
               <th>彈性庫存</th>
               <th>狀態調整</th>
             </tr>
           </thead>
           <tbody id="adminProductTableBody">
-            <tr><td colspan="5" style="text-align:center; color:#6b7280;">載入中...</td></tr>
+            <tr><td colspan="6" style="text-align:center; color:#6b7280;">載入中...</td></tr>
           </tbody>
         </table>
       </div>
@@ -150,7 +159,7 @@
             <tr>
               <th>訂單編號</th>
               <th>訂購者資訊</th>
-              <th>預購商品</th>
+              <th>預購商品與規格</th>
               <th>數量 / 總額</th>
               <th>下單時間</th>
               <th>即時狀態變更</th>
@@ -189,6 +198,7 @@
               <td><small style="color:#6b7280;">${p.product_id}</small></td>
               <td><strong>${p.title}</strong></td>
               <td><strong style="color:#0284c7;">${formatVND(p.price)}</strong></td>
+              <td><small style="color:#4b5563;">${p.options || '無規格限制'}</small></td>
               <td>
                 <input type="number" value="${p.stock}" class="stock-input" onchange="updateProductStock('${p.product_id}', this.value)">
               </td>
@@ -202,10 +212,10 @@
             </tr>
           `).join('');
         } else {
-          tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; color:#6b7280;">目前無上架商品。</td></tr>`;
+          tbody.innerHTML = `<tr><td colspan="6" style="text-align:center; color:#6b7280;">目前無上架商品。</td></tr>`;
         }
       } catch (e) {
-        tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; color:#ef4444;">連線失敗。</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="6" style="text-align:center; color:#ef4444;">連線失敗。</td></tr>`;
       }
     }
 
@@ -234,7 +244,7 @@
               <tr>
                 <td><small style="color:#6b7280;">${o.order_id}</small></td>
                 <td><strong>${o.name}</strong><br><small style="color:#6b7280;">${o.email}</small></td>
-                <td>${o.product_title}<br><small style="color:#9ca3af;">${o.remark || '無備註'}</small></td>
+                <td>${o.product_title}<br><small style="color:#059669; font-weight:bold;">規格：${o.selected_option || '預設'}</small><br><small style="color:#9ca3af;">${o.remark || ''}</small></td>
                 <td>${o.quantity} 件<br><strong style="color:#0284c7;">${formatVND(o.total_price)}</strong></td>
                 <td><small style="color:#6b7280;">${o.timestamp}</small></td>
                 <td>
@@ -289,7 +299,6 @@
         return;
       }
 
-      // 從姓名欄位解析班級 (例如支援 "Nguyen Van A (12A1)" 或括號內的格式)
       let classGroups = {};
       globalOrdersData.forEach(o => {
         let match = o.name.match(/\(([^)]+)\)/);
@@ -300,7 +309,6 @@
         classGroups[className].push(o);
       });
 
-      // 建立列印專用視窗
       let printWindow = window.open('', '_blank');
       let htmlContent = `
         <!DOCTYPE html>
@@ -329,7 +337,6 @@
           </div>
       `;
 
-      // 依班級迴圈產生區塊
       for (let className in classGroups) {
         let orders = classGroups[className];
         let classTotal = 0;
@@ -346,7 +353,7 @@
                   <th>序號</th>
                   <th>學生姓名</th>
                   <th>學號信箱</th>
-                  <th>預購品項與備註</th>
+                  <th>預購品項與規格</th>
                   <th>數量</th>
                   <th>應繳金額 (VND)</th>
                   <th>繳費簽收 / 備註</th>
@@ -357,14 +364,13 @@
 
         orders.forEach((o, index) => {
           classTotal += Number(o.total_price);
-          // 移除姓名後方的括號班級讓表格乾淨一點
           let cleanName = o.name.replace(/\([^)]+\)/g, '').trim();
           htmlContent += `
             <tr>
               <td>${index + 1}</td>
               <td><strong>${cleanName}</strong></td>
               <td><small>${o.email}</small></td>
-              <td>${o.product_title} <br><span style="color:#666; font-size:0.8rem;">${o.remark || ''}</span></td>
+              <td>${o.product_title} <br><span style="color:#059669; font-weight:bold; font-size:0.85rem;">規格：${o.selected_option || '預設'}</span> <span style="color:#666; font-size:0.8rem;">${o.remark || ''}</span></td>
               <td style="text-align:center;">${o.quantity}</td>
               <td><strong>${Number(o.total_price).toLocaleString()} ₫</strong></td>
               <td></td>
@@ -403,7 +409,7 @@
       }
       
       let csvContent = "\uFEFF";
-      csvContent += "訂單編號,學號信箱,姓名/班級,商品名稱,預購數量,總金額(VND),備註,下單時間,訂單狀態\n";
+      csvContent += "訂單編號,學號信箱,姓名/班級,商品名稱,選擇規格,預購數量,總金額(VND),備註,下單時間,訂單狀態\n";
       
       globalOrdersData.forEach(o => {
         let row = [
@@ -411,6 +417,7 @@
           `"${o.email}"`,
           `"${o.name}"`,
           `"${o.product_title}"`,
+          `"${o.selected_option || ''}"`,
           o.quantity,
           o.total_price,
           `"${o.remark || ''}"`,
@@ -438,6 +445,7 @@
         price: document.getElementById('prodPrice').value,
         stock: document.getElementById('prodStock').value,
         status: document.getElementById('prodStatus').value,
+        options: document.getElementById('prodOptions').value, // 傳遞規格選項
         img1: document.getElementById('img1').value,
         description: document.getElementById('prodDesc').value
       };

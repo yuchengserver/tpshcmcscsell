@@ -5,10 +5,30 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>TSSC13TH 公投與周邊專區</title>
   <link rel="stylesheet" href="style.css">
+  <style>
+    /* 自訂彈窗對話框樣式 */
+    .modal-overlay {
+      position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(0, 0, 0, 0.5); display: flex; justify-content: center; align-items: center;
+      z-index: 1000; animation: fadeIn 0.2s ease-in-out;
+    }
+    .modal-card {
+      background: #ffffff; padding: 24px; border-radius: 12px; width: 90%; max-width: 400px;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.15); text-align: left;
+    }
+    .modal-card h3 { margin-top: 0; margin-bottom: 12px; color: #111827; }
+    .modal-card .form-group { margin-bottom: 16px; }
+    .modal-card label { display: block; font-size: 0.9rem; font-weight: bold; margin-bottom: 6px; color: #374151; }
+    .modal-card select, .modal-card input { width: 100%; padding: 8px 12px; border: 1px solid #d1d5db; border-radius: 6px; font-size: 1rem; }
+    .modal-actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px; }
+    .btn-cancel { background: #9ca3af; color: white; border: none; padding: 8px 16px; border-radius: 6px; cursor: pointer; font-weight: bold; }
+    .btn-confirm { background: #2563eb; color: white; border: none; padding: 8px 16px; border-radius: 6px; cursor: pointer; font-weight: bold; }
+    .btn-confirm:hover { background: #1d4ed8; }
+  </style>
 </head>
 <body>
 
-  <!-- 頂部導覽列 (符合最新設計排版) -->
+  <!-- 頂部導覽列 -->
   <header>
     <div class="nav-brand">
       <img src="tpshcmcsc.png" alt="TSSC13TH 標誌" onerror="this.src='tpshcmcsc.png'">
@@ -28,8 +48,8 @@
     <div class="notice-box">
       <h3>📌 公投與意見投遞規則</h3>
       <ul>
-        <li><strong>實名驗證：</strong>為確保公平性，本平台全面採用學校官方信箱（@tshcmc.edu.vn）進行身分驗證。</li>
-        <li><strong>隱私保護：</strong>所有訂單與查詢皆需透過信箱與 6 位數安全驗證碼解鎖，確保最高隱私。</li>
+        <li><strong>實名驗證：</strong>為確保公平性，本平台全面採用學校官方 Google 帳號（@tshcmc.edu.vn）進行身分驗證。</li>
+        <li><strong>隱私保護：</strong>所有訂單與查詢皆需透過學校信箱登入解鎖，確保最高隱私與資安。</li>
         <li><strong>價格貨幣：</strong>所有商品價格均以越盾（VND / ₫）計價，請確認金額後進行選購與結算。</li>
       </ul>
     </div>
@@ -53,24 +73,22 @@
 
   </div>
 
-  <script>
-    // 正式綁定您的 GAS 網頁應用程式網址
-    const GAS_API_URL = "https://script.google.com/macros/s/AKfycbx7o4EJKoFsiJojM3FfS0pqj8n77mrdDR318Srn7DRy0kkFjMvogprtnHD0loSKqcB0/exec";
+  <!-- 🛒 加入購物車數量與選項互動彈窗容器 -->
+  <div id="modalContainer"></div>
 
+  <script>
+    const GAS_API_URL = "https://script.google.com/macros/s/AKfycbx7o4EJKoFsiJojM3FfS0pqj8n77mrdDR318Srn7DRy0kkFjMvogprtnHD0loSKqcB0/exec";
     let allProducts = [];
 
-    // 格式化越盾金額 (例如: 150000 -> 150.000 ₫)
     function formatVND(amount) {
       return new Intl.NumberFormat('vi-VN').format(amount) + ' ₫';
     }
 
-    // 頁面載入時抓取資料並更新購物車數量
     window.onload = function() {
       fetchProducts();
       updateCartCount();
     };
 
-    // 載入商品資料
     async function fetchProducts() {
       try {
         const response = await fetch(`${GAS_API_URL}?action=getProducts`);
@@ -89,7 +107,6 @@
       }
     }
 
-    // 渲染商品列表
     function renderProducts(products) {
       const openGrid = document.getElementById('openProductsGrid');
       const upcomingGrid = document.getElementById('upcomingProductsGrid');
@@ -97,14 +114,12 @@
       const openList = products.filter(p => p.status === '開放中');
       const upcomingList = products.filter(p => p.status === '預告中' || p.status === '即將開始');
 
-      // 渲染開放中
       if (openList.length === 0) {
         openGrid.innerHTML = `<div class="empty-state">目前暫無項目。</div>`;
       } else {
         openGrid.innerHTML = openList.map(p => createCardHTML(p, true)).join('');
       }
 
-      // 渲染預告中 (預告中不可加入購物車)
       if (upcomingList.length === 0) {
         upcomingGrid.innerHTML = `<div class="empty-state">目前暫無項目。</div>`;
       } else {
@@ -112,11 +127,12 @@
       }
     }
 
-    // 建立單張商品卡片 HTML (開放中顯示加入購物車，預告中顯示敬請期待)
     function createCardHTML(p, isOpen) {
       const imgSrc = p.img1 ? p.img1 : 'tpshcmcsc.png';
+      // 轉換成安全的 JSON 格式帶入函式中
+      const encodedProduct = encodeURIComponent(JSON.stringify(p));
       const actionButton = isOpen 
-        ? `<button onclick='addToCart(${JSON.stringify(p)})' class="buy-btn">加入購物車</button>`
+        ? `<button onclick='openAddToCartModal("${encodedProduct}")' class="buy-btn">加入購物車</button>`
         : `<button class="buy-btn" style="background:#9ca3af; cursor:not-allowed;" disabled>敬請期待</button>`;
 
       return `
@@ -137,28 +153,93 @@
       `;
     }
 
-    // 加入購物車功能 (使用 LocalStorage 暫存)
-    function addToCart(product) {
-      let cart = JSON.parse(localStorage.getItem('tss_cart') || '[]');
-      let existing = cart.find(item => item.product_id === product.product_id);
-      if (existing) {
-        existing.quantity += 1;
+    // 팝업：開啟加入購物車數量與選項設定視窗
+    function openAddToCartModal(encodedProduct) {
+      const product = JSON.parse(decodeURIComponent(encodedProduct));
+      const modalContainer = document.getElementById('modalContainer');
+
+      // 解析後台傳來的規格選項 (以逗號隔開)
+      let optionsHtml = '';
+      if (product.options && product.options.trim() !== "") {
+        let optArray = product.options.split(',').map(o => o.trim());
+        optionsHtml = `
+          <div class="form-group">
+            <label for="modalOption">選擇規格 / 選項：</label>
+            <select id="modalOption">
+              ${optArray.map(opt => `<option value="${opt}">${opt}</option>`).join('')}
+            </select>
+          </div>
+        `;
       } else {
-        cart.push({ ...product, quantity: 1 });
+        optionsHtml = `<input type="hidden" id="modalOption" value="預設">`;
       }
-      localStorage.setItem('tss_cart', JSON.stringify(cart));
-      updateCartCount();
-      alert(`成功將「${product.title}」加入購物車！`);
+
+      modalContainer.innerHTML = `
+        <div class="modal-overlay" onclick="closeModal(event)">
+          <div class="modal-card" onclick="event.stopPropagation()">
+            <h3>🛒 加入購物車 - ${product.title}</h3>
+            <p style="color: #6b7280; font-size: 0.9rem; margin-bottom: 16px;">單價：${formatVND(product.price)}</p>
+            
+            ${optionsHtml}
+
+            <div class="form-group">
+              <label for="modalQuantity">購買數量：</label>
+              <input type="number" id="modalQuantity" min="1" value="1" required>
+            </div>
+
+            <div class="modal-actions">
+              <button type="button" class="btn-cancel" onclick="closeModal()">取消</button>
+              <button type="button" class="btn-confirm" onclick='confirmAddToCart(${JSON.stringify(product)})'>確認加入</button>
+            </div>
+          </div>
+        </div>
+      `;
     }
 
-    // 更新導覽列購物車徽章數字
+    function closeModal() {
+      document.getElementById('modalContainer').innerHTML = '';
+    }
+
+    // 確認加入購物車（支援數量與選項）
+    function confirmAddToCart(product) {
+      const qtyInput = document.getElementById('modalQuantity');
+      const optionInput = document.getElementById('modalOption');
+      
+      const quantity = parseInt(qtyInput.value) || 1;
+      const selectedOption = optionInput ? optionInput.value : '預設';
+
+      if (quantity < 1) {
+        alert('購買數量至少須為 1 件！');
+        return;
+      }
+
+      let cart = JSON.parse(localStorage.getItem('tss_cart') || '[]');
+      
+      // 檢查購物車內是否已存在「相同商品 ID」且「相同規格」的品項
+      let existing = cart.find(item => item.product_id === product.product_id && (item.selected_option || '預設') === selectedOption);
+      
+      if (existing) {
+        existing.quantity += quantity;
+      } else {
+        cart.push({ 
+          ...product, 
+          quantity: quantity, 
+          selected_option: selectedOption 
+        });
+      }
+
+      localStorage.setItem('tss_cart', JSON.stringify(cart));
+      updateCartCount();
+      closeModal();
+      alert(`成功將「${product.title} (${selectedOption})」x ${quantity} 加入購物車！`);
+    }
+
     function updateCartCount() {
       let cart = JSON.parse(localStorage.getItem('tss_cart') || '[]');
       let total = cart.reduce((sum, item) => sum + item.quantity, 0);
       document.getElementById('cartCount').innerText = total;
     }
 
-    // 搜尋過濾功能
     function filterProducts() {
       const keyword = document.getElementById('searchInput').value.toLowerCase();
       const filtered = allProducts.filter(p => 
