@@ -271,12 +271,13 @@
           </div>
         </div>
 
-        <!-- 🎛️ PDF 排版與自由自訂欄位名稱控制台 -->
-        <div style="background:#f8fafc; padding:16px; border-radius:8px; border:1px solid #e2e8f0; margin-bottom:20px; display:grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap:12px;">
+        <!-- 🎛️ PDF 排版與自由自訂欄位名稱控制台 (排版升級整齊版) -->
+        <div style="background:#f8fafc; padding:20px; border-radius:10px; border:1px solid #e2e8f0; margin-bottom:20px; display:grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap:16px; align-items: start;">
           
+          <!-- 1. 字體大小 -->
           <div class="form-group" style="margin:0;">
-            <label style="font-weight:600; font-size:0.85rem;">字體大小 (Font Size)：</label>
-            <select id="styleFontSize" onchange="renderPrintPreview()" style="padding:6px; border:1px solid #d1d5db; border-radius:6px; width:100%;">
+            <label style="font-weight:600; font-size:0.88rem; margin-bottom:6px; color:#374151;">字體大小 (Font Size)：</label>
+            <select id="styleFontSize" onchange="renderPrintPreview()" style="padding:8px; border:1px solid #d1d5db; border-radius:6px; width:100%; background:#fff;">
               <option value="11px">小 (11px)</option>
               <option value="13px" selected>標準 (13px)</option>
               <option value="15px">大 (15px)</option>
@@ -284,46 +285,44 @@
             </select>
           </div>
 
+          <!-- 2. 表格行高與間距 -->
           <div class="form-group" style="margin:0;">
-            <label style="font-weight:600; font-size:0.85rem;">表格行高與間距 (Padding)：</label>
-            <select id="stylePadding" onchange="renderPrintPreview()" style="padding:6px; border:1px solid #d1d5db; border-radius:6px; width:100%;">
+            <label style="font-weight:600; font-size:0.88rem; margin-bottom:6px; color:#374151;">表格行高與間距 (Padding)：</label>
+            <select id="stylePadding" onchange="renderPrintPreview()" style="padding:8px; border:1px solid #d1d5db; border-radius:6px; width:100%; background:#fff;">
               <option value="4px 6px">緊湊</option>
               <option value="8px 10px" selected>舒適 (標準)</option>
               <option value="12px 14px">寬鬆</option>
             </select>
           </div>
 
-          <!-- ✏️ 自訂額外欄位 1 (原信箱欄) -->
+          <!-- 3. 自訂副欄位 1 -->
           <div class="form-group" style="margin:0;">
-            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
-              <label style="font-weight:600; font-size:0.85rem;"><input type="checkbox" id="chkShowCol1" checked onchange="renderPrintPreview()"> 顯示副欄位 1：</label>
+            <div style="display:flex; align-items:center; gap:8px; margin-bottom:6px; height:24px;">
+              <input type="checkbox" id="chkShowCol1" checked onchange="renderPrintPreview()" style="width:16px; height:16px; cursor:pointer;">
+              <label for="chkShowCol1" style="font-weight:600; font-size:0.88rem; color:#374151; cursor:pointer; margin:0;">顯示副欄位 1：</label>
             </div>
-            <input type="text" id="col1CustomTitle" value="學號信箱" oninput="renderPrintPreview()" placeholder="欄位標題 (例: 學生信箱/座號)" style="padding:6px; border:1px solid #d1d5db; border-radius:6px; font-size:0.85rem; width:100%;">
+            <input type="text" id="col1CustomTitle" value="學號信箱" oninput="renderPrintPreview()" placeholder="欄位標題" style="padding:8px; border:1px solid #d1d5db; border-radius:6px; font-size:0.9rem; width:100%; background:#fff;">
           </div>
 
-          <!-- ✏️ 自訂簽核/核勾欄位 2 (原核勾欄) -->
+          <!-- 4. 自訂核勾/簽名欄 -->
           <div class="form-group" style="margin:0;">
-            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
-              <label style="font-weight:600; font-size:0.85rem;"><input type="checkbox" id="chkShowCol2" checked onchange="renderPrintPreview()"> 顯示末尾核勾/簽名欄：</label>
+            <div style="display:flex; align-items:center; gap:8px; margin-bottom:6px; height:24px;">
+              <input type="checkbox" id="chkShowCol2" checked onchange="renderPrintPreview()" style="width:16px; height:16px; cursor:pointer;">
+              <label for="chkShowCol2" style="font-weight:600; font-size:0.88rem; color:#374151; cursor:pointer; margin:0;">顯示核勾/簽名欄：</label>
             </div>
-            <input type="text" id="col2CustomTitle" value="繳費核勾" oninput="renderPrintPreview()" placeholder="欄位標題 (例: 簽名/備註)" style="padding:6px; border:1px solid #d1d5db; border-radius:6px; font-size:0.85rem; width:100%;">
+            <input type="text" id="col2CustomTitle" value="繳費核勾" oninput="renderPrintPreview()" placeholder="欄位標題" style="padding:8px; border:1px solid #d1d5db; border-radius:6px; font-size:0.9rem; width:100%; background:#fff;">
           </div>
 
-          <!-- 自訂主標題與副標題 -->
-          <div class="form-group full-width" style="margin:0; grid-column:1 / -1;">
-            <label style="font-weight:600; font-size:0.85rem;">自訂報表標題與備註：</label>
-            <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px; margin-top:4px;">
-              <input type="text" id="customPrintTitle" value="TSSC13TH 周邊預購繳費清單" oninput="renderPrintPreview()" placeholder="主標題" style="padding:6px; border:1px solid #d1d5db; border-radius:6px;">
-              <input type="text" id="customPrintSubtitle" value="請各班負責人確認金額後進行收費與核銷" oninput="renderPrintPreview()" placeholder="副標題" style="padding:6px; border:1px solid #d1d5db; border-radius:6px;">
+          <!-- 5. 自訂報表標題與備註 (佔滿整行) -->
+          <div class="form-group full-width" style="margin:0; grid-column:1 / -1; border-top: 1px solid #e5e7eb; padding-top: 12px;">
+            <label style="font-weight:600; font-size:0.88rem; margin-bottom:6px; color:#374151; display:block;">自訂報表標題與備註：</label>
+            <div style="display:grid; grid-template-columns: 1fr 1fr; gap:12px;">
+              <input type="text" id="customPrintTitle" value="TSSC13TH 周邊預購繳費清單" oninput="renderPrintPreview()" placeholder="主標題" style="padding:8px; border:1px solid #d1d5db; border-radius:6px; background:#fff; font-size:0.9rem;">
+              <input type="text" id="customPrintSubtitle" value="請各班負責人確認金額後進行收費與核銷" oninput="renderPrintPreview()" placeholder="副標題" style="padding:8px; border:1px solid #d1d5db; border-radius:6px; background:#fff; font-size:0.9rem;">
             </div>
           </div>
+
         </div>
-
-        <!-- 預覽輸出畫布 -->
-        <div id="printPreviewContainer" class="card" style="margin-top:15px;"><div style="text-align:center; color:#6b7280; padding:20px;">請選擇班級...</div></div>
-      </div>
-    </div>
-
   <script>
     const GAS_API_URL = "https://script.google.com/macros/s/AKfycbx7o4EJKoFsiJojM3FfS0pqj8n77mrdDR318Srn7DRy0kkFjMvogprtnHD0loSKqcB0/exec";
     let globalOrdersData = [];
