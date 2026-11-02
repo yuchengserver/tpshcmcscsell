@@ -329,67 +329,67 @@
     let globalOrdersData = [];
     let globalProductsData = [];
 
-    // 輔助函式：將檔案轉為 Base64 字串
-function fileToBase64(file) {
-  return new Promise((resolve, reject) => {
-    if (!file) {
-      resolve("");
-      return;
+    // 輔助函式：將上傳的檔案轉為 Base64 字串
+    function fileToBase64(file) {
+      return new Promise((resolve, reject) => {
+        if (!file) {
+          resolve("");
+          return;
+        }
+        const reader = new FileReader();
+        reader.readAsDataURL(file);
+        reader.onload = () => resolve(reader.result);
+        reader.onerror = error => reject(error);
+      });
     }
-    const reader = new FileReader();
-    reader.readAsDataURL(file);
-    reader.onload = () => resolve(reader.result);
-    reader.onerror = error => reject(error);
-  });
-}
 
-async function handleProductSubmit(e) {
-  e.preventDefault();
-  const email = sessionStorage.getItem('tss_logged_email') || "";
-  
-  const file1 = document.getElementById('prodFile1').files[0];
-  const file2 = document.getElementById('prodFile2').files[0];
-  const file3 = document.getElementById('prodFile3').files[0];
+    // 🌟 唯一且正確的商品上架提交函式（支援檔案直接上傳轉 Base64，最多 3 張）
+    async function handleProductSubmit(e) {
+      e.preventDefault();
+      const email = sessionStorage.getItem('tss_logged_email') || "";
+      
+      const file1 = document.getElementById('prodFile1').files[0];
+      const file2 = document.getElementById('prodFile2').files[0];
+      const file3 = document.getElementById('prodFile3').files[0];
 
-  const btn = e.target.querySelector('button[type="submit"]');
-  btn.disabled = true;
-  btn.innerText = "圖片轉換與上架中...";
+      const btn = e.target.querySelector('button[type="submit"]');
+      btn.disabled = true;
+      btn.innerText = "圖片轉換與上架中...";
 
-  try {
-    // 自動將上傳的檔案轉為 Base64 字串，不需手動找網址
-    const base64Img1 = await fileToBase64(file1);
-    const base64Img2 = await fileToBase64(file2);
-    const base64Img3 = await fileToBase64(file3);
+      try {
+        const base64Img1 = await fileToBase64(file1);
+        const base64Img2 = await fileToBase64(file2);
+        const base64Img3 = await fileToBase64(file3);
 
-    const data = {
-      action: "addProduct", 
-      email,
-      title: document.getElementById('prodTitle').value,
-      price: document.getElementById('prodPrice').value,
-      stock: document.getElementById('prodStock').value,
-      status: document.getElementById('prodStatus').value,
-      img1: base64Img1,
-      img2: base64Img2,
-      img3: base64Img3,
-      options: buildOptionsJson(),
-      description: document.getElementById('prodDesc').value
-    };
+        const data = {
+          action: "addProduct", 
+          email,
+          title: document.getElementById('prodTitle').value,
+          price: document.getElementById('prodPrice').value,
+          stock: document.getElementById('prodStock').value,
+          status: document.getElementById('prodStatus').value,
+          img1: base64Img1,
+          img2: base64Img2,
+          img3: base64Img3,
+          options: buildOptionsJson(),
+          description: document.getElementById('prodDesc').value
+        };
 
-    const res = await fetch(GAS_API_URL, { method: "POST", body: JSON.stringify(data) });
-    const result = await res.json();
-    alert(result.message);
-    
-    if (result.status === "success") { 
-      loadAdminProducts(); 
-      document.getElementById('productForm').reset(); 
+        const res = await fetch(GAS_API_URL, { method: "POST", body: JSON.stringify(data) });
+        const result = await res.json();
+        alert(result.message);
+        
+        if (result.status === "success") { 
+          loadAdminProducts(); 
+          document.getElementById('productForm').reset(); 
+        }
+      } catch (err) {
+        alert("上傳失敗，圖片檔案可能過大或網路異常。");
+      } finally {
+        btn.disabled = false;
+        btn.innerText = "🚀 確認立即上架";
+      }
     }
-  } catch (err) {
-    alert("上傳失敗，圖片檔案可能過大。");
-  } finally {
-    btn.disabled = false;
-    btn.innerText = "🚀 確認立即上架";
-  }
-}
 
     function formatVND(amount) {
       return new Intl.NumberFormat('vi-VN').format(amount) + ' ₫';
@@ -639,19 +639,17 @@ async function handleProductSubmit(e) {
       renderPrintPreview();
     }
 
-   // 🖨️ 渲染含完全自訂標題與欄位名稱的 PDF 報表
+    // 🖨️ 渲染含完全自訂標題與欄位名稱的 PDF 報表
     function renderPrintPreview() {
       let c = document.getElementById('previewClassSelect').value;
       let orders = globalOrdersData.filter(o => o.name.toUpperCase().includes(c));
       let total = orders.reduce((sum, o) => sum + Number(o.total_price), 0);
 
-      // 讀取自訂標題與字體樣式
       let title = document.getElementById('customPrintTitle').value || '周邊預購繳費清單';
       let subtitle = document.getElementById('customPrintSubtitle').value || '';
       let fontSize = document.getElementById('styleFontSize').value;
       let cellPadding = document.getElementById('stylePadding').value;
 
-      // 讀取自訂欄位開關與自訂欄位名稱
       let showCol1 = document.getElementById('chkShowCol1').checked;
       let col1Title = document.getElementById('col1CustomTitle').value.trim() || '學號信箱';
 
@@ -733,24 +731,6 @@ async function handleProductSubmit(e) {
       document.body.removeChild(a);
     }
 
-    async function handleProductSubmit(e) {
-      e.preventDefault();
-      const email = sessionStorage.getItem('tss_logged_email') || "";
-      const data = {
-        action: "addProduct", email,
-        title: document.getElementById('prodTitle').value,
-        price: document.getElementById('prodPrice').value,
-        stock: document.getElementById('prodStock').value,
-        status: document.getElementById('prodStatus').value,
-        options: buildOptionsJson(),
-        description: document.getElementById('prodDesc').value
-      };
-      const res = await fetch(GAS_API_URL, { method: "POST", body: JSON.stringify(data) });
-      const result = await res.json();
-      alert(result.message);
-      if(result.status === "success") { loadAdminProducts(); document.getElementById('productForm').reset(); }
-    }
-
     async function changeOrderStatus(orderId, newStatus) {
       const email = sessionStorage.getItem('tss_logged_email') || "";
       await fetch(GAS_API_URL, { method: "POST", body: JSON.stringify({ action: "updateOrderStatus", email, orderId, newStatus }) });
@@ -779,26 +759,6 @@ async function handleProductSubmit(e) {
       document.body.appendChild(a);
       a.click();
       document.body.removeChild(a);
-    }
-    async function handleProductSubmit(e) {
-      e.preventDefault();
-      const email = sessionStorage.getItem('tss_logged_email') || "";
-      const data = {
-        action: "addProduct", email,
-        title: document.getElementById('prodTitle').value,
-        price: document.getElementById('prodPrice').value,
-        stock: document.getElementById('prodStock').value,
-        status: document.getElementById('prodStatus').value,
-        img1: document.getElementById('prodImg1').value,
-        img2: document.getElementById('prodImg2').value,
-        img3: document.getElementById('prodImg3').value,
-        options: buildOptionsJson(),
-        description: document.getElementById('prodDesc').value
-      };
-      const res = await fetch(GAS_API_URL, { method: "POST", body: JSON.stringify(data) });
-      const result = await res.json();
-      alert(result.message);
-      if(result.status === "success") { loadAdminProducts(); document.getElementById('productForm').reset(); }
     }
   </script>
 </body>
