@@ -7,6 +7,76 @@
   <link rel="stylesheet" href="style.css">
   <!-- 引入 Google Sign-In SDK -->
   <script src="https://accounts.google.com/gsi/client" async defer></script>
+  <style>
+    /* 🛒 購物車專屬電商化風格微調 */
+    .cart-item-card {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 16px;
+      background: #ffffff;
+      border: 1px solid #e5e7eb;
+      border-radius: 10px;
+      gap: 16px;
+      flex-wrap: wrap;
+      transition: box-shadow 0.2s;
+    }
+    .cart-item-card:hover {
+      box-shadow: 0 4px 12px rgba(0,0,0,0.04);
+    }
+    .cart-item-left {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      flex: 1;
+      min-width: 220px;
+    }
+    .cart-item-img {
+      width: 65px;
+      height: 65px;
+      object-fit: cover;
+      border-radius: 8px;
+      border: 1px solid #f1f5f9;
+      background: #f8fafc;
+    }
+    .cart-item-title {
+      font-size: 1rem;
+      font-weight: 600;
+      color: #1f2937;
+      margin: 0 0 4px 0;
+    }
+    .cart-item-price {
+      font-size: 0.9rem;
+      color: #6b7280;
+    }
+    .cart-item-right {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+      flex-wrap: wrap;
+    }
+    .cart-subtotal {
+      font-size: 1.05rem;
+      font-weight: bold;
+      color: #dc2626; /* 蝦皮紅 */
+      min-width: 100px;
+      text-align: right;
+    }
+    .btn-remove {
+      background: #ffeeef;
+      color: #ef4444;
+      border: 1px solid #fecaca;
+      padding: 6px 12px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 0.85rem;
+      font-weight: 600;
+      transition: background 0.2s;
+    }
+    .btn-remove:hover {
+      background: #fee2e2;
+    }
+  </style>
 </head>
 <body>
 
@@ -26,14 +96,14 @@
 
   <div class="container">
     <div class="card">
-      <h2>🛒 您的預購購物車結算</h2>
+      <h2 style="margin-bottom: 20px; font-size: 1.4rem; color: #111827;">🛒 您的預購購物車結算</h2>
       
       <!-- 購物車商品列表區 -->
       <div id="cartItemsContainer">載入中...</div>
       
       <!-- 結算表單區塊 (當購物車有商品時顯示) -->
-      <div id="checkoutFormContainer" style="display:none; margin-top: 24px; border-top: 2px solid #e5e7eb; padding-top: 20px;">
-        <h3>📝 填寫結算與實名驗證資料</h3>
+      <div id="checkoutFormContainer" style="display:none; margin-top: 24px; border-top: 2px solid #e5e7eb; padding-top: 24px;">
+        <h3 style="margin-bottom: 16px; font-size: 1.1rem; color: #1f2937;">📝 填寫結算與實名驗證資料</h3>
         
         <!-- 🔐 Google 身分驗證區塊 -->
         <div id="authBox" style="margin-bottom: 20px; padding: 16px; background: #f3f4f6; border-radius: 8px; border: 1px solid #e5e7eb;">
@@ -58,12 +128,12 @@
         </div>
 
         <form onsubmit="submitCheckout(event)">
-          <div class="form-group">
-            <label for="studentName">真實姓名 / 班級座號：</label>
-            <input type="text" id="studentName" required placeholder="例如：Nguyen Van A (12A1)">
+          <div class="form-group" style="margin-bottom: 16px;">
+            <label for="studentName" style="display: block; font-weight: bold; margin-bottom: 6px; color: #374151;">真實姓名 / 班級座號：</label>
+            <input type="text" id="studentName" required placeholder="例如：Nguyen Van A (12A1)" style="width: 100%; padding: 10px; border: 1px solid #d1d5db; border-radius: 6px; font-size: 1rem;">
           </div>
 
-          <button type="submit" id="submitBtn" class="submit-btn" disabled style="background:#9ca3af; cursor:not-allowed;">🚀 請先完成 Google 登入後始可送出</button>
+          <button type="submit" id="submitBtn" class="submit-btn" disabled style="background:#9ca3af; cursor:not-allowed; width: 100%; padding: 12px; border: none; border-radius: 6px; color: #fff; font-weight: bold; font-size: 1rem;">🚀 請先完成 Google 登入後始可送出</button>
         </form>
       </div>
     </div>
@@ -81,12 +151,10 @@
       }
     };
 
-    // 格式化越盾金額
     function formatVND(amount) {
       return new Intl.NumberFormat('vi-VN').format(amount) + ' ₫';
     }
 
-    // Google OAuth 驗證回呼
     function handleCredentialResponse(response) {
       const responsePayload = parseJwt(response.credential);
       const email = responsePayload.email;
@@ -138,14 +206,29 @@
       btn.innerText = "🚀 請先完成 Google 登入後始可送出";
     }
 
-    // 渲染購物車內容 (支援即時修改數量與切換規格選項)
+    // 解析選項 (相容 JSON 或逗號分隔)
+    function parseOptions(optionsStr) {
+      if (!optionsStr || optionsStr.trim() === "") return [];
+      try {
+        let parsed = JSON.parse(optionsStr);
+        if (typeof parsed === 'object') {
+          let firstKey = Object.keys(parsed)[0];
+          return parsed[firstKey] || [];
+        }
+      } catch(e) {
+        return optionsStr.split(',').map(o => o.trim()).filter(o => o);
+      }
+      return [];
+    }
+
+    // 渲染購物車內容 (電商化卡片排版)
     function renderCart() {
       let cart = JSON.parse(localStorage.getItem('tss_cart') || '[]');
       const container = document.getElementById('cartItemsContainer');
       const checkoutBox = document.getElementById('checkoutFormContainer');
 
       if (cart.length === 0) {
-        container.innerHTML = `<div class="empty-state">購物車目前是空的，快去首頁選購吧！</div>`;
+        container.innerHTML = `<div class="empty-state" style="text-align:center; color:#6b7280; padding:40px 0;">購物車目前是空的，快去首頁選購吧！</div>`;
         checkoutBox.style.display = 'none';
         return;
       }
@@ -154,59 +237,58 @@
       let grandTotal = 0;
 
       container.innerHTML = `
-        <div style="display: flex; flex-direction: column; gap: 12px;">
+        <div style="display: flex; flex-direction: column; gap: 14px;">
           ${cart.map((item, index) => {
             let itemTotal = Number(item.price) * item.quantity;
             grandTotal += itemTotal;
 
-            // 處理規格選項下拉選單
+            let optArray = parseOptions(item.options);
             let optionSelectorHtml = '';
-            if (item.options && item.options.trim() !== "") {
-              let optArray = item.options.split(',').map(o => o.trim());
+            if (optArray.length > 0) {
               optionSelectorHtml = `
-                <div style="margin-top: 4px;">
-                  <small style="color:#4b5563;">規格：</small>
-                  <select onchange="updateItemOption(${index}, this.value)" style="padding: 2px 6px; font-size: 0.8rem; border-radius: 4px; border: 1px solid #d1d5db;">
+                <div style="margin-top: 6px;">
+                  <span style="font-size:0.8rem; color:#4b5563;">規格：</span>
+                  <select onchange="updateItemOption(${index}, this.value)" style="padding: 3px 8px; font-size: 0.85rem; border-radius: 4px; border: 1px solid #d1d5db; background:#fff;">
                     ${optArray.map(opt => `<option value="${opt}" ${opt === (item.selected_option || '預設') ? 'selected' : ''}>${opt}</option>`).join('')}
                   </select>
                 </div>
               `;
             } else {
-              optionSelectorHtml = `<small style="color:#059669; font-weight:bold;">規格：${item.selected_option || '預設'}</small>`;
+              optionSelectorHtml = `<div style="margin-top: 4px;"><span style="font-size:0.8rem; color:#059669; font-weight:bold;">規格：${item.selected_option || '預設'}</span></div>`;
             }
 
             return `
-              <div style="display:flex; justify-content:space-between; align-items:center; padding:12px; background:#f9fafb; border:1px solid #e5e7eb; border-radius:8px; gap:12px; flex-wrap:wrap;">
-                <div style="display:flex; align-items:center; gap:12px; flex:1; min-width:200px;">
-                  <img src="${item.img1 || 'tpshcmcsc.png'}" alt="圖" style="width:50px; height:50px; object-fit:cover; border-radius:6px;">
+              <div class="cart-item-card">
+                <div class="cart-item-left">
+                  <img src="${item.img1 || 'tpshcmcsc.png'}" alt="商品圖" class="cart-item-img" onerror="this.src='tpshcmcsc.png';">
                   <div>
-                    <strong>${item.title}</strong><br>
-                    <small style="color:#6b7280;">單價：${formatVND(item.price)}</small>
+                    <h4 class="cart-item-title">${item.title}</h4>
+                    <div class="cart-item-price">單價：${formatVND(item.price)}</div>
                     ${optionSelectorHtml}
                   </div>
                 </div>
                 
-                <div style="display:flex; align-items:center; gap:16px;">
+                <div class="cart-item-right">
                   <div>
-                    <label style="font-size:0.8rem; color:#6b7280; display:block;">數量：</label>
-                    <input type="number" min="1" value="${item.quantity}" onchange="updateItemQuantity(${index}, this.value)" style="width:60px; padding:4px; border:1px solid #d1d5db; border-radius:4px; text-align:center;">
+                    <span style="font-size:0.8rem; color:#6b7280; display:block; margin-bottom:2px;">數量：</span>
+                    <input type="number" min="1" value="${item.quantity}" onchange="updateItemQuantity(${index}, this.value)" style="width:60px; padding:6px; border:1px solid #d1d5db; border-radius:6px; text-align:center; font-size:0.95rem;">
                   </div>
-                  <div style="text-align:right; min-width:90px;">
-                    <span style="font-weight:bold; color:#0284c7; display:block;">${formatVND(itemTotal)}</span>
+                  <div class="cart-subtotal">
+                    ${formatVND(itemTotal)}
                   </div>
-                  <button type="button" onclick="removeItem(${index})" style="background:#ef4444; color:#fff; border:none; padding:6px 12px; border-radius:6px; cursor:pointer; font-size:0.85rem;">移除</button>
+                  <button type="button" class="btn-remove" onclick="removeItem(${index})">刪除</button>
                 </div>
               </div>
             `;
           }).join('')}
-          <div style="text-align:right; font-size:1.2rem; font-weight:bold; margin-top:12px; color:#111827;">
-            總金額合計：<span style="color:#0284c7;">${formatVND(grandTotal)}</span>
+          
+          <div style="text-align: right; font-size: 1.25rem; font-weight: bold; margin-top: 16px; color: #111827; padding-top: 10px; border-top: 1px solid #f1f5f9;">
+            總金額合計：<span style="color: #dc2626;">${formatVND(grandTotal)}</span>
           </div>
         </div>
       `;
     }
 
-    // 即時更新購物車中某項商品的數量
     function updateItemQuantity(index, val) {
       let cart = JSON.parse(localStorage.getItem('tss_cart') || '[]');
       let qty = parseInt(val);
@@ -220,7 +302,6 @@
       renderCart();
     }
 
-    // 即時更新購物車中某項商品的規格選項
     function updateItemOption(index, val) {
       let cart = JSON.parse(localStorage.getItem('tss_cart') || '[]');
       cart[index].selected_option = val;
@@ -228,7 +309,6 @@
       renderCart();
     }
 
-    // 移除單一商品
     function removeItem(index) {
       let cart = JSON.parse(localStorage.getItem('tss_cart') || '[]');
       cart.splice(index, 1);
@@ -236,7 +316,6 @@
       renderCart();
     }
 
-    // 提交結算 (包含數量與所選規格)
     async function submitCheckout(e) {
       e.preventDefault();
       
@@ -258,7 +337,6 @@
       btn.innerText = "正在送出訂單...";
 
       try {
-        // 迴圈將購物車每一項商品透過 submitOrder 送至後端 (攜帶最新數量與規格)
         for (let item of cart) {
           await fetch(GAS_API_URL, {
             method: "POST",
@@ -275,8 +353,8 @@
         }
 
         alert('🎉 恭喜！您的所有預購訂單已成功送出！');
-        localStorage.removeItem('tss_cart'); // 清空購物車
-        location.href = "query.html"; // 引導至查詢頁面
+        localStorage.removeItem('tss_cart');
+        location.href = "query.html";
       } catch (err) {
         alert('送出訂單發生網路錯誤，請稍後再試。');
         btn.disabled = false;

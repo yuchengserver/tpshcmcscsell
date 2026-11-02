@@ -7,6 +7,47 @@
   <link rel="stylesheet" href="style.css">
   <!-- 引入 Google Sign-In SDK -->
   <script src="https://accounts.google.com/gsi/client" async defer></script>
+  <style>
+    /* 單品預購頁面專屬電商化風格微調 */
+    .product-summary {
+      display: flex;
+      gap: 16px;
+      align-items: center;
+      background: #f8fafc;
+      border: 1px solid #e5e7eb;
+      border-radius: 10px;
+      padding: 16px;
+      margin-top: 20px;
+    }
+    .product-summary img {
+      width: 90px;
+      height: 90px;
+      object-fit: cover;
+      border-radius: 8px;
+      border: 1px solid #cbd5e1;
+      background: #fff;
+    }
+    .product-info h3 {
+      margin: 0 0 6px 0;
+      font-size: 1.1rem;
+      color: #1f2937;
+    }
+    .product-info p {
+      margin: 0 0 8px 0;
+      font-size: 0.85rem;
+      color: #6b7280;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      line-clamp: 2;
+      overflow: hidden;
+    }
+    .product-info .price {
+      font-size: 1.1rem;
+      font-weight: bold;
+      color: #dc2626; /* 蝦皮紅 */
+    }
+  </style>
 </head>
 <body>
 
@@ -14,7 +55,7 @@
   <header>
     <div class="nav-brand">
       <img src="tpshcmcsc.png" alt="TSSC13TH 標誌" onerror="this.src='tpshcmcsc.png'">
-      <span>TSSC13TH 公投專區</span>
+      <span>TSSC13TH 公投與周邊專區</span>
     </div>
     <nav class="nav-links">
       <a href="index.html">首頁與通知</a>
@@ -26,12 +67,12 @@
 
   <div class="container">
     <div class="card" style="max-width: 800px; margin: 0 auto;">
-      <h2>📝 單品預購與快速下單填寫</h2>
+      <h2 style="margin-bottom: 10px; color: #111827;">📝 單品預購與快速下單填寫</h2>
       
       <!-- 動態載入所選商品資訊 -->
-      <div id="selectedProductContainer" class="product-summary" style="margin-top: 20px;">
+      <div id="selectedProductContainer" class="product-summary">
         <img id="previewImg" src="tpshcmcsc.png" alt="商品圖片" onerror="this.onerror=null; this.src='tpshcmcsc.png';">
-        <div class="product-info">
+        <div class="product-info" style="flex:1;">
           <h3 id="previewTitle">載入中或未選擇特定商品...</h3>
           <p id="previewDesc">請從首頁瀏覽商品，或在此確認您選購的單品資訊。</p>
           <div id="previewPrice" class="price">-- ₫</div>
@@ -60,34 +101,34 @@
         </div>
       </div>
 
-      <form id="orderForm" onsubmit="submitOrder(event)" style="margin-top: 20px;">
+      <form id="orderForm" onsubmit="submitOrder(event)" style="margin-top: 24px;">
         <!-- 隱藏的商品 ID 與 已驗證信箱 -->
         <input type="hidden" id="productId" name="productId">
 
         <!-- 動態規格選項容器 -->
         <div id="productOptionsContainer"></div>
 
-        <div class="form-group">
-          <label for="studentName">真實姓名 / 班級座號：</label>
-          <input type="text" id="studentName" required placeholder="例如：Nguyen Van A (12A1)">
+        <div class="form-group" style="margin-bottom: 16px;">
+          <label for="studentName" style="display: block; font-weight: bold; margin-bottom: 6px; color: #374151;">真實姓名 / 班級座號：</label>
+          <input type="text" id="studentName" required placeholder="例如：Nguyen Van A (12A1)" style="width: 100%; padding: 10px; border: 1px solid #d1d5db; border-radius: 6px; font-size: 1rem;">
         </div>
 
-        <div class="form-group">
-          <label for="quantity">購買數量：</label>
-          <input type="number" id="quantity" min="1" value="1" required onchange="calculateTotal()">
+        <div class="form-group" style="margin-bottom: 16px;">
+          <label for="quantity" style="display: block; font-weight: bold; margin-bottom: 6px; color: #374151;">購買數量：</label>
+          <input type="number" id="quantity" min="1" value="1" required onchange="calculateTotal()" style="width: 100%; padding: 10px; border: 1px solid #d1d5db; border-radius: 6px; font-size: 1rem;">
         </div>
 
-        <div class="form-group">
-          <label>總金額試算 (越盾 VND)：</label>
-          <div id="totalPriceDisplay" style="font-size: 1.2rem; font-weight: bold; color: #0284c7; padding: 6px 0;">0 ₫</div>
+        <div class="form-group" style="margin-bottom: 16px;">
+          <label style="display: block; font-weight: bold; margin-bottom: 4px; color: #374151;">總金額試算 (越盾 VND)：</label>
+          <div id="totalPriceDisplay" style="font-size: 1.25rem; font-weight: bold; color: #dc2626; padding: 6px 0;">0 ₫</div>
         </div>
 
-        <div class="form-group">
-          <label for="remark">備註說明 (選填)：</label>
-          <textarea id="remark" rows="2" placeholder="其他特殊需求或備註..."></textarea>
+        <div class="form-group" style="margin-bottom: 20px;">
+          <label for="remark" style="display: block; font-weight: bold; margin-bottom: 6px; color: #374151;">備註說明 (選填)：</label>
+          <textarea id="remark" rows="2" placeholder="其他特殊需求或備註..." style="width: 100%; padding: 10px; border: 1px solid #d1d5db; border-radius: 6px; font-size: 1rem;"></textarea>
         </div>
 
-        <button type="submit" id="submitBtn" class="submit-btn" disabled style="background:#9ca3af; cursor:not-allowed;">🚀 請先完成 Google 登入後始可送出</button>
+        <button type="submit" id="submitBtn" class="submit-btn" disabled style="background:#9ca3af; cursor:not-allowed; width: 100%; padding: 12px; border: none; border-radius: 6px; color: #fff; font-weight: bold; font-size: 1rem;">🚀 請先完成 Google 登入後始可送出</button>
       </form>
     </div>
   </div>
@@ -173,6 +214,21 @@
       return new Intl.NumberFormat('vi-VN').format(amount) + ' ₫';
     }
 
+    // 解析選項 (相容 JSON 或逗號分隔)
+    function parseOptions(optionsStr) {
+      if (!optionsStr || optionsStr.trim() === "") return [];
+      try {
+        let parsed = JSON.parse(optionsStr);
+        if (typeof parsed === 'object') {
+          let firstKey = Object.keys(parsed)[0];
+          return parsed[firstKey] || [];
+        }
+      } catch(e) {
+        return optionsStr.split(',').map(o => o.trim()).filter(o => o);
+      }
+      return [];
+    }
+
     async function loadProductDetails(prodId) {
       try {
         const response = await fetch(`${GAS_API_URL}?action=getProducts`);
@@ -188,12 +244,13 @@
             
             // 動態產生規格選項下拉選單
             const optContainer = document.getElementById('productOptionsContainer');
-            if (product.options && product.options.trim() !== "") {
-              let optArray = product.options.split(',').map(o => o.trim());
+            let optArray = parseOptions(product.options);
+            
+            if (optArray.length > 0) {
               optContainer.innerHTML = `
-                <div class="form-group">
-                  <label for="productOption">選擇規格 / 選項：</label>
-                  <select id="productOption" required>
+                <div class="form-group" style="margin-bottom: 16px;">
+                  <label for="productOption" style="display: block; font-weight: bold; margin-bottom: 6px; color: #374151;">選擇規格 / 選項：</label>
+                  <select id="productOption" required style="width: 100%; padding: 10px; border: 1px solid #d1d5db; border-radius: 6px; font-size: 1rem; background: #fff;">
                     ${optArray.map(opt => `<option value="${opt}">${opt}</option>`).join('')}
                   </select>
                 </div>

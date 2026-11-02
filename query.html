@@ -7,6 +7,55 @@
   <link rel="stylesheet" href="style.css">
   <!-- 引入 Google Sign-In SDK -->
   <script src="https://accounts.google.com/gsi/client" async defer></script>
+  <style>
+    /* 📋 訂單查詢頁面專屬電商化風格微調 */
+    .order-card {
+      background: #ffffff;
+      border: 1px solid #e5e7eb;
+      border-radius: 10px;
+      padding: 16px;
+      margin-bottom: 14px;
+      transition: box-shadow 0.2s;
+    }
+    .order-card:hover {
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.04);
+    }
+    .order-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 10px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid #f1f5f9;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+    .order-id {
+      font-size: 0.85rem;
+      color: #6b7280;
+    }
+    .order-status-badge {
+      padding: 4px 10px;
+      border-radius: 12px;
+      font-weight: 600;
+      font-size: 0.8rem;
+      background: #e0f2fe;
+      color: #0369a1;
+    }
+    .order-body-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 8px;
+      font-size: 0.9rem;
+      color: #374151;
+      margin-bottom: 8px;
+    }
+    .order-total-price {
+      font-size: 1.1rem;
+      font-weight: bold;
+      color: #dc2626; /* 蝦皮紅 */
+    }
+  </style>
 </head>
 <body>
 
@@ -14,7 +63,7 @@
   <header>
     <div class="nav-brand">
       <img src="tpshcmcsc.png" alt="TSSC13TH標誌" onerror="this.src='tpshcmcsc.png'">
-      <span>TSSC13TH 公投專區</span>
+      <span>TSSC13TH 公投與周邊專區</span>
     </div>
     <nav class="nav-links">
       <a href="index.html">首頁與通知</a>
@@ -25,12 +74,12 @@
   </header>
 
   <div class="container">
-    <div class="card" style="max-width: 650px; margin: 0 auto;">
-      <h2>🔒 訂單安全登入與查詢</h2>
-      <p style="font-size: 0.9rem; color: #6b7280;">為保障個人隱私，查詢訂單須透過學校官方帳號（@tshcmc.edu.vn）進行 Google 一鍵實名登入。</p>
+    <div class="card" style="max-width: 750px; margin: 0 auto;">
+      <h2 style="margin-bottom: 8px; color: #111827;">🔒 訂單安全登入與查詢</h2>
+      <p style="font-size: 0.9rem; color: #6b7280; margin-bottom: 20px;">為保障個人隱私，查詢訂單須透過學校官方帳號（@tshcmc.edu.vn）進行 Google 一鍵實名登入。</p>
 
       <!-- 🔐 Google 身分驗證區塊 -->
-      <div id="authBox" style="margin-top: 20px; padding: 20px; background: #f3f4f6; border-radius: 8px; border: 1px solid #e5e7eb;">
+      <div id="authBox" style="padding: 16px; background: #f3f4f6; border-radius: 8px; border: 1px solid #e5e7eb;">
         <div id="notLoggedIn" style="text-align: center;">
           <p style="margin-bottom: 12px; font-weight: bold; color: #374151;">請使用學校官方 Google 帳號登入以查詢訂單：</p>
           <div id="g_id_onload" 
@@ -114,7 +163,7 @@
     // 撈取指定 Email 的預購訂單
     async function fetchUserOrders(email) {
       const resDiv = document.getElementById('orderResultContainer');
-      resDiv.innerHTML = `<div style="text-align:center; color:#6b7280; padding:12px;">🔍 正在從後端系統檢索您的預購紀錄...</div>`;
+      resDiv.innerHTML = `<div style="text-align:center; color:#6b7280; padding:20px;">🔍 正在從後端系統檢索您的預購紀錄...</div>`;
 
       try {
         const res = await fetch(`${GAS_API_URL}?action=getUserOrders&email=${encodeURIComponent(email)}`);
@@ -122,31 +171,37 @@
 
         if (result.status === "success") {
           if (!result.data || result.data.length === 0) {
-            resDiv.innerHTML = `<div class="empty-state">✅ 身分驗證通過！目前查無「${email}」的預購訂單紀錄。</div>`;
+            resDiv.innerHTML = `<div class="empty-state" style="text-align:center; padding:30px; color:#6b7280;">✅ 身分驗證通過！目前查無「${email}」的預購訂單紀錄。</div>`;
           } else {
             resDiv.innerHTML = `
-              <h3 style="color:#166534; border-bottom:1px solid #ddd; padding-bottom:8px; margin-bottom:16px;">📦 您的預購訂單列表 (${result.data.length} 筆)：</h3>
+              <h3 style="color:#1f2937; font-size: 1.1rem; border-bottom: 2px solid #e5e7eb; padding-bottom: 8px; margin-bottom: 16px;">📦 您的預購訂單列表 (${result.data.length} 筆)：</h3>
               ${result.data.map(o => `
-                <div style="background:#f9fafb; border:1px solid #e5e7eb; padding:16px; border-radius:8px; margin-bottom:12px;">
-                  <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
-                    <strong style="color:#111827;">訂單編號：${o.order_id}</strong>
-                    <span style="padding:4px 10px; background:#e0f2fe; color:#0369a1; border-radius:12px; font-weight:bold; font-size:0.85rem;">${o.status}</span>
+                <div class="order-card">
+                  <div class="order-header">
+                    <span class="order-id">訂單編號：<strong>${o.order_id}</strong></span>
+                    <span class="order-status-badge">${o.status}</span>
                   </div>
-                  <div><strong>預購品項：</strong>${o.product_title || o.title}</div>
-                  <div><strong>選擇規格：</strong><span style="color:#059669; font-weight:bold;">${o.selected_option || '預設'}</span></div>
-                  <div><strong>預購數量：</strong>${o.quantity} 件</div>
-                  <div><strong>應繳總金額：</strong><span style="color:#0284c7; font-weight:bold; font-size:1.1rem;">${formatVND(o.total_price)}</span></div>
-                  ${o.remark ? `<div style="color:#6b7280; font-size:0.85rem; margin-top:4px;">備註：${o.remark}</div>` : ''}
-                  <small style="color:#9ca3af; display:block; margin-top:8px;">下單時間：${o.timestamp}</small>
+                  <div style="font-weight: 600; color: #1f2937; font-size: 1.02rem; margin-bottom: 6px;">
+                    🛍️ ${o.product_title || o.title}
+                  </div>
+                  <div class="order-body-grid">
+                    <div>規格選項：<span style="color:#059669; font-weight:bold;">${o.selected_option || '預設'}</span></div>
+                    <div>預購數量：<strong>${o.quantity}</strong> 件</div>
+                    <div>應繳總金額：<span class="order-total-price">${formatVND(o.total_price)}</span></div>
+                  </div>
+                  ${o.remark ? `<div style="color:#6b7280; font-size:0.85rem; margin-top:6px; background:#f8fafc; padding:6px 8px; border-radius:4px;">備註：${o.remark}</div>` : ''}
+                  <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 10px; padding-top: 6px; border-top: 1px dashed #f1f5f9;">
+                    <small style="color:#9ca3af;">下單時間：${o.timestamp}</small>
+                  </div>
                 </div>
               `).join('')}
             `;
           }
         } else {
-          resDiv.innerHTML = `<div class="empty-state" style="color:#ef4444;">查詢失敗：${result.message}</div>`;
+          resDiv.innerHTML = `<div class="empty-state" style="color:#ef4444; text-align:center; padding:20px;">查詢失敗：${result.message}</div>`;
         }
       } catch (e) {
-        resDiv.innerHTML = `<div class="empty-state" style="color:#ef4444;">查詢過程發生網路錯誤，請重新整理頁面試試。</div>`;
+        resDiv.innerHTML = `<div class="empty-state" style="color:#ef4444; text-align:center; padding:20px;">查詢過程發生網路錯誤，請重新整理頁面試試。</div>`;
       }
     }
   </script>

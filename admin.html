@@ -29,8 +29,67 @@
     .status-select { background: #fff; color: #374151; border: 1px solid #d1d5db; padding: 4px 8px; border-radius: 4px; font-size: 0.85rem; }
     .stock-input { width: 70px; padding: 4px 6px; background: #fff; color: #111; border: 1px solid #d1d5db; border-radius: 4px; }
     
+    /* 🖼️ 最多 3 張圖片上傳預覽網格 */
+    .image-upload-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+      margin-top: 8px;
+    }
+    .image-preview-card {
+      position: relative;
+      border: 2px dashed #cbd5e1;
+      border-radius: 8px;
+      height: 120px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: #f8fafc;
+      overflow: hidden;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .image-preview-card:hover { border-color: #0f172a; background: #f1f5f9; }
+    .image-preview-card img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+    .image-preview-card .upload-placeholder {
+      text-align: center;
+      color: #64748b;
+      font-size: 0.8rem;
+    }
+    .btn-remove-img {
+      position: absolute;
+      top: 6px;
+      right: 6px;
+      background: rgba(239, 68, 68, 0.9);
+      color: white;
+      border: none;
+      border-radius: 50%;
+      width: 24px;
+      height: 24px;
+      font-size: 0.8rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+    }
+    .btn-remove-img:hover { background: #dc2626; }
+
     /* 預覽繳費單專區 */
     .preview-box { background: #fff; border: 1px solid #cbd5e1; padding: 30px; border-radius: 8px; margin-top: 15px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
+
+    /* 💵 點鈔機小幫手表格樣式 */
+    .cash-counter-table { width: 100%; border-collapse: collapse; margin-top: 8px; background: #fff; font-size: 0.9rem; }
+    .cash-counter-table th, .cash-counter-table td { border: 1px solid #e5e7eb; padding: 6px 10px; text-align: center; }
+    .cash-counter-table th { background: #f3f4f6; color: #374151; }
+
+    @media screen and (max-width: 768px) {
+      .image-upload-grid { grid-template-columns: 1fr; }
+    }
   </style>
 </head>
 <body>
@@ -69,21 +128,19 @@
 
     <!-- 🗂️ 後台分頁切換按鈕列 -->
     <div class="admin-tabs">
-      <button class="tab-btn active" onclick="switchTab(event, 'tabOrders')">📊 訂單管理與對帳中心</button>
+      <button class="tab-btn active" onclick="switchTab(event, 'tabOrders')">📊 訂單總覽管理</button>
+      <button class="tab-btn" onclick="switchTab(event, 'tabReconcile')">🧮 AI 智慧班級對帳中心</button>
       <button class="tab-btn" onclick="switchTab(event, 'tabProductAdd')">🛍️ 上架新周邊商品</button>
       <button class="tab-btn" onclick="switchTab(event, 'tabProductManage')">📋 商品庫存與規格控管</button>
       <button class="tab-btn" onclick="switchTab(event, 'tabPrintPreview')">🖨️ 繳費單預覽與列印</button>
     </div>
 
-    <!-- 标签頁 1：訂單管理與對帳中心 (含多元搜尋) -->
+    <!-- 標籤頁 1：訂單總覽管理 -->
     <div id="tabOrders" class="tab-content active">
       <div class="admin-card">
         <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:2px solid #e5e7eb; padding-bottom:10px; margin-bottom:16px; flex-wrap:wrap; gap:10px;">
-          <h2 style="border:none; margin:0; padding:0;">📋 訂單總覽與智慧排查</h2>
-          <div style="display:flex; gap:8px; flex-wrap:wrap;">
-            <button onclick="openReconcileModal()" class="btn-reconcile">🧮 班級自動對帳</button>
-            <button onclick="exportOrdersToCSV()" class="btn-export">📥 匯出 Excel / CSV</button>
-          </div>
+          <h2 style="border:none; margin:0; padding:0;">📋 訂單總覽與狀態管理</h2>
+          <button onclick="exportOrdersToCSV()" class="btn-export">📥 匯出 Excel / CSV</button>
         </div>
 
         <!-- 🔍 進階多元搜尋列 -->
@@ -94,7 +151,7 @@
             <option value="name">姓名 / 班級 / 座號</option>
             <option value="email">聯絡信箱 (學號)</option>
             <option value="title">商品名稱</option>
-            <option value="status">訂單狀態 (候補/已付款等)</option>
+            <option value="status">訂單狀態</option>
           </select>
         </div>
 
@@ -118,10 +175,75 @@
       </div>
     </div>
 
-    <!-- 标签頁 2：上架新周邊商品 (支援圖片上傳與 JSON 動態選項) -->
+    <!-- 標籤頁 2：AI 智慧班級對帳中心 (獨立分頁 + 點鈔機防呆 + 機率排序 + 一鍵自動更新) -->
+    <div id="tabReconcile" class="tab-content">
+      <div class="admin-card">
+        <h2>🧮 班級自動對帳與 AI 差額排查中心</h2>
+        <p style="font-size:0.9rem; color:#6b7280; margin-bottom:16px;">選擇班級並使用點鈔機輸入現鈔張數，系統將自動比對並以機率高低列出可疑缺帳與數錯可能。</p>
+        
+        <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap:16px; margin-bottom:16px;">
+          <div class="form-group">
+            <label style="font-weight:bold; margin-bottom:6px; display:block;">選擇對帳班級：</label>
+            <select id="reconcileClassSelect" onchange="updateReconcileExpected()" style="width:100%; padding:8px; border:1px solid #d1d5db; border-radius:6px;"></select>
+          </div>
+          <div class="form-group">
+            <label style="font-weight:bold; margin-bottom:6px; display:block;">系統預期總金額：</label>
+            <div id="expectedTotalDisplay" style="font-weight:bold; color:#0284c7; font-size:1.2rem; margin-top:6px;">0 ₫</div>
+          </div>
+        </div>
+
+        <!-- 💵 點鈔機防呆輸入區 (越盾面額計算) -->
+        <div style="background: #f8fafc; border: 1px solid #cbd5e1; padding: 16px; border-radius: 8px; margin-bottom: 16px;">
+          <h3 style="margin-top:0; font-size:1rem; color:#1f2937;">💵 越盾現金點鈔機小幫手 (免人工心算)</h3>
+          <div style="overflow-x: auto;">
+            <table class="cash-counter-table">
+              <thead>
+                <tr>
+                  <th>面額</th>
+                  <th>500,000 ₫</th>
+                  <th>200,000 ₫</th>
+                  <th>100,000 ₫</th>
+                  <th>50,000 ₫</th>
+                  <th>20,000 ₫</th>
+                  <th>10,000 ₫</th>
+                  <th>其他 / 零錢</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><strong>張數輸入：</strong></td>
+                  <td><input type="number" id="note500k" min="0" value="0" oninput="calculateCashTotal()" style="width:60px; text-align:center;"></td>
+                  <td><input type="number" id="note200k" min="0" value="0" oninput="calculateCashTotal()" style="width:60px; text-align:center;"></td>
+                  <td><input type="number" id="note100k" min="0" value="0" oninput="calculateCashTotal()" style="width:60px; text-align:center;"></td>
+                  <td><input type="number" id="note50k" min="0" value="0" oninput="calculateCashTotal()" style="width:60px; text-align:center;"></td>
+                  <td><input type="number" id="note20k" min="0" value="0" oninput="calculateCashTotal()" style="width:60px; text-align:center;"></td>
+                  <td><input type="number" id="note10k" min="0" value="0" oninput="calculateCashTotal()" style="width:60px; text-align:center;"></td>
+                  <td><input type="number" id="noteOther" min="0" value="0" oninput="calculateCashTotal()" style="width:90px; text-align:center;" placeholder="輸入總額"></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-top:10px;">
+            <span style="font-size:0.85rem; color:#6b7280;">💡 輸入各面額張數後，實際收到總金額將自動帶入下方。</span>
+            <div>實際點收總金額：<strong id="cashTotalDisplay" style="color:#16a34a; font-size:1.1rem;">0 ₫</strong></div>
+          </div>
+        </div>
+
+        <div class="form-group" style="margin-bottom:16px;">
+          <label for="actualReceivedAmount" style="font-weight:bold; margin-bottom:6px; display:block;">實際收到總金額 (VND)：</label>
+          <input type="number" id="actualReceivedAmount" placeholder="輸入或由點鈔機自動計算" style="width:100%; padding:8px; border:1px solid #d1d5db; border-radius:6px; font-weight:bold; font-size:1.05rem;">
+        </div>
+
+        <button type="button" onclick="executeReconciliation()" class="btn-reconcile" style="padding:10px 20px; font-size:1rem;">🚀 開始 AI 智慧機率差額排查</button>
+
+        <div id="reconcileResultArea" style="margin-top:24px;"></div>
+      </div>
+    </div>
+
+    <!-- 標籤頁 3：上架新周邊商品 -->
     <div id="tabProductAdd" class="tab-content">
       <div class="admin-card">
-        <h2>🛍️ 上架新周邊商品 (支援圖片上傳與 JSON 規格)</h2>
+        <h2>🛍️ 上架新周邊商品 (最多 3 張圖片與 JSON 規格)</h2>
         <form id="productForm" onsubmit="handleProductSubmit(event)">
           <div class="form-grid">
             <div class="form-group">
@@ -150,31 +272,50 @@
           <div class="form-group" style="margin-top:16px; background:#f9fafb; padding:16px; border-radius:8px; border:1px solid #e5e7eb;">
             <label style="font-weight:bold; color:#111827;">⚙️ 尺寸與顏色規格選項 (JSON 動態產生)</label>
             <div style="display:flex; gap:10px; margin-bottom:10px;">
-              <input type="text" id="optionNameInput" placeholder="選項類別 (例如: 尺寸 或 顏色)" style="flex:1; padding:6px; border:1px solid #d1d5db; border-radius:4px;">
-              <input type="text" id="optionValuesInput" placeholder="項目值 (用逗號隔開，例: S, M, L 或 黑, 白)" style="flex:2; padding:6px; border:1px solid #d1d5db; border-radius:4px;">
+              <input type="text" id="optionNameInput" placeholder="選項類別 (例如: 尺寸)" style="flex:1; padding:6px; border:1px solid #d1d5db; border-radius:4px;">
+              <input type="text" id="optionValuesInput" placeholder="項目值 (逗號隔開, 例: S, M, L)" style="flex:2; padding:6px; border:1px solid #d1d5db; border-radius:4px;">
               <button type="button" onclick="addOptionToJson()" style="background:#0284c7; color:#fff; border:none; padding:6px 12px; border-radius:4px; cursor:pointer;">➕ 新增選項</button>
             </div>
-            <textarea id="prodOptionsJson" rows="2" readonly style="width:100%; background:#fff; font-family:monospace; font-size:0.85rem;" placeholder='自動產生的 JSON 格式 (例如: {"尺寸":["S","M","L"]})'>{}</textarea>
+            <textarea id="prodOptionsJson" rows="2" readonly style="width:100%; background:#fff; font-family:monospace; font-size:0.85rem;" placeholder='{}'>{}</textarea>
           </div>
 
-          <!-- 圖片直接上傳 (Base64 內嵌，免填 URL) -->
+          <!-- 🖼️ 圖片上傳區 -->
           <div class="form-group">
-            <label for="prodImageFile">上傳商品圖片檔案：</label>
-            <input type="file" id="prodImageFile" accept="image/*" required onchange="encodeImageFileAsURL(this)">
-            <input type="hidden" id="img1Base64">
-            <small style="color: #6b7280;">⚠️ 圖片將自動轉換為高效內嵌格式，無須手動填寫外部圖床連結。</small>
+            <label>🖼️ 商品圖片上傳 (最多 3 張)</label>
+            <div class="image-upload-grid">
+              <div class="image-preview-card" id="card-img-1" onclick="triggerFileInput(1)">
+                <div class="upload-placeholder" id="placeholder-1">➕ 上傳圖片 1</div>
+                <img id="preview-img-1" class="hidden" alt="預覽圖 1">
+                <button type="button" class="btn-remove-img hidden" id="btn-remove-1" onclick="removeImage(1, event)">✕</button>
+              </div>
+              <input type="file" id="file-input-1" class="hidden" accept="image/*" onchange="handleImageUpload(1, this)">
+
+              <div class="image-preview-card" id="card-img-2" onclick="triggerFileInput(2)">
+                <div class="upload-placeholder" id="placeholder-2">➕ 上傳圖片 2</div>
+                <img id="preview-img-2" class="hidden" alt="預覽圖 2">
+                <button type="button" class="btn-remove-img hidden" id="btn-remove-2" onclick="removeImage(2, event)">✕</button>
+              </div>
+              <input type="file" id="file-input-2" class="hidden" accept="image/*" onchange="handleImageUpload(2, this)">
+
+              <div class="image-preview-card" id="card-img-3" onclick="triggerFileInput(3)">
+                <div class="upload-placeholder" id="placeholder-3">➕ 上傳圖片 3</div>
+                <img id="preview-img-3" class="hidden" alt="預覽圖 3">
+                <button type="button" class="btn-remove-img hidden" id="btn-remove-3" onclick="removeImage(3, event)">✕</button>
+              </div>
+              <input type="file" id="file-input-3" class="hidden" accept="image/*" onchange="handleImageUpload(3, this)">
+            </div>
           </div>
 
           <div class="form-group full-width">
             <label for="prodDesc">商品詳細說明：</label>
-            <textarea id="prodDesc" rows="2" placeholder="材質、尺寸對照說明..."></textarea>
+            <textarea id="prodDesc" rows="2" placeholder="材質與尺寸說明..."></textarea>
           </div>
           <button type="submit" id="submitBtn" class="action-btn">🚀 立即上架周邊商品</button>
         </form>
       </div>
     </div>
 
-    <!-- 标签頁 3：商品庫存與規格控管 -->
+    <!-- 標籤頁 4：商品庫存與規格控管 -->
     <div id="tabProductManage" class="tab-content">
       <div class="admin-card">
         <h2>📋 現有上架商品控管與庫存維護</h2>
@@ -198,7 +339,7 @@
       </div>
     </div>
 
-    <!-- 标签頁 4：繳費單預覽與即時樣式微調 -->
+    <!-- 標籤頁 5：繳費單預覽與即時樣式微調 -->
     <div id="tabPrintPreview" class="tab-content">
       <div class="admin-card">
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
@@ -218,14 +359,12 @@
 
   </div>
 
-  <!-- 🧮 自動對帳彈窗容器 -->
-  <div id="reconcileModalContainer"></div>
-
   <script>
     const GAS_API_URL = "https://script.google.com/macros/s/AKfycbx7o4EJKoFsiJojM3FfS0pqj8n77mrdDR318Srn7DRy0kkFjMvogprtnHD0loSKqcB0/exec";
     let globalOrdersData = [];
     let globalProductsData = [];
     let currentOptionsObj = {};
+    let uploadedImages = ["", "", ""];
 
     function formatVND(amount) {
       return new Intl.NumberFormat('vi-VN').format(amount) + ' ₫';
@@ -236,28 +375,54 @@
       loadAllOrders();
     };
 
-    // 🗂️ 分頁切換邏輯
     function switchTab(evt, tabId) {
       document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
       document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
       document.getElementById(tabId).classList.add('active');
       evt.currentTarget.classList.add('active');
       if (tabId === 'tabPrintPreview') initPrintPreviewDropdown();
+      if (tabId === 'tabReconcile') initReconcileDropdown();
     }
 
-    // 圖片轉 Base64
-    function encodeImageFileAsURL(element) {
-      const file = element.files[0];
+    function triggerFileInput(index) {
+      document.getElementById(`file-input-${index}`).click();
+    }
+
+    function handleImageUpload(index, inputElement) {
+      const file = inputElement.files[0];
       if (file) {
         const reader = new FileReader();
         reader.onloadend = function() {
-          document.getElementById('img1Base64').value = reader.result;
-        }
+          const base64Str = reader.result;
+          uploadedImages[index - 1] = base64Str;
+          const previewImg = document.getElementById(`preview-img-${index}`);
+          const placeholder = document.getElementById(`placeholder-${index}`);
+          const removeBtn = document.getElementById(`btn-remove-${index}`);
+
+          previewImg.src = base64Str;
+          previewImg.classList.remove('hidden');
+          placeholder.classList.add('hidden');
+          removeBtn.classList.remove('hidden');
+        };
         reader.readAsDataURL(file);
       }
     }
 
-    // 動態新增 JSON 規格選項
+    function removeImage(index, event) {
+      event.stopPropagation();
+      uploadedImages[index - 1] = "";
+      const previewImg = document.getElementById(`preview-img-${index}`);
+      const placeholder = document.getElementById(`placeholder-${index}`);
+      const removeBtn = document.getElementById(`btn-remove-${index}`);
+      const fileInput = document.getElementById(`file-input-${index}`);
+
+      previewImg.src = "";
+      previewImg.classList.add('hidden');
+      placeholder.classList.remove('hidden');
+      removeBtn.classList.add('hidden');
+      fileInput.value = "";
+    }
+
     function addOptionToJson() {
       const key = document.getElementById('optionNameInput').value.trim();
       const valStr = document.getElementById('optionValuesInput').value.trim();
@@ -311,7 +476,6 @@
         
         if (result.status === "success") {
           globalOrdersData = result.data;
-          
           let totalRev = 0;
           let pendingCount = 0;
           globalOrdersData.forEach(o => {
@@ -330,7 +494,6 @@
       }
     }
 
-    // 渲染訂單表格
     function renderOrdersTable(orders) {
       const tbody = document.getElementById('adminOrderTableBody');
       if (orders.length === 0) {
@@ -358,7 +521,6 @@
       `).join('');
     }
 
-    // 🔍 進階多元搜尋與過濾功能
     function filterOrdersTable() {
       const keyword = document.getElementById('searchKeyword').value.toLowerCase().trim();
       const field = document.getElementById('searchField').value;
@@ -370,7 +532,6 @@
         if (field === 'title') return o.product_title.toLowerCase().includes(keyword);
         if (field === 'status') return o.status.toLowerCase().includes(keyword);
         
-        // 全欄位
         return o.name.toLowerCase().includes(keyword) || 
                o.email.toLowerCase().includes(keyword) || 
                o.product_title.toLowerCase().includes(keyword) || 
@@ -379,6 +540,185 @@
       });
 
       renderOrdersTable(filtered);
+    }
+
+    // 💵 點鈔機即時計算加總
+    function calculateCashTotal() {
+      const n500k = parseInt(document.getElementById('note500k').value) || 0;
+      const n200k = parseInt(document.getElementById('note200k').value) || 0;
+      const n100k = parseInt(document.getElementById('note100k').value) || 0;
+      const n50k  = parseInt(document.getElementById('note50k').value) || 0;
+      const n20k  = parseInt(document.getElementById('note20k').value) || 0;
+      const n10k  = parseInt(document.getElementById('note10k').value) || 0;
+      const other = parseInt(document.getElementById('noteOther').value) || 0;
+
+      const total = (n500k * 500000) + (n200k * 200000) + (n100k * 100000) + (n50k * 50000) + (n20k * 20000) + (n10k * 10000) + other;
+      
+      document.getElementById('cashTotalDisplay').innerText = formatVND(total);
+      document.getElementById('actualReceivedAmount').value = total;
+    }
+
+    // 🧮 AI 智慧對帳下拉與預期總額初始化
+    function initReconcileDropdown() {
+      let classGroups = {};
+      globalOrdersData.forEach(o => {
+        let match = o.name.match(/\(([^)]+)\)/);
+        let className = match ? match[1].trim().toUpperCase() : "未分類班級";
+        if (!classGroups[className]) classGroups[className] = [];
+        classGroups[className].push(o);
+      });
+
+      const select = document.getElementById('reconcileClassSelect');
+      select.innerHTML = Object.keys(classGroups).map(c => `<option value="${c}">${c} (${classGroups[c].length} 筆)</option>`).join('');
+      updateReconcileExpected();
+    }
+
+    function updateReconcileExpected() {
+      let className = document.getElementById('reconcileClassSelect').value;
+      let orders = globalOrdersData.filter(o => {
+        let match = o.name.match(/\(([^)]+)\)/);
+        let cName = match ? match[1].trim().toUpperCase() : "未分類班級";
+        return cName === className;
+      });
+      let expected = orders.reduce((sum, o) => sum + Number(o.total_price || 0), 0);
+      document.getElementById('expectedTotalDisplay').innerText = formatVND(expected);
+      document.getElementById('actualReceivedAmount').value = expected;
+      // 清空點鈔機
+      ['note500k', 'note200k', 'note100k', 'note50k', 'note20k', 'note10k', 'noteOther'].forEach(id => document.getElementById(id).value = 0);
+      document.getElementById('cashTotalDisplay').innerText = formatVND(expected);
+    }
+
+    // 🚀 AI 智慧機率差額排查核心
+    function executeReconciliation() {
+      let className = document.getElementById('reconcileClassSelect').value;
+      let actual = Number(document.getElementById('actualReceivedAmount').value);
+      let orders = globalOrdersData.filter(o => {
+        let match = o.name.match(/\(([^)]+)\)/);
+        let cName = match ? match[1].trim().toUpperCase() : "未分類班級";
+        return cName === className;
+      });
+      let expected = orders.reduce((sum, o) => sum + Number(o.total_price || 0), 0);
+      let diff = actual - expected;
+      let resArea = document.getElementById('reconcileResultArea');
+
+      if (diff === 0) {
+        resArea.innerHTML = `<div style="padding:15px; background:#f0fdf4; border:1px solid #bbf7d0; color:#166534; border-radius:6px; font-weight:bold;">✅ 金額完美吻合！該班預期與實際收到金額皆為 ${formatVND(expected)}。</div>`;
+        return;
+      }
+
+      // 排查分析
+      let probabilities = [];
+
+      // 1. 檢查是否有單人金額剛好等於缺額 (機率最高)
+      let target = Math.abs(diff);
+      orders.forEach(o => {
+        if (Number(o.total_price) === target) {
+          probabilities.push({
+            level: "🔥 機率最高 (單人金額完全吻合差額)",
+            desc: `學生 <strong>${o.name}</strong> 訂單金額 (${formatVND(o.total_price)}) 剛好等於差額。`,
+            orderIds: [o.order_id]
+          });
+        }
+      });
+
+      // 2. 檢查是否有兩人組合金額等於差額 (機率次高)
+      let foundPairs = [];
+      for (let i = 0; i < orders.length; i++) {
+        for (let j = i + 1; j < orders.length; j++) {
+          if (Number(orders[i].total_price) + Number(orders[j].total_price) === target) {
+            foundPairs.push([orders[i], orders[j]]);
+          }
+        }
+      }
+      if (foundPairs.length > 0) {
+        foundPairs.slice(0, 3).forEach(pair => {
+          probabilities.push({
+            level: "⚡ 機率次高 (兩人加總等於差額)",
+            desc: `<strong>${pair[0].name}</strong> (${formatVND(pair[0].total_price)}) + <strong>${pair[1].name}</strong> (${formatVND(pair[1].total_price)}) 合計等於差額。`,
+            orderIds: [pair[0].order_id, pair[1].order_id]
+          });
+        });
+      }
+
+      // 3. 數錯錢 / 找零猜測 (若誤差為 10,000 ~ 50,000 等常見找零面額)
+      if (Math.abs(diff) <= 100000 && Math.abs(diff) % 10000 === 0) {
+        probabilities.push({
+          level: "💡 可能原因：人員找零或數錯錢",
+          desc: `實際金額與預期相差 ${formatVND(diff)}，極可能是點鈔找零時多找或少算面額。`
+        });
+      }
+
+      let html = `<div style="padding:20px; background:#fef2f2; border:1px solid #fecaca; border-radius:8px; color:#991b1b;">
+        <h3 style="margin-top:0; color:#b91c1c;">⚠️ 發現金額差額：${formatVND(diff)}</h3>
+        <p style="font-size:0.9rem; color:#7f1d1d;">系統已依發生機率由高至低為您列出可能原因與可疑項目：</p>`;
+
+      if (probabilities.length > 0) {
+        html += `<div style="display:flex; flex-direction:column; gap:10px; margin-bottom:16px;">`;
+        probabilities.forEach((p, idx) => {
+          html => html; // placeholder
+          html += `<div style="background:#fff; padding:12px; border:1px solid #fca5a5; border-radius:6px;">
+            <div style="font-weight:bold; color:#b91c1c; margin-bottom:4px;">${idx + 1}. ${p.level}</div>
+            <div style="font-size:0.9rem; color:#374151;">${p.desc}</div>
+          </div>`;
+        });
+        html += `</div>`;
+      }
+
+      html += `<div style="margin-top:16px; border-top:1px dashed #f87171; padding-top:12px;">
+        <strong>📋 本班所有訂單核對清單（人工審查與一鍵批次更新）：</strong><br>
+        <small style="color:#7f1d1d;">勾選確定已收到款項的訂單，點擊下方按鈕將「其餘未勾選」的項目自動更新為已付款。</small>
+        <div style="max-height:220px; overflow-y:auto; background:#fff; padding:10px; border:1px solid #cbd5e1; border-radius:6px; margin-top:8px;">
+          ${orders.map(o => `
+            <div style="display:flex; align-items:center; justify-content:space-between; padding:6px 0; border-bottom:1px solid #f1f5f9;">
+              <label style="display:flex; align-items:center; gap:8px; cursor:pointer; flex:1;">
+                <input type="checkbox" class="recon-checkbox" value="${o.order_id}" ${o.status === '已付款' ? 'checked' : ''}>
+                <span><strong>${o.name}</strong> - ${o.product_title} (${o.selected_option || '預設'}) - <span style="color:#0284c7; font-weight:bold;">${formatVND(o.total_price)}</span></span>
+              </label>
+              <span style="font-size:0.75rem; padding:2px 6px; background:#f3f4f6; border-radius:4px;">目前狀態: ${o.status}</span>
+            </div>
+          `).join('')}
+        </div>
+        <button type="button" onclick="confirmBatchUpdateUnchecked()" style="margin-top:14px; background:#16a34a; color:#white; border:none; padding:10px 16px; border-radius:6px; font-weight:bold; cursor:pointer; width:100%; color:#fff;">
+          ✅ 確認審查完畢：將未勾選項目自動批次更新為「已付款」
+        </button>
+      </div>
+    </div>`;
+
+      resArea.innerHTML = html;
+    }
+
+    // 🛡️ 防呆批次更新未勾選項目
+    async function confirmBatchUpdateUnchecked() {
+      const checkboxes = document.querySelectorAll('.recon-checkbox');
+      let uncheckedOrderIds = [];
+      checkboxes.forEach(cb => {
+        if (!cb.checked) {
+          uncheckedOrderIds.push(cb.value);
+        }
+      });
+
+      if (uncheckedOrderIds.length === 0) {
+        alert('【防呆提示】所有項目皆已勾選，沒有需要自動更新的項目！');
+        return;
+      }
+
+      if (!confirm(`【安全防呆確認】您確定要將這 ${uncheckedOrderIds.length筆} 未勾選的訂單狀態全部自動更新為「已付款」嗎？`)) {
+        return;
+      }
+
+      try {
+        for (let orderId of uncheckedOrderIds) {
+          await fetch(GAS_API_URL, {
+            method: "POST",
+            body: JSON.stringify({ action: "updateOrderStatus", orderId: orderId, newStatus: "已付款" })
+          });
+        }
+        alert('🎉 批次對帳與狀態更新成功！');
+        loadAllOrders();
+        initReconcileDropdown();
+      } catch (e) {
+        alert('批次更新發生錯誤，請檢查網路連線。');
+      }
     }
 
     async function changeOrderStatus(orderId, newStatus) {
@@ -416,7 +756,9 @@
         stock: document.getElementById('prodStock').value,
         status: document.getElementById('prodStatus').value,
         options: document.getElementById('prodOptionsJson').value,
-        img1: document.getElementById('img1Base64').value,
+        img1: uploadedImages[0],
+        img2: uploadedImages[1],
+        img3: uploadedImages[2],
         description: document.getElementById('prodDesc').value
       };
       const res = await fetch(GAS_API_URL, { method: "POST", body: JSON.stringify(productData) });
@@ -425,13 +767,18 @@
       if (result.status === "success") {
         document.getElementById('productForm').reset();
         currentOptionsObj = {};
+        uploadedImages = ["", "", ""];
+        for(let i=1; i<=3; i++) {
+          document.getElementById(`preview-img-${i}`).classList.add('hidden');
+          document.getElementById(`placeholder-${i}`).classList.remove('hidden');
+          document.getElementById(`btn-remove-${i}`).classList.add('hidden');
+        }
         document.getElementById('prodOptionsJson').value = '{}';
         loadAdminProducts();
         switchTab({ currentTarget: document.querySelectorAll('.tab-btn')[0] }, 'tabOrders');
       }
     }
 
-    // 🖨️ 繳費單即時預覽設定
     function initPrintPreviewDropdown() {
       let classGroups = {};
       globalOrdersData.forEach(o => {
