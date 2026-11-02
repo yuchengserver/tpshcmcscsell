@@ -195,56 +195,130 @@
       </div>
     </div>
 
-    <!-- 標籤頁 3：上架新商品 -->
-<!-- 標籤頁 3：上架新商品 (含最多 3 張照片設定) -->
+    <!-- 標籤頁 3：上架新商品 (含檔案上傳與即時預覽) -->
     <div id="tabProductAdd" class="tab-content">
       <div class="admin-card">
-        <h2 style="margin-bottom: 20px;">🛍️ 上架全新周邊商品 (支援最多 3 張圖片)</h2>
-        <form id="productForm" onsubmit="handleProductSubmit(event)">
-          <div class="form-grid">
-            <div class="form-group"><label>商品名稱 *：</label><input type="text" id="prodTitle" required placeholder="例: TSSC13TH 紀念衣服"></div>
-            <div class="form-group"><label>價格 (VND) *：</label><input type="number" id="prodPrice" required placeholder="例: 150000"></div>
-            <div class="form-group"><label>限量庫存數量 *：</label><input type="number" id="prodStock" min="1" required placeholder="例: 50"></div>
-            <div class="form-group">
-              <label>上架狀態：</label>
-              <select id="prodStatus"><option value="開放中">開放中</option><option value="預告中">預告中</option><option value="已完售">已完售</option></select>
+        <h2 style="margin-bottom: 20px;">🛍️ 上架全新周邊商品 (支援裝置檔案上傳與即時預覽)</h2>
+        
+        <div style="display: grid; grid-template-columns: 1fr 320px; gap: 24px; align-items: start;" class="product-add-layout">
+          
+          <!-- 左側：上架表單 -->
+          <form id="productForm" onsubmit="handleProductSubmit(event)">
+            <div class="form-grid">
+              <div class="form-group"><label>商品名稱 *：</label><input type="text" id="prodTitle" required placeholder="例: TSSC13TH 紀念衣服" oninput="updatePreviewCard()"></div>
+              <div class="form-group"><label>價格 (VND) *：</label><input type="number" id="prodPrice" required placeholder="例: 150000" oninput="updatePreviewCard()"></div>
+              <div class="form-group"><label>限量庫存數量 *：</label><input type="number" id="prodStock" min="1" required placeholder="例: 50" oninput="updatePreviewCard()"></div>
+              <div class="form-group">
+                <label>上架狀態：</label>
+                <select id="prodStatus" onchange="updatePreviewCard()">
+                  <option value="開放中">開放中</option>
+                  <option value="預告中">預告中</option>
+                  <option value="已完售">已完售</option>
+                </select>
+              </div>
             </div>
+
+            <!-- 📸 商品照片上傳區 (從裝置選擇檔案，最多 3 張) -->
+            <div style="margin-top:20px; background:#f8fafc; padding:16px; border-radius:8px; border:1px solid #e2e8f0;">
+              <strong style="color:#111827; font-size:1.05rem; display:block; margin-bottom:12px;">📸 商品照片上傳 (從裝置選擇檔案，最多 3 張)</strong>
+              <div class="form-grid">
+                <div class="form-group" style="margin-bottom:10px;">
+                  <label>圖片 1 (主圖) *：</label>
+                  <input type="file" id="prodFile1" accept="image/*" required style="padding:6px; background:#fff;" onchange="previewSelectedImage(event, 1)">
+                </div>
+                <div class="form-group" style="margin-bottom:10px;">
+                  <label>圖片 2 (選填)：</label>
+                  <input type="file" id="prodFile2" accept="image/*" style="padding:6px; background:#fff;" onchange="previewSelectedImage(event, 2)">
+                </div>
+                <div class="form-group full-width" style="margin-bottom:0;">
+                  <label>圖片 3 (選填)：</label>
+                  <input type="file" id="prodFile3" accept="image/*" style="padding:6px; background:#fff;" onchange="previewSelectedImage(event, 3)">
+                </div>
+              </div>
+            </div>
+
+            <!-- ⚙️ 規格組設定區 -->
+            <div style="margin-top:20px; background:#f8fafc; padding:16px; border-radius:8px; border:1px solid #e2e8f0;">
+              <div class="options-header-row">
+                <strong style="color:#111827; font-size:1.05rem;">⚙️ 商品規格與選項設定</strong>
+                <button type="button" onclick="addOptionCard()" class="btn-admin-action" style="padding:6px 14px; font-size:0.85rem;">＋ 新增規格選項組</button>
+              </div>
+              <div id="optionsCardsContainer"></div>
+            </div>
+
+            <div class="form-group" style="margin-top:16px;">
+              <label>詳細說明：</label>
+              <textarea id="prodDesc" rows="3" placeholder="請輸入商品材質、尺寸說明或注意事項..." oninput="updatePreviewCard()"></textarea>
+            </div>
+            
+            <button type="submit" class="btn-admin-action" style="width:100%; padding:14px; margin-top:10px; font-size:1.1rem;">🚀 確認立即上架</button>
+          </form>
+
+          <!-- 右側：即時預覽卡片專區 -->
+          <div style="position: sticky; top: 80px;">
+            <div style="font-weight: bold; margin-bottom: 8px; color: #374151; font-size: 0.95rem;">👁️ 前台首頁卡片即時預覽：</div>
+            
+            <div class="product-card" id="livePreviewCard" style="background:#fff; border:1px solid #e5e7eb; border-radius:10px; overflow:hidden; box-shadow:0 1px 3px rgba(0,0,0,0.05);">
+              <div class="product-img-container" style="width:100%; height:180px; background:#f3f4f6; position:relative; overflow:hidden;">
+                <img id="previewImg" src="tpshcmcsc.png" alt="預覽圖" style="width:100%; height:100%; object-fit:cover;" onerror="this.src='tpshcmcsc.png'">
+                <span id="previewBadge" class="product-badge" style="position:absolute; top:10px; right:10px; background:rgba(0,0,0,0.7); color:#fff; padding:4px 8px; font-size:0.75rem; border-radius:4px;">開放中</span>
+              </div>
+              <div class="product-content" style="padding:16px; display:flex; flex-direction:column;">
+                <h4 id="previewTitle" class="product-title" style="font-size:1.05rem; font-weight:600; color:#1f2937; margin:0 0 8px 0;">商品名稱範例</h4>
+                <p id="previewDesc" class="product-desc" style="font-size:0.85rem; color:#6b7280; margin:0 0 12px 0; line-height:1.4;">詳細說明將顯示於此處...</p>
+                <div class="product-footer" style="display:flex; justify-content:space-between; align-items:center; border-top:1px solid #f3f4f6; padding-top:12px;">
+                  <span id="previewPrice" class="product-price" style="font-size:1.1rem; font-weight:700; color:#0284c7;">0 ₫</span>
+                  <span class="buy-btn" style="background-color:#2563eb; color:white; padding:6px 14px; border-radius:6px; font-size:0.9rem;">立即預購</span>
+                </div>
+              </div>
+            </div>
+            
+            <small style="color: #6b7280; display: block; margin-top: 8px; text-align: center;">註：上傳圖片 1 後會立即顯示於預覽主圖。</small>
           </div>
 
-          <!-- 📸 商品照片設定區 (最多三張) -->
-          <!-- 📸 商品照片設定區 (改為直接從裝置選擇檔案，最多 3 張) -->
-<div style="margin-top:20px; background:#f8fafc; padding:16px; border-radius:8px; border:1px solid #e2e8f0;">
-  <strong style="color:#111827; font-size:1.05rem; display:block; margin-bottom:12px;">📸 商品照片上傳 (從裝置選擇檔案，最多 3 張)</strong>
-  <div class="form-grid">
-    <div class="form-group" style="margin-bottom:10px;">
-      <label>圖片 1 (主圖) *：</label>
-      <input type="file" id="prodFile1" accept="image/*" required style="padding:6px; background:#fff;">
-    </div>
-    <div class="form-group" style="margin-bottom:10px;">
-      <label>圖片 2 (選填)：</label>
-      <input type="file" id="prodFile2" accept="image/*" style="padding:6px; background:#fff;">
-    </div>
-    <div class="form-group full-width" style="margin-bottom:0;">
-      <label>圖片 3 (選填)：</label>
-      <input type="file" id="prodFile3" accept="image/*" style="padding:6px; background:#fff;">
-    </div>
-  </div>
-</div>
-
-          <!-- ⚙️ 規格組設定區 -->
-          <div style="margin-top:20px; background:#f8fafc; padding:16px; border-radius:8px; border:1px solid #e2e8f0;">
-            <div class="options-header-row">
-              <strong style="color:#111827; font-size:1.05rem;">⚙️ 商品規格與選項設定</strong>
-              <button type="button" onclick="addOptionCard()" class="btn-admin-action" style="padding:6px 14px; font-size:0.85rem;">＋ 新增規格選項組</button>
-            </div>
-            <div id="optionsCardsContainer"></div>
-          </div>
-
-          <div class="form-group" style="margin-top:16px;"><label>詳細說明：</label><textarea id="prodDesc" rows="3" placeholder="請輸入商品材質、尺寸說明或注意事項..."></textarea></div>
-          <button type="submit" class="btn-admin-action" style="width:100%; padding:14px; margin-top:10px; font-size:1.1rem;">🚀 確認立即上架</button>
-        </form>
+        </div>
       </div>
     </div>
+
+    <!-- 響應式排版控制：小於 900px 時改為上下堆疊 -->
+    <style>
+      @media (max-width: 900px) {
+        .product-add-layout {
+          grid-template-columns: 1fr !important;
+        }
+      }
+    </style>
+
+    <!-- 💡 搭配即時預覽所需的 JavaScript 函式 (請確保存在於 script 區塊中) -->
+    <script>
+      let previewImagesData = ["", "", ""];
+
+      function previewSelectedImage(event, index) {
+        const file = event.target.files[0];
+        if (file) {
+          const reader = new FileReader();
+          reader.onload = function(e) {
+            previewImagesData[index - 1] = e.target.result;
+            if (index === 1) {
+              document.getElementById('previewImg').src = e.target.result;
+            }
+          };
+          reader.readAsDataURL(file);
+        }
+      }
+
+      function updatePreviewCard() {
+        const title = document.getElementById('prodTitle').value.trim() || "商品名稱範例";
+        const price = Number(document.getElementById('prodPrice').value) || 0;
+        const desc = document.getElementById('prodDesc').value.trim() || "詳細說明將顯示於此處...";
+        const status = document.getElementById('prodStatus').value;
+
+        document.getElementById('previewTitle').innerText = title;
+        document.getElementById('previewPrice').innerText = new Intl.NumberFormat('vi-VN').format(price) + ' ₫';
+        document.getElementById('previewDesc').innerText = desc;
+        document.getElementById('previewBadge').innerText = status;
+      }
+    </script>
     <!-- 標籤頁 4：庫存管理 -->
     <div id="tabProductManage" class="tab-content">
       <div class="admin-card">
