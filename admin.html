@@ -427,10 +427,15 @@
     function handleCredentialResponse(response) {
       const payload = JSON.parse(atob(response.credential.split('.')[1]));
       const email = payload.email;
-      if (!/^\d{7}@tshcmc\.edu\.vn$/.test(email) && email !== "yucheng.server@gmail.com") {
-        alert('【身分拒絕】僅限學校官方信箱登入後台！');
+      
+      // 🔒 嚴格限制僅允許指定的兩位管理員信箱登入後台
+      const ALLOWED_ADMINS = ["yucheng.server@gmail.com", "1141303@tshcmc.edu.vn"];
+      
+      if (!ALLOWED_ADMINS.includes(email)) {
+        alert('【權限拒絕】此後台僅限系統管理員存取！');
         return;
       }
+      
       sessionStorage.setItem('tss_logged_email', email);
       sessionStorage.setItem('tss_login_time', Date.now());
       setNavLoggedIn(email);
