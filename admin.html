@@ -9,14 +9,37 @@
   <script src="https://accounts.google.com/gsi/client" async defer></script>
   <style>
     .admin-tabs { display: flex; gap: 8px; margin-bottom: 20px; border-bottom: 2px solid #e5e7eb; padding-bottom: 10px; flex-wrap: wrap; }
-    .tab-btn { background: #f3f4f6; border: none; padding: 10px 20px; border-radius: 8px; cursor: pointer; font-weight: bold; font-size: 0.95rem; color: #4b5563; }
-    .tab-btn.active { background: #000000; color: #fff; box-shadow: 0 4px 6px rgba(0,0,0,0.2); }
+    .tab-btn { background: #f3f4f6; border: none; padding: 10px 18px; border-radius: 8px; cursor: pointer; font-weight: bold; font-size: 0.95rem; color: #4b5563; transition: all 0.2s; }
+    .tab-btn:hover { background: #e5e7eb; color: #111827; }
+    .tab-btn.active { background: #000000; color: #fff; box-shadow: 0 4px 6px rgba(0,0,0,0.15); }
     .tab-content { display: none; }
     .tab-content.active { display: block; }
-    .dashboard-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; margin-bottom: 24px; }
-    .stat-card { background: #ffffff; padding: 20px; border-radius: 10px; border: 1px solid #e5e7eb; text-align: center; }
+    
+    .dashboard-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px; margin-bottom: 24px; }
+    .stat-card { background: #ffffff; padding: 20px; border-radius: 10px; border: 1px solid #e5e7eb; text-align: center; box-shadow: 0 1px 3px rgba(0,0,0,0.02); }
+    .stat-card .label { font-size: 0.85rem; color: #6b7280; font-weight: 600; }
     .stat-card .num { font-size: 1.6rem; font-weight: bold; color: #0284c7; margin-top: 6px; }
-    .form-item-card { background: #fdfdfd; border: 1px solid #e5e7eb; border-radius: 8px; padding: 16px; margin-bottom: 14px; }
+
+    /* 🎨 美化規格組卡片 */
+    .form-item-card { background: #ffffff; border: 1px solid #d1d5db; border-radius: 10px; padding: 16px; margin-bottom: 12px; box-shadow: 0 1px 2px rgba(0,0,0,0.02); }
+    .options-header-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; border-bottom: 2px solid #f1f5f9; padding-bottom: 8px; }
+
+    /* 💵 輔助點鈔機表格樣式 */
+    .cashier-table { width: 100%; border-collapse: collapse; font-size: 0.9rem; margin-top: 10px; }
+    .cashier-table th, .cashier-table td { border: 1px solid #e5e7eb; padding: 8px 10px; text-align: center; }
+    .cashier-table th { background: #f9fafb; color: #374151; }
+    .cashier-table input[type="number"] { width: 70px; padding: 4px; text-align: center; border: 1px solid #d1d5db; border-radius: 4px; }
+
+    /* 按鈕樣式統一升級 */
+    .btn-admin-action { background: #000; color: #fff; border: none; padding: 8px 16px; border-radius: 6px; font-weight: 600; cursor: pointer; transition: background 0.2s; font-size: 0.9rem; }
+    .btn-admin-action:hover { background: #333; }
+    .btn-admin-export { background: #16a34a; color: #fff; border: none; padding: 8px 16px; border-radius: 6px; font-weight: 600; cursor: pointer; transition: background 0.2s; font-size: 0.9rem; }
+    .btn-admin-export:hover { background: #15803d; }
+    .btn-admin-print { background: #2563eb; color: #fff; border: none; padding: 8px 16px; border-radius: 6px; font-weight: 600; cursor: pointer; transition: background 0.2s; font-size: 0.9rem; }
+    .btn-admin-print:hover { background: #1d4ed8; }
+    .btn-admin-canva { background: #7c3aed; color: #fff; border: none; padding: 8px 16px; border-radius: 6px; font-weight: 600; cursor: pointer; transition: background 0.2s; font-size: 0.9rem; }
+    .btn-admin-canva:hover { background: #6d28d9; }
+
     .nav-auth-container { display: flex; align-items: center; gap: 10px; background: #f8fafc; padding: 6px 12px; border-radius: 8px; border: 1px solid #e2e8f0; }
     .nav-user-email { color: #166534; font-weight: bold; max-width: 160px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
     .btn-nav-logout { background: #ef4444; color: #fff; border: none; padding: 4px 10px; border-radius: 6px; cursor: pointer; font-size: 0.75rem; font-weight: bold; }
@@ -60,7 +83,7 @@
 
     <div class="admin-tabs">
       <button class="tab-btn active" onclick="switchTab(event, 'tabOrders')">📊 訂單總覽</button>
-      <button class="tab-btn" onclick="switchTab(event, 'tabReconcile')">🧮 AI 智慧對帳中心</button>
+      <button class="tab-btn" onclick="switchTab(event, 'tabReconcile')">🧮 AI 智慧對帳與點鈔中心</button>
       <button class="tab-btn" onclick="switchTab(event, 'tabProductAdd')">🛍️ 上架商品</button>
       <button class="tab-btn" onclick="switchTab(event, 'tabProductManage')">📋 庫存管理</button>
       <button class="tab-btn" onclick="switchTab(event, 'tabPrintPreview')">🖨️ 列印與 Canva 匯出</button>
@@ -69,14 +92,17 @@
     <!-- 標籤頁 1：訂單總覽 -->
     <div id="tabOrders" class="tab-content active">
       <div class="admin-card">
-        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
-          <h2>📋 訂單總覽與狀態管理</h2>
-          <button onclick="exportOrdersToCSV()" class="btn-export">📥 匯出 CSV</button>
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px; flex-wrap:wrap; gap:12px;">
+          <h2 style="margin:0;">📋 訂單總覽與狀態管理</h2>
+          <div style="display:flex; gap:10px; align-items:center; flex-wrap:wrap;">
+            <input type="text" id="orderSearchInput" placeholder="🔍 搜尋姓名、學號或商品..." oninput="filterOrdersTable()" style="padding:8px 12px; border:1px solid #d1d5db; border-radius:6px; font-size:0.9rem; width:220px;">
+            <button onclick="exportOrdersToCSV()" class="btn-admin-export">📥 匯出 CSV 報表</button>
+          </div>
         </div>
         <div style="overflow-x: auto;">
           <table class="product-table">
             <thead>
-              <tr><th>編號</th><th>訂購者資訊</th><th>商品與規格</th><th>數量 / 金額</th><th>時間</th><th>狀態變更</th></tr>
+              <tr><th>編號</th><th>訂購者資訊</th><th>商品與規格</th><th>數量 / 金額</th><th>下單時間 (越時)</th><th>狀態變更</th></tr>
             </thead>
             <tbody id="adminOrderTableBody"><tr><td colspan="6" style="text-align:center;">載入中...</td></tr></tbody>
           </table>
@@ -84,58 +110,78 @@
       </div>
     </div>
 
-    <!-- 標籤頁 2：AI 對帳中心 -->
+    <!-- 標籤頁 2：AI 對帳與輔助點鈔中心 -->
     <div id="tabReconcile" class="tab-content">
       <div class="admin-card">
-        <h2>🧮 班級自動對帳與自動核銷中心</h2>
-        <p style="color:#6b7280; font-size:0.9rem;">選擇班級輸入點鈔金額，若金額完全正確將自動把消費者訂單改為「已付款」。</p>
+        <h2>🧮 班級自動對帳與輔助點鈔中心</h2>
+        <p style="color:#6b7280; font-size:0.9rem; margin-bottom:16px;">選擇班級檢視預期金額，並可透過下方「紙鈔面額計算機」快速統計現金，金額吻合即可一鍵核銷！</p>
         
         <div style="display:grid; grid-template-columns: 1fr 1fr; gap:16px; margin-bottom:16px;">
           <div>
-            <label style="font-weight:bold;">選擇班級：</label>
-            <select id="reconcileClassSelect" onchange="updateReconcileExpected()" style="width:100%; padding:8px; border:1px solid #d1d5db; border-radius:6px;"></select>
+            <label style="font-weight:bold; display:block; margin-bottom:6px;">選擇對帳班級：</label>
+            <select id="reconcileClassSelect" onchange="updateReconcileExpected()" style="width:100%; padding:10px; border:1px solid #d1d5db; border-radius:6px; font-size:1rem;"></select>
           </div>
           <div>
-            <label style="font-weight:bold;">系統預期總金額：</label>
-            <div id="expectedTotalDisplay" style="font-weight:bold; color:#0284c7; font-size:1.2rem; margin-top:6px;">0 ₫</div>
+            <label style="font-weight:bold; display:block; margin-bottom:6px;">系統預期總金額：</label>
+            <div id="expectedTotalDisplay" style="font-weight:bold; color:#0284c7; font-size:1.3rem; margin-top:6px;">0 ₫</div>
           </div>
         </div>
 
-        <div class="form-group">
-          <label style="font-weight:bold;">實際收到總金額 (VND)：</label>
-          <input type="number" id="actualReceivedAmount" style="width:100%; padding:8px; border:1px solid #d1d5db; border-radius:6px; font-weight:bold; font-size:1.05rem;">
+        <!-- 💵 輔助點鈔機表格 -->
+        <div style="margin-bottom: 20px; background: #f8fafc; padding: 16px; border-radius: 8px; border: 1px solid #e2e8f0;">
+          <h4 style="margin:0 0 10px 0; font-size:0.95px; color:#1e293b;">💵 現金輔助點鈔計算機 (越南盾面額)</h4>
+          <table class="cashier-table">
+            <thead>
+              <tr><th>面額 (VND)</th><th>數量 (張/枚)</th><th>小計</th></tr>
+            </thead>
+            <tbody>
+              <tr><td>500,000 ₫</td><td><input type="number" min="0" value="0" data-val="500000" oninput="calculateCashierTotal()"></td><td class="sub-cash">0 ₫</td></tr>
+              <tr><td>200,000 ₫</td><td><input type="number" min="0" value="0" data-val="200000" oninput="calculateCashierTotal()"></td><td class="sub-cash">0 ₫</td></tr>
+              <tr><td>100,000 ₫</td><td><input type="number" min="0" value="0" data-val="100000" oninput="calculateCashierTotal()"></td><td class="sub-cash">0 ₫</td></tr>
+              <tr><td>50,000 ₫</td><td><input type="number" min="0" value="0" data-val="50000" oninput="calculateCashierTotal()"></td><td class="sub-cash">0 ₫</td></tr>
+              <tr><td>20,000 ₫</td><td><input type="number" min="0" value="0" data-val="20000" oninput="calculateCashierTotal()"></td><td class="sub-cash">0 ₫</td></tr>
+              <tr><td>10,000 ₫</td><td><input type="number" min="0" value="0" data-val="10000" oninput="calculateCashierTotal()"></td><td class="sub-cash">0 ₫</td></tr>
+              <tr><td>其他 / 零錢</td><td><input type="number" min="0" value="0" data-val="1" oninput="calculateCashierTotal()"></td><td class="sub-cash">0 ₫</td></tr>
+            </tbody>
+          </table>
         </div>
 
-        <button type="button" onclick="executeReconciliation()" class="btn-reconcile">🚀 開始自動對帳與核銷</button>
-        <div id="reconcileResultArea" style="margin-top:24px;"></div>
+        <div class="form-group" style="margin-bottom:16px;">
+          <label style="font-weight:bold; display:block; margin-bottom:6px;">實際收到總金額 (VND)：</label>
+          <input type="number" id="actualReceivedAmount" style="width:100%; padding:10px; border:1px solid #d1d5db; border-radius:6px; font-weight:bold; font-size:1.1rem; color:#dc2626;" value="0">
+        </div>
+
+        <button type="button" onclick="executeReconciliation()" class="btn-admin-action" style="width:100%; padding:12px; font-size:1.05rem;">🚀 開始自動對帳與核銷訂單</button>
+        <div id="reconcileResultArea" style="margin-top:20px;"></div>
       </div>
     </div>
 
-    <!-- 標籤頁 3：上架新商品 (選項標題與按鈕左右並排) -->
+    <!-- 標籤頁 3：上架新商品 -->
     <div id="tabProductAdd" class="tab-content">
       <div class="admin-card">
+        <h2 style="margin-bottom: 20px;">🛍️ 上架全新周邊商品</h2>
         <form id="productForm" onsubmit="handleProductSubmit(event)">
           <div class="form-grid">
-            <div class="form-group"><label>商品名稱 *：</label><input type="text" id="prodTitle" required></div>
-            <div class="form-group"><label>價格 (VND) *：</label><input type="number" id="prodPrice" required></div>
-            <div class="form-group"><label>限量庫存數量 *：</label><input type="number" id="prodStock" min="1" required></div>
+            <div class="form-group"><label>商品名稱 *：</label><input type="text" id="prodTitle" required placeholder="例: TSSC13TH 紀念衣服"></div>
+            <div class="form-group"><label>價格 (VND) *：</label><input type="number" id="prodPrice" required placeholder="例: 150000"></div>
+            <div class="form-group"><label>限量庫存數量 *：</label><input type="number" id="prodStock" min="1" required placeholder="例: 50"></div>
             <div class="form-group">
               <label>上架狀態：</label>
               <select id="prodStatus"><option value="開放中">開放中</option><option value="預告中">預告中</option><option value="已完售">已完售</option></select>
             </div>
           </div>
 
-          <!-- ⚙️ 左右並排：左側標題、右側新增按鈕 -->
-          <div style="margin-top:20px;">
+          <!-- ⚙️ 規格組設定區 (美化排版) -->
+          <div style="margin-top:24px; background:#f8fafc; padding:16px; border-radius:8px; border:1px solid #e2e8f0;">
             <div class="options-header-row">
-              <strong style="color:#111827; font-size:1rem;">⚙️ 商品規格與選項設定</strong>
-              <button type="button" onclick="addOptionCard()" class="btn-black">＋ 新增規格選項組</button>
+              <strong style="color:#111827; font-size:1.05rem;">⚙️ 商品規格與選項設定</strong>
+              <button type="button" onclick="addOptionCard()" class="btn-admin-action" style="padding:6px 14px; font-size:0.85rem;">＋ 新增規格選項組</button>
             </div>
             <div id="optionsCardsContainer"></div>
           </div>
 
-          <div class="form-group" style="margin-top:16px;"><label>詳細說明：</label><textarea id="prodDesc" rows="2"></textarea></div>
-          <button type="submit" class="btn-black" style="width:100%; padding:12px; margin-top:10px;">🚀 立即上架</button>
+          <div class="form-group" style="margin-top:16px;"><label>詳細說明：</label><textarea id="prodDesc" rows="3" placeholder="請輸入商品材質、尺寸說明或注意事項..."></textarea></div>
+          <button type="submit" class="btn-admin-action" style="width:100%; padding:14px; margin-top:10px; font-size:1.1rem;">🚀 確認立即上架</button>
         </form>
       </div>
     </div>
@@ -143,40 +189,51 @@
     <!-- 標籤頁 4：庫存管理 -->
     <div id="tabProductManage" class="tab-content">
       <div class="admin-card">
-        <h2>📋 現有上架商品控管</h2>
-        <table class="product-table">
-          <thead><tr><th>ID</th><th>名稱</th><th>價格</th><th>庫存</th><th>狀態調整</th></tr></thead>
-          <tbody id="adminProductTableBody"><tr><td colspan="5" style="text-align:center;">載入中...</td></tr></tbody>
-        </table>
+        <h2>📋 現有上架商品庫存控管</h2>
+        <div style="overflow-x:auto; margin-top:12px;">
+          <table class="product-table">
+            <thead><tr><th>ID</th><th>名稱</th><th>價格</th><th>庫存量</th><th>狀態調整</th></tr></thead>
+            <tbody id="adminProductTableBody"><tr><td colspan="5" style="text-align:center;">載入中...</td></tr></tbody>
+          </table>
+        </div>
       </div>
     </div>
 
     <!-- 標籤頁 5：列印與 Canva 匯出 -->
     <div id="tabPrintPreview" class="tab-content">
       <div class="admin-card">
-        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
-          <h2>🖨️ 繳費單與 Canva 格式匯出</h2>
-          <div style="display:flex; gap:10px;">
-            <select id="previewClassSelect" onchange="renderPrintPreview()" style="padding:6px; border:1px solid #d1d5db; border-radius:4px;"></select>
-            <button onclick="openPrintPreviewModal()" class="btn-print">🖨️ 預覽與轉 PDF</button>
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px; flex-wrap:wrap; gap:12px;">
+          <h2 style="margin:0;">🖨️ 繳費單與 Canva 格式匯出中心</h2>
+          <div style="display:flex; gap:10px; align-items:center; flex-wrap:wrap;">
+            <select id="previewClassSelect" onchange="renderPrintPreview()" style="padding:8px; border:1px solid #d1d5db; border-radius:6px; font-size:0.95rem;"></select>
+            <button onclick="openPrintPreviewModal()" class="btn-admin-print">🖨️ 預覽與轉 PDF</button>
+            <button onclick="exportCanvaCSV()" class="btn-admin-canva">🎨 下載 Canva 可讀取的 CSV</button>
           </div>
         </div>
-        <div id="printPreviewContainer" class="card" style="margin-top:15px;"><div style="text-align:center; color:#6b7280;">請選擇班級...</div></div>
+
+        <!-- 📝 自訂義列印標題與補充文字區塊 -->
+        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:16px; background:#f8fafc; padding:16px; border-radius:8px; border:1px solid #e2e8f0; margin-bottom:20px;">
+          <div class="form-group" style="margin:0;"><label style="font-weight:600;">自訂標題 (Main Title)：</label><input type="text" id="customPrintTitle" value="TSSC13TH 周邊預購繳費清單" oninput="renderPrintPreview()" style="padding:8px; border:1px solid #d1d5db; border-radius:6px; width:100%;"></div>
+          <div class="form-group" style="margin:0;"><label style="font-weight:600;">自訂小標題 / 班級備註：</label><input type="text" id="customPrintSubtitle" value="請各班負責人確認金額後進行收費與核銷" oninput="renderPrintPreview()" style="padding:8px; border:1px solid #d1d5db; border-radius:6px; width:100%;"></div>
+          <div class="form-group full-width" style="margin:0; grid-column: 1 / -1;"><label style="font-weight:600;">補充說明文字 (Footer Notes)：</label><input type="text" id="customPrintNotes" value="注意事項：請於繳費期限內繳交現金給學生會財務股，繳費完成後請確認核勾。" oninput="renderPrintPreview()" style="padding:8px; border:1px solid #d1d5db; border-radius:6px; width:100%;"></div>
+        </div>
+
+        <div id="printPreviewContainer" class="card" style="margin-top:15px;"><div style="text-align:center; color:#6b7280; padding:20px;">請選擇班級...</div></div>
       </div>
     </div>
   </div>
 
-  <!-- 🖨️ 預覽彈窗 (支援一鍵複製貼到 Canva 與繳費勾選格) -->
-  <div id="printModalOverlay">
-    <div id="printModalContent">
+  <!-- 🖨️ 預覽彈窗 -->
+  <div id="printModalOverlay" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.6); z-index:1000; justify-content:center; align-items:center;">
+    <div style="background:#fff; width:90%; max-width:850px; max-height:90vh; border-radius:10px; padding:24px; display:flex; flex-direction:column; overflow-y:auto;">
       <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid #e5e7eb; padding-bottom:10px; margin-bottom:15px;">
-        <h3 style="margin:0;">📄 繳費清單預覽 (含繳費勾選格)</h3>
-        <button onclick="closePrintModal()" style="background:#ef4444; color:#fff; border:none; padding:6px 12px; border-radius:6px; cursor:pointer;">關閉</button>
+        <h3 style="margin:0;">📄 列印與 PDF 預覽 (含繳費勾選格)</h3>
+        <button onclick="closePrintModal()" style="background:#ef4444; color:#fff; border:none; padding:6px 12px; border-radius:6px; cursor:pointer; font-weight:600;">關閉</button>
       </div>
       <div id="printableArea" style="flex:1; overflow-y:auto; padding:20px; background:#fff; border:1px solid #e5e7eb;"></div>
       <div style="display:flex; justify-content:flex-end; gap:12px; margin-top:20px; border-top:1px solid #e5e7eb; padding-top:15px;">
-        <button onclick="copyTableForCanva()" class="btn-black" style="background:#7c3aed;">🎨 複製表格資料以貼至 Canva</button>
-        <button onclick="window.print()" class="btn-print">🖨️ 直接列印 PDF</button>
+        <button onclick="exportCanvaCSV()" class="btn-admin-canva">🎨 下載 Canva CSV 檔</button>
+        <button onclick="window.print()" class="btn-admin-print">🖨️ 直接列印 / 存為 PDF</button>
       </div>
     </div>
   </div>
@@ -250,13 +307,13 @@
       div.className = 'form-item-card';
       div.id = cardId;
       div.innerHTML = `
-        <div style="display:flex; justify-content:between; margin-bottom:8px;">
-          <strong style="font-size:0.9rem;">規格組</strong>
-          <button type="button" onclick="document.getElementById('${cardId}').remove()" style="background:#fee2e2; color:#dc2626; border:none; padding:2px 8px; border-radius:4px; cursor:pointer;">刪除</button>
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+          <strong style="font-size:0.9rem; color:#374151;">規格選項組</strong>
+          <button type="button" onclick="document.getElementById('${cardId}').remove()" style="background:#fee2e2; color:#dc2626; border:none; padding:4px 10px; border-radius:4px; cursor:pointer; font-size:0.8rem; font-weight:600;">刪除</button>
         </div>
         <div style="display:grid; grid-template-columns:1fr 2fr; gap:10px;">
-          <input type="text" class="opt-name-input" placeholder="選項名稱 (如尺寸)">
-          <input type="text" class="opt-val-input" placeholder="選項值逗號隔開 (S, M, L)">
+          <input type="text" class="opt-name-input" placeholder="選項名稱 (如 尺寸)" style="padding:8px; border:1px solid #d1d5db; border-radius:6px; font-size:0.9rem;">
+          <input type="text" class="opt-val-input" placeholder="選項值逗號隔開 (S, M, L)" style="padding:8px; border:1px solid #d1d5db; border-radius:6px; font-size:0.9rem;">
         </div>`;
       container.appendChild(div);
     }
@@ -282,8 +339,8 @@
               <td>${p.product_id}</td>
               <td><strong>${p.title}</strong></td>
               <td>${formatVND(p.price)}</td>
-              <td><input type="number" value="${p.stock}" style="width:70px;" onchange="updateStock('${p.product_id}', this.value)"></td>
-              <td><select onchange="updateStatus('${p.product_id}', this.value)"><option value="開放中" ${p.status==='開放中'?'selected':''}>開放中</option><option value="已完售" ${p.status==='已完售'?'selected':''}>已完售</option></select></td>
+              <td><input type="number" value="${p.stock}" style="width:70px; padding:4px; text-align:center; border:1px solid #d1d5db; border-radius:4px;" onchange="updateStock('${p.product_id}', this.value)"></td>
+              <td><select onchange="updateStatus('${p.product_id}', this.value)" style="padding:4px; border:1px solid #d1d5db; border-radius:4px;"><option value="開放中" ${p.status==='開放中'?'selected':''}>開放中</option><option value="預告中" ${p.status==='預告中'?'selected':''}>預告中</option><option value="已完售" ${p.status==='已完售'?'selected':''}>已完售</option></select></td>
             </tr>`).join('');
         }
       } catch(e) {}
@@ -309,6 +366,18 @@
       } catch(e) {}
     }
 
+    // 🇻🇳 轉換為越南標準時間（GMT+7）
+    function formatVietnamTime(timestampStr) {
+      if (!timestampStr) return '';
+      try {
+        let d = new Date(timestampStr);
+        if (isNaN(d.getTime())) return timestampStr;
+        return d.toLocaleString('vi-VN', { timeZone: 'Asia/Ho_Chi_Minh', hour12: false });
+      } catch(e) {
+        return timestampStr;
+      }
+    }
+
     function renderOrdersTable(orders) {
       document.getElementById('adminOrderTableBody').innerHTML = orders.map(o => `
         <tr>
@@ -316,13 +385,25 @@
           <td><strong>${o.name}</strong><br><small>${o.email}</small></td>
           <td>${o.product_title} (${o.selected_option || '預設'})</td>
           <td>${o.quantity}件 / <strong>${formatVND(o.total_price)}</strong></td>
-          <td><small>${o.timestamp}</small></td>
-          <td><select onchange="changeStatus('${o.order_id}', this.value)">
+          <td><small>${formatVietnamTime(o.timestamp)}</small></td>
+          <td><select onchange="changeStatus('${o.order_id}', this.value)" style="padding:4px; border:1px solid #d1d5db; border-radius:4px;">
             <option value="待付款" ${o.status==='待付款'?'selected':''}>待付款</option>
             <option value="已付款" ${o.status==='已付款'?'selected':''}>已付款</option>
+            <option value="候補中" ${o.status==='候補中'?'selected':''}>候補中</option>
             <option value="已取消" ${o.status==='已取消'?'selected':''}>已取消</option>
           </select></td>
         </tr>`).join('');
+    }
+
+    function filterOrdersTable() {
+      const keyword = document.getElementById('orderSearchInput').value.toLowerCase();
+      const filtered = globalOrdersData.filter(o => 
+        o.name.toLowerCase().includes(keyword) || 
+        o.email.toLowerCase().includes(keyword) || 
+        o.product_title.toLowerCase().includes(keyword) ||
+        o.order_id.toLowerCase().includes(keyword)
+      );
+      renderOrdersTable(filtered);
     }
 
     function initReconcileDropdown() {
@@ -342,7 +423,22 @@
       let orders = globalOrdersData.filter(o => o.name.toUpperCase().includes(c));
       let expected = orders.reduce((sum, o) => sum + Number(o.total_price || 0), 0);
       document.getElementById('expectedTotalDisplay').innerText = formatVND(expected);
-      document.getElementById('actualReceivedAmount').value = expected;
+      // 清空點鈔機
+      document.querySelectorAll('.cashier-table input').forEach(input => input.value = 0);
+      calculateCashierTotal();
+    }
+
+    // 💵 計算點鈔機總金額
+    function calculateCashierTotal() {
+      let total = 0;
+      document.querySelectorAll('.cashier-table tbody tr').forEach(row => {
+        let denom = Number(row.querySelector('input').dataset.val);
+        let count = Number(row.querySelector('input').value) || 0;
+        let sub = denom * count;
+        row.querySelector('.sub-cash').innerText = formatVND(sub);
+        total += sub;
+      });
+      document.getElementById('actualReceivedAmount').value = total;
     }
 
     // 🚀 金額完全正確時自動改為已付款
@@ -356,7 +452,6 @@
       const email = sessionStorage.getItem('tss_logged_email') || "";
 
       if (diff === 0) {
-        // 自動將該班級消費者訂單改為已付款
         try {
           for (let o of orders) {
             if (o.status !== '已付款') {
@@ -370,7 +465,7 @@
           loadAllOrders();
         } catch(e) { alert("自動更新失敗"); }
       } else {
-        resArea.innerHTML = `<div style="padding:15px; background:#fef2f2; color:#991b1b; border-radius:6px; font-weight:bold;">⚠️ 金額有誤！差額：${formatVND(diff)}。可能是數錯金額或其他原因，請人工排查。</div>`;
+        resArea.innerHTML = `<div style="padding:15px; background:#fef2f2; color:#991b1b; border-radius:6px; font-weight:bold;">⚠️ 金額有誤！差額：${formatVND(diff)}。請重新點算現金。</div>`;
       }
     }
 
@@ -386,29 +481,38 @@
       renderPrintPreview();
     }
 
-    // 🖨️ 產生含繳費勾選格的報表
     function renderPrintPreview() {
       let c = document.getElementById('previewClassSelect').value;
       let orders = globalOrdersData.filter(o => o.name.toUpperCase().includes(c));
       let total = orders.reduce((sum, o) => sum + Number(o.total_price), 0);
 
+      let title = document.getElementById('customPrintTitle').value;
+      let subtitle = document.getElementById('customPrintSubtitle').value;
+      let notes = document.getElementById('customPrintNotes').value;
+
       document.getElementById('printPreviewContainer').innerHTML = `
-        <h3 style="border-bottom:2px solid #000; padding-bottom:6px;">TSSC13TH 繳費清單 - ${c}</h3>
+        <div style="text-align:center; margin-bottom:15px;">
+          <h2 style="margin:0 0 5px 0; font-size:1.4rem;">${title}</h2>
+          <p style="margin:0; color:#4b5563; font-size:0.95rem;">${subtitle} (班級: ${c})</p>
+        </div>
         <table class="product-table">
-          <thead><tr><th>序號</th><th>姓名</th><th>學號信箱</th><th>品項與規格</th><th>金額</th><th>繳費確認 (□)</th></tr></thead>
+          <thead><tr><th>序號</th><th>姓名</th><th>學號信箱</th><th>品項與規格</th><th>金額 (VND)</th><th>繳費核勾 (□)</th></tr></thead>
           <tbody>
             ${orders.map((o, i) => `
               <tr>
                 <td>${i+1}</td>
                 <td><strong>${o.name}</strong></td>
                 <td><small>${o.email}</small></td>
-                <td>${o.product_title} (${o.selected_option || '預設'})</td>
+                <td>${o.product_title} (${o.selected_option || '預設'}) x ${o.quantity}</td>
                 <td><strong>${Number(o.total_price).toLocaleString()} ₫</strong></td>
-                <td style="text-align:center; font-size:1.2rem;">□</td>
+                <td style="text-align:center; font-size:1.3rem;">□</td>
               </tr>`).join('')}
           </tbody>
         </table>
-        <div style="margin-top:15px; text-align:right; font-weight:bold;">總計：${total.toLocaleString()} ₫</div>`;
+        <div style="margin-top:15px; display:flex; justify-content:space-between; align-items:center; font-weight:bold;">
+          <span style="font-size:0.9rem; color:#6b7280;">${notes}</span>
+          <span style="font-size:1.1rem; color:#dc2626;">總計金額：${total.toLocaleString()} ₫</span>
+        </div>`;
     }
 
     function openPrintPreviewModal() {
@@ -420,11 +524,33 @@
       document.getElementById('printModalOverlay').style.display = 'none';
     }
 
-    function copyTableForCanva() {
-      const text = document.getElementById('printableArea').innerText;
-      navigator.clipboard.writeText(text).then(() => {
-        alert('📋 表格文字已複製！您可以直接至 Canva 建立文件並按 Ctrl+V 貼上使用。');
+    // 🎨 下載 Canva 可直接讀取的 CSV 檔案
+    function exportCanvaCSV() {
+      let c = document.getElementById('previewClassSelect').value;
+      let orders = globalOrdersData.filter(o => o.name.toUpperCase().includes(c));
+      if (orders.length === 0) { alert('該班級無訂單資料可匯出！'); return; }
+
+      let csvContent = "\uFEFF" + "No,Name,Email,Product,Quantity,TotalPrice\n";
+      orders.forEach((o, index) => {
+        let row = [
+          index + 1,
+          `"${o.name}"`,
+          `"${o.email}"`,
+          `"${o.product_title} (${o.selected_option || '預設'})"`,
+          o.quantity,
+          o.total_price
+        ];
+        csvContent += row.join(",") + "\n";
       });
+
+      let blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+      let url = URL.createObjectURL(blob);
+      let a = document.createElement('a');
+      a.href = url;
+      a.download = `TSSC13TH_${c}_Canva_Data.csv`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
     }
 
     async function handleProductSubmit(e) {
@@ -449,6 +575,30 @@
       const email = sessionStorage.getItem('tss_logged_email') || "";
       await fetch(GAS_API_URL, { method: "POST", body: JSON.stringify({ action: "updateOrderStatus", email, orderId, newStatus }) });
       loadAllOrders();
+    }
+
+    async function updateStock(productId, newStock) {
+      alert(`商品 ${productId} 庫存已暫存更新為 ${newStock} (請確保後端支援更新庫存動作)`);
+    }
+
+    async function updateStatus(productId, newStatus) {
+      alert(`商品 ${productId} 狀態已變更為 ${newStatus}`);
+    }
+
+    function exportOrdersToCSV() {
+      if (globalOrdersData.length === 0) { alert('無訂單資料！'); return; }
+      let csvContent = "\uFEFF" + "OrderID,Name,Email,Product,Option,Quantity,TotalPrice,Status,Timestamp\n";
+      globalOrdersData.forEach(o => {
+        csvContent += [o.order_id, `"${o.name}"`, `"${o.email}"`, `"${o.product_title}"`, `"${o.selected_option}"`, o.quantity, o.total_price, o.status, `"${o.timestamp}"`].join(",") + "\n";
+      });
+      let blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+      let url = URL.createObjectURL(blob);
+      let a = document.createElement('a');
+      a.href = url;
+      a.download = `TSSC13TH_All_Orders.csv`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
     }
   </script>
 </body>

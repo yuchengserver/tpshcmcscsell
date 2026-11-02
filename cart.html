@@ -333,13 +333,16 @@
               optionSelectorHtml = `<div style="margin-top: 4px;"><span style="font-size:0.8rem; color:#059669; font-weight:bold;">規格：${item.selected_option || '預設'}</span></div>`;
             }
 
+            let stockText = (item.stock !== undefined) ? `庫存：${item.stock}` : '庫存：未知';
+            let isSoldOut = (item.stock !== undefined && Number(item.stock) <= 0);
+
             return `
-              <div class="cart-item-card">
+              <div class="cart-item-card" style="${isSoldOut ? 'border-color: #fca5a5; background: #fff1f2;' : ''}">
                 <div class="cart-item-left">
                   <img src="${item.img1 || 'tpshcmcsc.png'}" alt="商品圖" class="cart-item-img" onerror="this.src='tpshcmcsc.png';">
                   <div>
-                    <h4 class="cart-item-title">${item.title}</h4>
-                    <div class="cart-item-price">單價：${formatVND(item.price)} | 庫存：${item.stock || '無限'}</div>
+                    <h4 class="cart-item-title">${item.title} ${isSoldOut ? '<span style="color:#dc2626; font-size:0.75rem; background:#fee2e2; padding:2px 6px; border-radius:4px;">已完售(將轉候補)</span>' : ''}</h4>
+                    <div class="cart-item-price">單價：${formatVND(item.price)} | ${stockText}</div>
                     ${optionSelectorHtml}
                   </div>
                 </div>
@@ -365,7 +368,6 @@
       `;
     }
 
-    // 🛡️ 購物車數量防呆檢查（不可高於商品庫存）
     function updateItemQuantity(index, val) {
       let cart = JSON.parse(localStorage.getItem('tss_cart') || '[]');
       let qty = parseInt(val);
@@ -374,15 +376,7 @@
         renderCart();
         return;
       }
-
-      let maxStock = parseInt(cart[index].stock) || 9999;
-      if (qty > maxStock) {
-        alert(`【庫存限制】「${cart[index].title}」目前庫存僅剩 ${maxStock} 件，無法購買超過庫存的數量！`);
-        cart[index].quantity = maxStock;
-      } else {
-        cart[index].quantity = qty;
-      }
-
+      cart[index].quantity = qty;
       localStorage.setItem('tss_cart', JSON.stringify(cart));
       renderCart();
     }
@@ -401,6 +395,7 @@
       renderCart();
     }
 
+    // 🚀 智慧結算：檢查庫存並彈窗詢問是否轉為候補
     async function submitCheckout(e) {
       e.preventDefault();
       
@@ -420,12 +415,36 @@
         return;
       }
 
+      // 🔍 檢查是否有商品庫存不足或已完售
+      let hasSoldOutItems = false;
+      let soldOutNames = [];
+
+      cart.forEach(item => {
+        let stock = parseInt(item.stock) || 0;
+        if (stock <= 0 || item.quantity > stock) {
+          hasSoldOutItems = true;
+          soldOutNames.push(item.title);
+        }
+      });
+
+      let orderStatus = "待付款";
+      if (hasSoldOutItems) {
+        const confirmWaitlist = confirm(`【庫存提示】您選購的商品中包含已完售或庫存不足的品項（例如：${soldOutNames.join(', ')}）。請問是否接受將這些品項以「候補」狀態送出訂單？`);
+        if (!confirmWaitlist) {
+          return; // 使用者取消
+        }
+        orderStatus = "候補中";
+      }
+
       const btn = document.getElementById('submitBtn');
       btn.disabled = true;
       btn.innerText = "正在送出訂單...";
 
       try {
         for (let item of cart) {
+          let itemStatus = orderStatus;
+          let stock = parseInt(item.stock) || 0;
+          // 若該項商品庫存充足，可以維持待付款；若整車觸發候補，則全部以候補送出或依單品判定
           await fetch(GAS_API_URL, {
             method: "POST",
             body: JSON.stringify({
@@ -435,7 +454,8 @@
               name: combinedName,
               quantity: item.quantity,
               selected_option: item.selected_option || '預設',
-              remark: "購物車批次結算"
+              remark: "購物車批次結算",
+              status: ((stock <= 0 || item.quantity > stock) ? "候補中" : "待付款")
             })
           });
         }

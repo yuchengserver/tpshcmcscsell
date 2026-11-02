@@ -16,26 +16,27 @@
       margin-top: 16px;
     }
 
-    /* 📦 蝦皮風格單品卡片 */
+    /* 📦 簡化後的商品卡片 (僅顯示圖片、標題、價格) */
     .shopee-card {
       background: #ffffff;
       border: 1px solid #e5e7eb;
-      border-radius: 8px;
+      border-radius: 10px;
       overflow: hidden;
       display: flex;
       flex-direction: column;
       transition: transform 0.2s ease, box-shadow 0.2s ease;
       position: relative;
+      cursor: pointer;
     }
     .shopee-card:hover {
       transform: translateY(-3px);
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+      box-shadow: 0 6px 16px rgba(0, 0, 0, 0.08);
       border-color: #cbd5e1;
     }
 
     .shopee-img-box {
       width: 100%;
-      height: 180px;
+      height: 190px;
       background: #f8fafc;
       position: relative;
       overflow: hidden;
@@ -61,16 +62,17 @@
     }
 
     .shopee-content {
-      padding: 12px;
+      padding: 14px;
       display: flex;
       flex-direction: column;
       flex: 1;
+      justify-content: space-between;
     }
     .shopee-title {
       font-size: 0.95rem;
       font-weight: 600;
       color: #1f2937;
-      margin: 0 0 6px 0;
+      margin: 0 0 8px 0;
       display: -webkit-box;
       -webkit-line-clamp: 2;
       -webkit-box-orient: vertical;
@@ -78,36 +80,84 @@
       overflow: hidden;
       height: 2.6em;
     }
-    .shopee-desc {
-      font-size: 0.8rem;
-      color: #6b7280;
-      margin: 0 0 10px 0;
-      display: -webkit-box;
-      -webkit-line-clamp: 2;
-      -webkit-box-orient: vertical;
-      line-clamp: 2;
-      overflow: hidden;
+    .shopee-price {
+      font-size: 1.1rem;
+      font-weight: bold;
+      color: #dc2626; /* 蝦皮紅 */
     }
 
-    /* 🏷️ 蝦皮風格規格標籤選擇區 */
-    .shopee-options-label {
-      font-size: 0.78rem;
+    /* 🪟 彈出式小視窗 (Modal) 樣式 */
+    #productModalOverlay {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.6);
+      z-index: 1000;
+      justify-content: center;
+      align-items: center;
+      padding: 16px;
+    }
+    .modal-card {
+      background: #ffffff;
+      width: 100%;
+      max-width: 520px;
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+      display: flex;
+      flex-direction: column;
+      max-height: 90vh;
+      animation: modalFadeIn 0.2s ease-out;
+    }
+    @keyframes modalFadeIn {
+      from { transform: translateY(10px); opacity: 0; }
+      to { transform: translateY(0); opacity: 1; }
+    }
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 14px 20px;
+      border-bottom: 1px solid #e5e7eb;
+      background: #f8fafc;
+    }
+    .modal-body {
+      padding: 20px;
+      overflow-y: auto;
+      flex: 1;
+    }
+    .modal-img {
+      width: 100%;
+      height: 220px;
+      object-fit: cover;
+      border-radius: 8px;
+      margin-bottom: 14px;
+      border: 1px solid #e2e8f0;
+      background: #f1f5f9;
+    }
+    
+    /* 規格標籤與數量器 */
+    .modal-options-label {
+      font-size: 0.85rem;
       font-weight: bold;
       color: #374151;
-      margin-bottom: 4px;
+      margin-bottom: 6px;
     }
     .shopee-pills-container {
       display: flex;
       flex-wrap: wrap;
       gap: 6px;
-      margin-bottom: 10px;
+      margin-bottom: 14px;
     }
     .shopee-pill {
       background: #f3f4f6;
       border: 1px solid #d1d5db;
-      border-radius: 4px;
-      padding: 3px 8px;
-      font-size: 0.78rem;
+      border-radius: 6px;
+      padding: 6px 12px;
+      font-size: 0.85rem;
       color: #374151;
       cursor: pointer;
       transition: all 0.15s;
@@ -120,77 +170,16 @@
       font-weight: 600;
     }
 
-    /* 🔢 數量調整器與價格 */
-    .shopee-price-row {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      margin-top: auto;
-      margin-bottom: 10px;
-    }
-    .shopee-price {
-      font-size: 1.05rem;
-      font-weight: bold;
-      color: #dc2626; /* 蝦皮紅 */
-    }
-    .shopee-qty-wrapper {
-      display: flex;
-      align-items: center;
-      border: 1px solid #d1d5db;
-      border-radius: 4px;
-      overflow: hidden;
-    }
-    .shopee-qty-btn {
-      background: #f3f4f6;
-      border: none;
-      width: 26px;
-      height: 26px;
-      font-weight: bold;
-      cursor: pointer;
-      color: #374151;
-    }
-    .shopee-qty-input {
-      width: 34px;
-      height: 26px;
-      border: none;
-      text-align: center;
-      font-size: 0.85rem;
-      outline: none;
-    }
-
-    /* 🛒 底部按鈕群組 */
-    .shopee-actions {
+    /* 三欄式填單：姓名、班級、座號 */
+    .form-row-three {
       display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 6px;
+      grid-template-columns: 2fr 1fr 1fr;
+      gap: 10px;
+      margin-bottom: 14px;
     }
-    .shopee-btn-cart {
-      background: #eff6ff;
-      color: #2563eb;
-      border: 1px solid #bfdbfe;
-      border-radius: 6px;
-      padding: 7px 4px;
-      font-size: 0.8rem;
-      font-weight: 600;
-      cursor: pointer;
-      transition: background 0.2s;
-      text-align: center;
+    @media (max-width: 500px) {
+      .form-row-three { grid-template-columns: 1fr; }
     }
-    .shopee-btn-cart:hover { background: #dbeafe; }
-    
-    .shopee-btn-buy {
-      background: #2563eb;
-      color: #ffffff;
-      border: none;
-      border-radius: 6px;
-      padding: 7px 4px;
-      font-size: 0.8rem;
-      font-weight: 600;
-      cursor: pointer;
-      transition: background 0.2s;
-      text-align: center;
-    }
-    .shopee-btn-buy:hover { background: #1d4ed8; }
 
     /* 🔐 右上角導覽列登入精緻化 CSS 樣式 */
     .nav-auth-container {
@@ -271,13 +260,13 @@
 
   <div class="container">
 
-    <!-- 規範提示區塊 -->
+    <!-- 🌟 網站介紹區塊 (取代原先的公投規則) -->
     <div class="notice-box">
-      <h3>📌 公投與意見投遞規則</h3>
+      <h3>🌟 歡迎來到 TSSC13TH 學生會官方周邊與公投商城</h3>
       <ul>
-        <li><strong>實名驗證：</strong>為確保身分符合資格，本平台全面採用學校官方 Google 帳號（@tshcmc.edu.vn）進行身分驗證。</li>
-        <li><strong>隱私保護：</strong>所有訂單與查詢皆需透過學校信箱登入解鎖，確保最高隱私與資安。</li>
-        <li><strong>價格貨幣：</strong>所有商品價格均以越盾（VND / ₫）計價，請確認金額後進行選購與結算。</li>
+        <li><strong>關於本站：</strong>本平台由第 13 屆學生會（TSSC13TH）傾力打造，旨在提供全校師生安全、透明且便捷的官方周邊預購與意見公投服務。</li>
+        <li><strong>實名防護：</strong>為確保每一位學生的權益，所有預購與投票均須使用學校官方 Google 帳號（<code>@tshcmc.edu.vn</code>）進行安全認證。</li>
+        <li><strong>售完候補機制：</strong>若心儀的周邊商品顯示已完售，您仍可透過點擊商品進行「候補登記」，我們將依序為您排隊保留名額！</li>
       </ul>
     </div>
 
@@ -286,7 +275,7 @@
       <input type="text" id="searchInput" placeholder="🔍 輸入關鍵字搜尋周邊商品..." oninput="filterProducts()">
     </div>
 
-    <!-- 統一的商品展示總區塊 -->
+    <!-- 商品列表區塊 -->
     <div class="section-title">🛍️ 全部周邊商品列表</div>
     <div id="productsGrid" class="product-grid">
       <div class="empty-state">載入中...</div>
@@ -294,10 +283,57 @@
 
   </div>
 
+  <!-- 🪟 點擊商品後彈出的互動視窗 (Modal) -->
+  <div id="productModalOverlay">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3 id="modalTitle" style="margin:0; font-size:1.1rem; color:#111827;">商品詳細與選購</h3>
+        <button onclick="closeProductModal()" style="background:#ef4444; color:#fff; border:none; padding:4px 10px; border-radius:6px; cursor:pointer; font-weight:bold;">✕</button>
+      </div>
+      <div class="modal-body">
+        <img id="modalImg" class="modal-img" src="tpshcmcsc.png" alt="商品圖片" onerror="this.src='tpshcmcsc.png'">
+        <div id="modalStatusBadge" style="display:inline-block; padding:3px 8px; border-radius:4px; font-size:0.78rem; font-weight:600; margin-bottom:8px;"></div>
+        <p id="modalDesc" style="color:#4b5563; font-size:0.9rem; margin:0 0 14px 0; line-height:1.5;"></p>
+        <div id="modalPrice" style="font-size:1.25rem; font-weight:bold; color:#dc2626; margin-bottom:14px;">0 ₫</div>
+
+        <!-- 動態規格選項容器 -->
+        <div id="modalOptionsContainer"></div>
+
+        <!-- 購買數量調整器 -->
+        <div style="margin-bottom: 16px;">
+          <label style="font-size:0.85rem; font-weight:bold; color:#374151; display:block; margin-bottom:6px;">購買數量：</label>
+          <div style="display:flex; align-items:center; width:120px; border:1px solid #d1d5db; border-radius:6px; overflow:hidden;">
+            <button type="button" onclick="adjustModalQty(-1)" style="background:#f3f4f6; border:none; width:36px; height:36px; font-weight:bold; cursor:pointer;">-</button>
+            <input type="text" id="modalQtyInput" value="1" readonly style="flex:1; height:36px; border:none; text-align:center; font-size:1rem; outline:none;">
+            <button type="button" onclick="adjustModalQty(1)" style="background:#f3f4f6; border:none; width:36px; height:36px; font-weight:bold; cursor:pointer;">+</button>
+          </div>
+        </div>
+
+        <!-- 👤 實名填單區 (姓名、班級、座號) -->
+        <div style="margin-bottom: 16px;">
+          <label style="font-size:0.85rem; font-weight:bold; color:#374151; display:block; margin-bottom:6px;">訂購者身分資料 (姓名 / 班級 / 座號) *：</label>
+          <div class="form-row-three">
+            <input type="text" id="modalInputName" required placeholder="真實姓名 (例: Nguyen Van A)" style="padding:9px; border:1px solid #d1d5db; border-radius:6px; font-size:0.9rem;">
+            <input type="text" id="modalInputClass" required placeholder="班級 (例: 12A1)" style="padding:9px; border:1px solid #d1d5db; border-radius:6px; font-size:0.9rem;">
+            <input type="text" id="modalInputSeat" required placeholder="座號 (例: 15)" style="padding:9px; border:1px solid #d1d5db; border-radius:6px; font-size:0.9rem;">
+          </div>
+        </div>
+
+        <!-- 底部按鈕群組 -->
+        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px; margin-top:20px;">
+          <button type="button" onclick="modalAddToCart()" style="background:#eff6ff; color:#2563eb; border:1px solid #bfdbfe; border-radius:8px; padding:12px; font-weight:600; cursor:pointer;">🛒 加入購物車</button>
+          <button type="button" onclick="modalSubmitDirectOrder()" id="modalSubmitBtn" style="background:#2563eb; color:#ffffff; border:none; border-radius:8px; padding:12px; font-weight:600; cursor:pointer;">⚡ 確認送出預購</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <script>
     const GAS_API_URL = "https://script.google.com/macros/s/AKfycbx7o4EJKoFsiJojM3FfS0pqj8n77mrdDR318Srn7DRy0kkFjMvogprtnHD0loSKqcB0/exec";
     let allProducts = [];
-    let productStates = {};
+    let currentSelectedProduct = null;
+    let selectedOptionValue = '預設';
+    let currentModalQty = 1;
 
     function formatVND(amount) {
       return new Intl.NumberFormat('vi-VN').format(amount) + ' ₫';
@@ -374,23 +410,13 @@
         
         if (result.status === "success") {
           allProducts = result.data;
-          allProducts.forEach(p => {
-            let defaultOpt = '預設';
-            let optArray = parseOptions(p.options);
-            if (optArray.length > 0) defaultOpt = optArray[0];
-            
-            productStates[p.product_id] = {
-              selectedOption: defaultOpt,
-              quantity: 1
-            };
-          });
           renderProducts(allProducts);
         } else {
           document.getElementById('productsGrid').innerHTML = `<div class="empty-state">載入商品失敗：${result.message}</div>`;
         }
       } catch (error) {
         console.error("無法連線至後端：", error);
-        document.getElementById('productsGrid').innerHTML = `<div class="empty-state">目前暫無項目。</div>`;
+        document.getElementById('productsGrid').innerHTML = `<div class="empty-state">目前暫無上架項目。</div>`;
       }
     }
 
@@ -414,115 +440,162 @@
       if (products.length === 0) {
         grid.innerHTML = `<div class="empty-state">目前查無相關周邊商品。</div>`;
       } else {
-        grid.innerHTML = products.map(p => createShopeeCardHTML(p)).join('');
+        grid.innerHTML = products.map(p => {
+          const imgSrc = p.img1 ? p.img1 : 'tpshcmcsc.png';
+          return `
+            <div class="shopee-card" onclick='openProductModal("${p.product_id}")'>
+              <div class="shopee-img-box">
+                <span class="shopee-badge">${p.status || '開放中'}</span>
+                <img src="${imgSrc}" alt="${p.title}" onerror="this.onerror=null; this.src='tpshcmcsc.png';">
+              </div>
+              <div class="shopee-content">
+                <h4 class="shopee-title">${p.title}</h4>
+                <div class="shopee-price">${formatVND(p.price)}</div>
+              </div>
+            </div>
+          `;
+        }).join('');
       }
     }
 
-    function createShopeeCardHTML(p) {
-      const imgSrc = p.img1 ? p.img1 : 'tpshcmcsc.png';
-      const optArray = parseOptions(p.options);
-      const isOpen = (p.status === '開放中');
-      
-      if (!productStates[p.product_id]) {
-        productStates[p.product_id] = { selectedOption: optArray[0] || '預設', quantity: 1 };
-      }
-      const currentState = productStates[p.product_id];
+    // 🪟 開啟商品互動視窗
+    function openProductModal(productId) {
+      const product = allProducts.find(p => p.product_id === productId);
+      if (!product) return;
+      currentSelectedProduct = product;
+      currentModalQty = 1;
+      document.getElementById('modalQtyInput').value = 1;
 
-      let optionsHtml = '';
+      document.getElementById('modalTitle').innerText = product.title;
+      document.getElementById('modalImg').src = product.img1 || 'tpshcmcsc.png';
+      document.getElementById('modalDesc').innerText = product.description || '無詳細說明';
+      document.getElementById('modalPrice').innerText = formatVND(product.price);
+
+      const badge = document.getElementById('modalStatusBadge');
+      const stock = parseInt(product.stock) || 0;
+      if (stock > 0) {
+        badge.innerText = `狀態: ${product.status || '開放中'} | 剩餘庫存: ${stock}`;
+        badge.style.background = "#dcfce7";
+        badge.style.color = "#166534";
+      } else {
+        badge.innerText = `⚠️ 目前已售完 (送出將自動轉為候補登記)`;
+        badge.style.background = "#fee2e2";
+        badge.style.color = "#991b1b";
+      }
+
+      // 規格渲染
+      const optContainer = document.getElementById('modalOptionsContainer');
+      let optArray = parseOptions(product.options);
+      selectedOptionValue = optArray[0] || '預設';
+
       if (optArray.length > 0) {
-        optionsHtml = `
-          <div class="shopee-options-label">規格選擇：</div>
+        optContainer.innerHTML = `
+          <div class="modal-options-label">選擇規格 / 選項：</div>
           <div class="shopee-pills-container">
             ${optArray.map(opt => `
-              <div class="shopee-pill ${currentState.selectedOption === opt ? 'active' : ''}" 
-                   onclick="selectOption('${p.product_id}', '${opt}')">${opt}</div>
+              <div class="shopee-pill ${selectedOptionValue === opt ? 'active' : ''}" 
+                   onclick="selectModalOption(this, '${opt}')">${opt}</div>
             `).join('')}
           </div>
         `;
+      } else {
+        optContainer.innerHTML = '';
       }
 
-      const actionFooter = isOpen ? `
-        <div class="shopee-price-row">
-          <span class="shopee-price">${formatVND(p.price)}</span>
-          <div class="shopee-qty-wrapper">
-            <button class="shopee-qty-btn" onclick="updateQty('${p.product_id}', -1)">-</button>
-            <input type="text" id="qty-${p.product_id}" class="shopee-qty-input" value="${currentState.quantity}" readonly>
-            <button class="shopee-qty-btn" onclick="updateQty('${p.product_id}', 1)">+</button>
-          </div>
-        </div>
-        <div class="shopee-actions">
-          <button class="shopee-btn-cart" onclick='addToCartDirect("${p.product_id}")'>🛒 加入購物車</button>
-          <button class="shopee-btn-buy" onclick='buyNowDirect("${p.product_id}")'>⚡ 直接購買</button>
-        </div>
-      ` : `
-        <div class="shopee-price-row" style="margin-top:8px;">
-          <span class="shopee-price">${formatVND(p.price)}</span>
-          <button class="shopee-btn-buy" style="background:#9ca3af; cursor:not-allowed;" disabled>${p.status || '未開放'}</button>
-        </div>
-      `;
-
-      return `
-        <div class="shopee-card">
-          <div class="shopee-img-box">
-            <span class="shopee-badge">${p.status || '未知'} | 庫存: ${p.stock}</span>
-            <img src="${imgSrc}" alt="${p.title}" onerror="this.onerror=null; this.src='tpshcmcsc.png';">
-          </div>
-          <div class="shopee-content">
-            <h4 class="shopee-title">${p.title}</h4>
-            <p class="shopee-desc">${p.description || '無詳細說明'}</p>
-            ${optionsHtml}
-            ${actionFooter}
-          </div>
-        </div>
-      `;
+      document.getElementById('productModalOverlay').style.display = 'flex';
     }
 
-    function selectOption(productId, option) {
-      if (productStates[productId]) {
-        productStates[productId].selectedOption = option;
-        renderProducts(allProducts);
-      }
+    function closeProductModal() {
+      document.getElementById('productModalOverlay').style.display = 'none';
     }
 
-    function updateQty(productId, change) {
-      if (productStates[productId]) {
-        let newQty = productStates[productId].quantity + change;
-        if (newQty < 1) newQty = 1;
-        productStates[productId].quantity = newQty;
-        const inputElem = document.getElementById(`qty-${productId}`);
-        if (inputElem) inputElem.value = newQty;
-      }
+    function selectModalOption(elem, val) {
+      selectedOptionValue = val;
+      document.querySelectorAll('.shopee-pill').forEach(p => p.classList.remove('active'));
+      elem.classList.add('active');
     }
 
-    function addToCartDirect(productId) {
-      const product = allProducts.find(p => p.product_id === productId);
-      if (!product) return;
+    function adjustModalQty(change) {
+      currentModalQty += change;
+      if (currentModalQty < 1) currentModalQty = 1;
+      document.getElementById('modalQtyInput').value = currentModalQty;
+    }
 
-      const state = productStates[productId] || { selectedOption: '預設', quantity: 1 };
+    function modalAddToCart() {
+      if (!currentSelectedProduct) return;
       let cart = JSON.parse(localStorage.getItem('tss_cart') || '[]');
       
-      let existing = cart.find(item => item.product_id === product.product_id && (item.selected_option || '預設') === state.selectedOption);
+      let existing = cart.find(item => item.product_id === currentSelectedProduct.product_id && (item.selected_option || '預設') === selectedOptionValue);
       
       if (existing) {
-        existing.quantity += state.quantity;
+        existing.quantity += currentModalQty;
       } else {
-        cart.push({ ...product, quantity: state.quantity, selected_option: state.selectedOption, stock: product.stock });
+        cart.push({ ...currentSelectedProduct, quantity: currentModalQty, selected_option: selectedOptionValue, stock: currentSelectedProduct.stock });
       }
 
       localStorage.setItem('tss_cart', JSON.stringify(cart));
       updateCartCount();
-      alert(`成功將「${product.title} (${state.selectedOption})」x ${state.quantity} 加入購物車！`);
+      alert(`成功將「${currentSelectedProduct.title} (${selectedOptionValue})」x ${currentModalQty} 加入購物車！`);
+      closeProductModal();
     }
 
-    function buyNowDirect(productId) {
-      const product = allProducts.find(p => p.product_id === productId);
-      if (!product) return;
+    async function modalSubmitDirectOrder() {
+      const email = sessionStorage.getItem('tss_logged_email');
+      if (!email) {
+        alert('請先完成右上角 Google 帳號登入後始可送出預購！');
+        return;
+      }
 
-      const state = productStates[productId] || { selectedOption: '預設', quantity: 1 };
-      let cart = [{ ...product, quantity: state.quantity, selected_option: state.selectedOption, stock: product.stock }];
-      
-      localStorage.setItem('tss_cart', JSON.stringify(cart));
-      location.href = "cart.html";
+      const nameVal = document.getElementById('modalInputName').value.trim();
+      const classVal = document.getElementById('modalInputClass').value.trim();
+      const seatVal = document.getElementById('modalInputSeat').value.trim();
+
+      if (!nameVal || !classVal || !seatVal) {
+        alert('請完整填寫姓名、班級與座號！');
+        return;
+      }
+
+      const combinedName = `${nameVal} (${classVal} ${seatVal}號)`;
+      const stock = parseInt(currentSelectedProduct.stock) || 0;
+
+      let orderStatus = "待付款";
+      if (stock <= 0 || currentModalQty > stock) {
+        const confirmWaitlist = confirm(`【庫存提示】目前此商品庫存僅剩 ${stock} 件（您欲購買 ${currentModalQty} 件）。是否同意自動轉為「候補中」進行登記排隊？`);
+        if (!confirmWaitlist) return;
+        orderStatus = "候補中";
+      }
+
+      const orderData = {
+        action: "submitOrder",
+        productId: currentSelectedProduct.product_id,
+        email: email,
+        name: combinedName,
+        quantity: currentModalQty,
+        selected_option: selectedOptionValue,
+        remark: "首頁快速彈窗預購",
+        status: orderStatus
+      };
+
+      const btn = document.getElementById('modalSubmitBtn');
+      btn.disabled = true;
+      btn.innerText = "提交中...";
+
+      try {
+        const response = await fetch(GAS_API_URL, {
+          method: "POST",
+          body: JSON.stringify(orderData)
+        });
+        const result = await response.json();
+        alert(result.message);
+        if (result.status === "success") {
+          location.href = "query.html";
+        }
+      } catch (err) {
+        alert("提交發生錯誤，請檢查網路連線。");
+      } finally {
+        btn.disabled = false;
+        btn.innerText = "⚡ 確認送出預購";
+      }
     }
 
     function updateCartCount() {
