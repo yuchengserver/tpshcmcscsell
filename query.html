@@ -115,6 +115,24 @@
       transform: translateY(-1px);
     }
   </style>
+  <script>
+  // ⚡ 全域防閃爍引擎：在 DOM 載入前瞬間完成驗證與樣式套用
+  (function() {
+    const savedEmail = sessionStorage.getItem('tss_logged_email');
+    const loginTime = sessionStorage.getItem('tss_login_time');
+    
+    // 檢查是否有登入紀錄且在 30 分鐘有效時間內
+    if (savedEmail && loginTime && (Date.now() - Number(loginTime) <= 30 * 60 * 1000)) {
+      // 若已登入，直接注入 CSS 強制預先隱藏未登入按鈕、顯示已登入態，零延遲不閃爍
+      document.write(`
+        <style>
+          #navNotLoggedIn { display: none !important; }
+          #navIsLoggedIn { display: flex !important; }
+        </style>
+      `);
+    }
+  })();
+</script>
 </head>
 <body>
 
