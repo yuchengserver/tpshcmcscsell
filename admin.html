@@ -24,11 +24,12 @@
     .form-item-card { background: #ffffff; border: 1px solid #d1d5db; border-radius: 10px; padding: 16px; margin-bottom: 12px; box-shadow: 0 1px 2px rgba(0,0,0,0.02); }
     .options-header-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; border-bottom: 2px solid #f1f5f9; padding-bottom: 8px; }
 
-    /* 💵 輔助點鈔機表格樣式 */
-    .cashier-table { width: 100%; border-collapse: collapse; font-size: 0.9rem; margin-top: 10px; }
-    .cashier-table th, .cashier-table td { border: 1px solid #e5e7eb; padding: 8px 10px; text-align: center; }
-    .cashier-table th { background: #f9fafb; color: #374151; }
-    .cashier-table input[type="number"] { width: 70px; padding: 4px; text-align: center; border: 1px solid #d1d5db; border-radius: 4px; }
+    /* 💵 輕量化輔助點鈔機框架樣式 */
+    .cashier-box { background: #fafafa; padding: 12px 16px; border-radius: 8px; border: 1px solid #e2e8f0; margin-bottom: 16px; }
+    .cashier-table { width: 100%; border-collapse: collapse; font-size: 0.88rem; margin-top: 6px; }
+    .cashier-table th, .cashier-table td { border: 1px solid #e2e8f0; padding: 6px 8px; text-align: center; background: #fff; }
+    .cashier-table th { background: #f1f5f9; color: #374151; font-weight: 600; }
+    .cashier-table input[type="number"] { width: 65px; padding: 3px; text-align: center; border: 1px solid #d1d5db; border-radius: 4px; font-size: 0.9rem; }
 
     /* 按鈕樣式統一升級 */
     .btn-admin-action { background: #000; color: #fff; border: none; padding: 8px 16px; border-radius: 6px; font-weight: 600; cursor: pointer; transition: background 0.2s; font-size: 0.9rem; }
@@ -40,20 +41,40 @@
     .btn-admin-canva { background: #7c3aed; color: #fff; border: none; padding: 8px 16px; border-radius: 6px; font-weight: 600; cursor: pointer; transition: background 0.2s; font-size: 0.9rem; }
     .btn-admin-canva:hover { background: #6d28d9; }
 
+    /* 📱 手機側邊隱藏選單 (Mobile Drawer) 與漢堡按鈕 */
+    .mobile-menu-toggle { display: none; background: none; border: none; font-size: 1.5rem; cursor: pointer; color: #1f2937; padding: 4px 8px; }
+    .mobile-drawer-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1050; }
+    .mobile-drawer { position: fixed; top: 0; left: -280px; width: 280px; height: 100%; background: #ffffff; z-index: 1100; box-shadow: 4px 0 15px rgba(0,0,0,0.1); transition: left 0.3s ease; display: flex; flex-direction: column; padding: 20px; }
+    .mobile-drawer.open { left: 0; }
+    .mobile-drawer-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #e5e7eb; padding-bottom: 12px; margin-bottom: 16px; }
+    .mobile-drawer-links { display: flex; flex-direction: column; gap: 12px; }
+    .mobile-drawer-links a { text-decoration: none; color: #374151; font-weight: 600; padding: 10px 12px; border-radius: 6px; transition: background 0.2s; }
+    .mobile-drawer-links a:hover, .mobile-drawer-links a.active { background: #f3f4f6; color: #2563eb; }
+
+    @media (max-width: 768px) {
+      .desktop-nav { display: none !important; }
+      .mobile-menu-toggle { display: block !important; }
+    }
+
     .nav-auth-container { display: flex; align-items: center; gap: 10px; background: #f8fafc; padding: 6px 12px; border-radius: 8px; border: 1px solid #e2e8f0; }
-    .nav-user-email { color: #166534; font-weight: bold; max-width: 160px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .nav-user-email { color: #166534; font-weight: bold; max-width: 140px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
     .btn-nav-logout { background: #ef4444; color: #fff; border: none; padding: 4px 10px; border-radius: 6px; cursor: pointer; font-size: 0.75rem; font-weight: bold; }
   </style>
 </head>
 <body>
 
-  <header style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; padding: 12px 24px;">
-    <div class="nav-brand">
-      <img src="tpshcmcsc.png" alt="標誌" style="filter: brightness(0) saturate(100%);">
-      <span>TSSC13TH 智慧管理員後台</span>
+  <!-- 頂部導覽列 (支援手機漢堡選單與桌機導覽) -->
+  <header style="display: flex; justify-content: space-between; align-items: center; padding: 12px 24px;">
+    <div style="display: flex; align-items: center; gap: 12px;">
+      <button class="mobile-menu-toggle" onclick="toggleMobileDrawer()">☰</button>
+      <div class="nav-brand">
+        <img src="tpshcmcsc.png" alt="標誌" style="height:32px; width:32px; object-fit:contain; filter: brightness(0) saturate(100%);">
+        <span>TSSC13TH 後台</span>
+      </div>
     </div>
     
-    <nav class="nav-links">
+    <!-- 🖥️ 桌機導覽列 -->
+    <nav class="nav-links desktop-nav" style="display: flex; align-items: center; gap: 16px;">
       <a href="index.html">首頁與通知</a>
       <a href="cart.html">🛒 購物車結算</a>
       <a href="query.html">📋 查詢訂單</a>
@@ -74,6 +95,24 @@
     </nav>
   </header>
 
+  <!-- 📱 手機左側滑出選單 Drawer -->
+  <div id="mobileDrawerOverlay" class="mobile-drawer-overlay" onclick="toggleMobileDrawer()"></div>
+  <div id="mobileDrawer" class="mobile-drawer">
+    <div class="mobile-drawer-header">
+      <strong style="font-size: 1.1rem; color: #111827;">TSSC13TH 選單</strong>
+      <button onclick="toggleMobileDrawer()" style="background:none; border:none; font-size:1.2rem; cursor:pointer;">✕</button>
+    </div>
+    <div class="mobile-drawer-links">
+      <a href="index.html">首頁與通知</a>
+      <a href="cart.html">🛒 購物車結算</a>
+      <a href="query.html">📋 查詢訂單</a>
+      <a href="admin.html" class="active">⚙️ 後台管理</a>
+    </div>
+    <div style="margin-top: auto; padding-top: 15px; border-top: 1px solid #e5e7eb;">
+      <div id="mobileAuthArea" style="font-size:0.85rem; color:#4b5563;">請透過桌機或登入授權</div>
+    </div>
+  </div>
+
   <div class="container">
     <div class="dashboard-grid">
       <div class="stat-card"><div class="label">總預購數</div><div id="statTotalOrders" class="num">0 筆</div></div>
@@ -83,10 +122,10 @@
 
     <div class="admin-tabs">
       <button class="tab-btn active" onclick="switchTab(event, 'tabOrders')">📊 訂單總覽</button>
-      <button class="tab-btn" onclick="switchTab(event, 'tabReconcile')">🧮 AI 智慧對帳與點鈔中心</button>
+      <button class="tab-btn" onclick="switchTab(event, 'tabReconcile')">🧮 AI 點鈔與對帳</button>
       <button class="tab-btn" onclick="switchTab(event, 'tabProductAdd')">🛍️ 上架商品</button>
       <button class="tab-btn" onclick="switchTab(event, 'tabProductManage')">📋 庫存管理</button>
-      <button class="tab-btn" onclick="switchTab(event, 'tabPrintPreview')">🖨️ 列印與 Canva 匯出</button>
+      <button class="tab-btn" onclick="switchTab(event, 'tabPrintPreview')">🖨️ PDF 列印與排版</button>
     </div>
 
     <!-- 標籤頁 1：訂單總覽 -->
@@ -113,8 +152,8 @@
     <!-- 標籤頁 2：AI 對帳與輔助點鈔中心 -->
     <div id="tabReconcile" class="tab-content">
       <div class="admin-card">
-        <h2>🧮 班級自動對帳與輔助點鈔中心</h2>
-        <p style="color:#6b7280; font-size:0.9rem; margin-bottom:16px;">選擇班級檢視預期金額，並可透過下方「紙鈔面額計算機」快速統計現金，金額吻合即可一鍵核銷！</p>
+        <h2>🧮 班級自動對帳與輕量點鈔系統</h2>
+        <p style="color:#6b7280; font-size:0.9rem; margin-bottom:16px;">選擇班級檢視預期金額，並透過下方輕量級「紙鈔面額計算機」統計現金，金額吻合即可一鍵核銷！</p>
         
         <div style="display:grid; grid-template-columns: 1fr 1fr; gap:16px; margin-bottom:16px;">
           <div>
@@ -127,9 +166,9 @@
           </div>
         </div>
 
-        <!-- 💵 輔助點鈔機表格 -->
-        <div style="margin-bottom: 20px; background: #f8fafc; padding: 16px; border-radius: 8px; border: 1px solid #e2e8f0;">
-          <h4 style="margin:0 0 10px 0; font-size:0.95px; color:#1e293b;">💵 現金輔助點鈔計算機 (越南盾面額)</h4>
+        <!-- 💵 輕量化輔助點鈔機框架 -->
+        <div class="cashier-box">
+          <h4 style="margin:0 0 6px 0; font-size:0.92rem; color:#1e293b;">💵 現金輔助點鈔計算機 (越南盾面額)</h4>
           <table class="cashier-table">
             <thead>
               <tr><th>面額 (VND)</th><th>數量 (張/枚)</th><th>小計</th></tr>
@@ -171,7 +210,7 @@
             </div>
           </div>
 
-          <!-- ⚙️ 規格組設定區 (美化排版) -->
+          <!-- ⚙️ 規格組設定區 -->
           <div style="margin-top:24px; background:#f8fafc; padding:16px; border-radius:8px; border:1px solid #e2e8f0;">
             <div class="options-header-row">
               <strong style="color:#111827; font-size:1.05rem;">⚙️ 商品規格與選項設定</strong>
@@ -199,23 +238,51 @@
       </div>
     </div>
 
-    <!-- 標籤頁 5：列印與 Canva 匯出 -->
+    <!-- 標籤頁 5：PDF 列印與排版自訂 -->
     <div id="tabPrintPreview" class="tab-content">
       <div class="admin-card">
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px; flex-wrap:wrap; gap:12px;">
-          <h2 style="margin:0;">🖨️ 繳費單與 Canva 格式匯出中心</h2>
+          <h2 style="margin:0;">🖨️ PDF 列印與排版樣式自訂中心</h2>
           <div style="display:flex; gap:10px; align-items:center; flex-wrap:wrap;">
             <select id="previewClassSelect" onchange="renderPrintPreview()" style="padding:8px; border:1px solid #d1d5db; border-radius:6px; font-size:0.95rem;"></select>
             <button onclick="openPrintPreviewModal()" class="btn-admin-print">🖨️ 預覽與轉 PDF</button>
-            <button onclick="exportCanvaCSV()" class="btn-admin-canva">🎨 下載 Canva 可讀取的 CSV</button>
+            <button onclick="exportCanvaCSV()" class="btn-admin-canva">🎨 下載 Canva CSV 檔</button>
           </div>
         </div>
 
-        <!-- 📝 自訂義列印標題與補充文字區塊 -->
-        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:16px; background:#f8fafc; padding:16px; border-radius:8px; border:1px solid #e2e8f0; margin-bottom:20px;">
-          <div class="form-group" style="margin:0;"><label style="font-weight:600;">自訂標題 (Main Title)：</label><input type="text" id="customPrintTitle" value="TSSC13TH 周邊預購繳費清單" oninput="renderPrintPreview()" style="padding:8px; border:1px solid #d1d5db; border-radius:6px; width:100%;"></div>
-          <div class="form-group" style="margin:0;"><label style="font-weight:600;">自訂小標題 / 班級備註：</label><input type="text" id="customPrintSubtitle" value="請各班負責人確認金額後進行收費與核銷" oninput="renderPrintPreview()" style="padding:8px; border:1px solid #d1d5db; border-radius:6px; width:100%;"></div>
-          <div class="form-group full-width" style="margin:0; grid-column: 1 / -1;"><label style="font-weight:600;">補充說明文字 (Footer Notes)：</label><input type="text" id="customPrintNotes" value="注意事項：請於繳費期限內繳交現金給學生會財務股，繳費完成後請確認核勾。" oninput="renderPrintPreview()" style="padding:8px; border:1px solid #d1d5db; border-radius:6px; width:100%;"></div>
+        <!-- 🎛️ PDF 排版與樣式即時編輯控制台 -->
+        <div style="background:#f8fafc; padding:16px; border-radius:8px; border:1px solid #e2e8f0; margin-bottom:20px; display:grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap:12px;">
+          <div class="form-group" style="margin:0;">
+            <label style="font-weight:600; font-size:0.85rem;">字體大小 (Font Size)：</label>
+            <select id="styleFontSize" onchange="renderPrintPreview()" style="padding:6px; border:1px solid #d1d5db; border-radius:6px; width:100%;">
+              <option value="11px">小 (11px)</option>
+              <option value="13px" selected>標準 (13px)</option>
+              <option value="15px">大 (15px)</option>
+              <option value="17px">特大 (17px)</option>
+            </select>
+          </div>
+          <div class="form-group" style="margin:0;">
+            <label style="font-weight:600; font-size:0.85rem;">表格行高與間距 (Padding)：</label>
+            <select id="stylePadding" onchange="renderPrintPreview()" style="padding:6px; border:1px solid #d1d5db; border-radius:6px; width:100%;">
+              <option value="4px 6px">緊湊</option>
+              <option value="8px 10px" selected>舒適 (標準)</option>
+              <option value="12px 14px">寬鬆</option>
+            </select>
+          </div>
+          <div class="form-group" style="margin:0; display:flex; flex-direction:column; gap:6px;">
+            <label style="font-weight:600; font-size:0.85rem;">顯示欄位自訂：</label>
+            <div style="display:flex; gap:12px; font-size:0.85rem; align-items:center; height:32px;">
+              <label><input type="checkbox" id="chkShowEmail" checked onchange="renderPrintPreview()"> 學號信箱</label>
+              <label><input type="checkbox" id="chkShowCheckbox" checked onchange="renderPrintPreview()"> 繳費核勾格</label>
+            </div>
+          </div>
+          <div class="form-group full-width" style="margin:0; grid-column:1 / -1;">
+            <label style="font-weight:600; font-size:0.85rem;">自訂標題 / 副標題 / 補充說明：</label>
+            <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px; margin-top:4px;">
+              <input type="text" id="customPrintTitle" value="TSSC13TH 周邊預購繳費清單" oninput="renderPrintPreview()" placeholder="主標題" style="padding:6px; border:1px solid #d1d5db; border-radius:6px;">
+              <input type="text" id="customPrintSubtitle" value="請各班負責人確認金額後進行收費與核銷" oninput="renderPrintPreview()" placeholder="副標題" style="padding:6px; border:1px solid #d1d5db; border-radius:6px;">
+            </div>
+          </div>
         </div>
 
         <div id="printPreviewContainer" class="card" style="margin-top:15px;"><div style="text-align:center; color:#6b7280; padding:20px;">請選擇班級...</div></div>
@@ -227,7 +294,7 @@
   <div id="printModalOverlay" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.6); z-index:1000; justify-content:center; align-items:center;">
     <div style="background:#fff; width:90%; max-width:850px; max-height:90vh; border-radius:10px; padding:24px; display:flex; flex-direction:column; overflow-y:auto;">
       <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid #e5e7eb; padding-bottom:10px; margin-bottom:15px;">
-        <h3 style="margin:0;">📄 列印與 PDF 預覽 (含繳費勾選格)</h3>
+        <h3 style="margin:0;">📄 PDF 預覽與樣式排版</h3>
         <button onclick="closePrintModal()" style="background:#ef4444; color:#fff; border:none; padding:6px 12px; border-radius:6px; cursor:pointer; font-weight:600;">關閉</button>
       </div>
       <div id="printableArea" style="flex:1; overflow-y:auto; padding:20px; background:#fff; border:1px solid #e5e7eb;"></div>
@@ -253,6 +320,18 @@
       loadAllOrders();
       addOptionCard();
     };
+
+    function toggleMobileDrawer() {
+      const drawer = document.getElementById('mobileDrawer');
+      const overlay = document.getElementById('mobileDrawerOverlay');
+      if (drawer.classList.contains('open')) {
+        drawer.classList.remove('open');
+        overlay.style.display = 'none';
+      } else {
+        drawer.classList.add('open');
+        overlay.style.display = 'block';
+      }
+    }
 
     function checkSessionTimeout() {
       const loginTime = sessionStorage.getItem('tss_login_time');
@@ -281,6 +360,7 @@
       document.getElementById('navNotLoggedIn').style.display = 'none';
       document.getElementById('navIsLoggedIn').style.display = 'flex';
       document.getElementById('navUserEmail').innerText = email;
+      document.getElementById('mobileAuthArea').innerHTML = `已登入帳號：<br><strong>${email}</strong>`;
     }
 
     function logout(isSilent = false) {
@@ -288,6 +368,7 @@
       sessionStorage.removeItem('tss_login_time');
       document.getElementById('navNotLoggedIn').style.display = 'block';
       document.getElementById('navIsLoggedIn').style.display = 'none';
+      document.getElementById('mobileAuthArea').innerHTML = `請透過桌機或登入授權`;
       if (!isSilent) alert("已登出！");
     }
 
@@ -366,7 +447,6 @@
       } catch(e) {}
     }
 
-    // 🇻🇳 轉換為越南標準時間（GMT+7）
     function formatVietnamTime(timestampStr) {
       if (!timestampStr) return '';
       try {
@@ -423,12 +503,10 @@
       let orders = globalOrdersData.filter(o => o.name.toUpperCase().includes(c));
       let expected = orders.reduce((sum, o) => sum + Number(o.total_price || 0), 0);
       document.getElementById('expectedTotalDisplay').innerText = formatVND(expected);
-      // 清空點鈔機
       document.querySelectorAll('.cashier-table input').forEach(input => input.value = 0);
       calculateCashierTotal();
     }
 
-    // 💵 計算點鈔機總金額
     function calculateCashierTotal() {
       let total = 0;
       document.querySelectorAll('.cashier-table tbody tr').forEach(row => {
@@ -441,7 +519,6 @@
       document.getElementById('actualReceivedAmount').value = total;
     }
 
-    // 🚀 金額完全正確時自動改為已付款
     async function executeReconciliation() {
       let c = document.getElementById('reconcileClassSelect').value;
       let actual = Number(document.getElementById('actualReceivedAmount').value);
@@ -481,6 +558,7 @@
       renderPrintPreview();
     }
 
+    // 🖨️ 渲染含即時排版樣式調整的 PDF 報表
     function renderPrintPreview() {
       let c = document.getElementById('previewClassSelect').value;
       let orders = globalOrdersData.filter(o => o.name.toUpperCase().includes(c));
@@ -488,30 +566,46 @@
 
       let title = document.getElementById('customPrintTitle').value;
       let subtitle = document.getElementById('customPrintSubtitle').value;
-      let notes = document.getElementById('customPrintNotes').value;
+      let fontSize = document.getElementById('styleFontSize').value;
+      let cellPadding = document.getElementById('stylePadding').value;
+      let showEmail = document.getElementById('chkShowEmail').checked;
+      let showCheckbox = document.getElementById('chkShowCheckbox').checked;
 
       document.getElementById('printPreviewContainer').innerHTML = `
         <div style="text-align:center; margin-bottom:15px;">
-          <h2 style="margin:0 0 5px 0; font-size:1.4rem;">${title}</h2>
-          <p style="margin:0; color:#4b5563; font-size:0.95rem;">${subtitle} (班級: ${c})</p>
+          <h2 style="margin:0 0 5px 0; font-size:1.3rem; color:#111827;">${title}</h2>
+          <p style="margin:0; color:#4b5563; font-size:0.9rem;">${subtitle} (班級: ${c})</p>
         </div>
-        <table class="product-table">
-          <thead><tr><th>序號</th><th>姓名</th><th>學號信箱</th><th>品項與規格</th><th>金額 (VND)</th><th>繳費核勾 (□)</th></tr></thead>
+        <style>
+          .dynamic-print-table { width: 100%; border-collapse: collapse; font-size: ${fontSize}; }
+          .dynamic-print-table th, .dynamic-print-table td { border: 1px solid #d1d5db; padding: ${cellPadding}; text-align: left; }
+          .dynamic-print-table th { background: #f3f4f6; color: #1f2937; }
+        </style>
+        <table class="dynamic-print-table">
+          <thead>
+            <tr>
+              <th>序號</th>
+              <th>姓名</th>
+              ${showEmail ? '<th>學號信箱</th>' : ''}
+              <th>品項與規格</th>
+              <th>金額 (VND)</th>
+              ${showCheckbox ? '<th style="text-align:center;">繳費核勾</th>' : ''}
+            </tr>
+          </thead>
           <tbody>
             ${orders.map((o, i) => `
               <tr>
                 <td>${i+1}</td>
                 <td><strong>${o.name}</strong></td>
-                <td><small>${o.email}</small></td>
+                ${showEmail ? `<td><small>${o.email}</small></td>` : ''}
                 <td>${o.product_title} (${o.selected_option || '預設'}) x ${o.quantity}</td>
                 <td><strong>${Number(o.total_price).toLocaleString()} ₫</strong></td>
-                <td style="text-align:center; font-size:1.3rem;">□</td>
+                ${showCheckbox ? '<td style="text-align:center; font-size:1.2rem;">□</td>' : ''}
               </tr>`).join('')}
           </tbody>
         </table>
-        <div style="margin-top:15px; display:flex; justify-content:space-between; align-items:center; font-weight:bold;">
-          <span style="font-size:0.9rem; color:#6b7280;">${notes}</span>
-          <span style="font-size:1.1rem; color:#dc2626;">總計金額：${total.toLocaleString()} ₫</span>
+        <div style="margin-top:15px; text-align:right; font-weight:bold; font-size:1.1rem; color:#dc2626;">
+          總計金額：${total.toLocaleString()} ₫
         </div>`;
     }
 
@@ -524,7 +618,6 @@
       document.getElementById('printModalOverlay').style.display = 'none';
     }
 
-    // 🎨 下載 Canva 可直接讀取的 CSV 檔案
     function exportCanvaCSV() {
       let c = document.getElementById('previewClassSelect').value;
       let orders = globalOrdersData.filter(o => o.name.toUpperCase().includes(c));
@@ -578,7 +671,7 @@
     }
 
     async function updateStock(productId, newStock) {
-      alert(`商品 ${productId} 庫存已暫存更新為 ${newStock} (請確保後端支援更新庫存動作)`);
+      alert(`商品 ${productId} 庫存已暫存更新為 ${newStock}`);
     }
 
     async function updateStatus(productId, newStatus) {
