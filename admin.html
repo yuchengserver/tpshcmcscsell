@@ -34,7 +34,7 @@
     .status-select { background: #fff; color: #374151; border: 1px solid #d1d5db; padding: 4px 8px; border-radius: 4px; font-size: 0.85rem; }
     .stock-input { width: 70px; padding: 4px 6px; background: #fff; color: #111; border: 1px solid #d1d5db; border-radius: 4px; }
     
-    /* 🖼️ 最多 3 張圖片上傳預覽網格 */
+    /* 🖼️ 圖片上傳預覽網格 */
     .image-upload-grid {
       display: grid;
       grid-template-columns: repeat(3, 1fr);
@@ -55,61 +55,25 @@
       transition: all 0.2s;
     }
     .image-preview-card:hover { border-color: #0f172a; background: #f1f5f9; }
-    .image-preview-card img {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-    }
-    .image-preview-card .upload-placeholder {
-      text-align: center;
-      color: #64748b;
-      font-size: 0.8rem;
-    }
+    .image-preview-card img { width: 100%; height: 100%; object-fit: cover; }
+    .image-preview-card .upload-placeholder { text-align: center; color: #64748b; font-size: 0.8rem; }
     .btn-remove-img {
-      position: absolute;
-      top: 6px;
-      right: 6px;
-      background: rgba(239, 68, 68, 0.9);
-      color: white;
-      border: none;
-      border-radius: 50%;
-      width: 24px;
-      height: 24px;
-      font-size: 0.8rem;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+      position: absolute; top: 6px; right: 6px;
+      background: rgba(239, 68, 68, 0.9); color: white;
+      border: none; border-radius: 50%; width: 24px; height: 24px;
+      font-size: 0.8rem; cursor: pointer; display: flex; align-items: center; justify-content: center;
     }
     .btn-remove-img:hover { background: #dc2626; }
 
-    /* 📋 簡潔好用的表單項目卡片排版 (參考截圖風格) */
+    /* 📋 簡潔好用的表單項目卡片排版 */
     .form-item-card {
-      background: #fdfdfd;
-      border: 1px solid #e5e7eb;
-      border-radius: 8px;
-      padding: 16px;
-      margin-bottom: 14px;
-      position: relative;
-      box-shadow: 0 1px 2px rgba(0,0,0,0.02);
+      background: #fdfdfd; border: 1px solid #e5e7eb; border-radius: 8px;
+      padding: 16px; margin-bottom: 14px; position: relative; box-shadow: 0 1px 2px rgba(0,0,0,0.02);
     }
-    .form-item-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 10px;
-    }
+    .form-item-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
     .btn-delete-item {
-      background: #fff1f2;
-      color: #e11d48;
-      border: 1px solid #fecdd3;
-      padding: 4px 10px;
-      border-radius: 6px;
-      font-size: 0.8rem;
-      font-weight: 600;
-      cursor: pointer;
-      transition: background 0.2s;
+      background: #fff1f2; color: #e11d48; border: 1px solid #fecdd3;
+      padding: 4px 10px; border-radius: 6px; font-size: 0.8rem; font-weight: 600; cursor: pointer;
     }
     .btn-delete-item:hover { background: #ffe4e6; }
 
@@ -123,47 +87,33 @@
 
     /* 🔐 右上角導覽列登入精緻化 CSS 樣式 */
     .nav-auth-container {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      background: #f8fafc;
-      padding: 6px 12px;
-      border-radius: 8px;
-      border: 1px solid #e2e8f0;
-      box-shadow: 0 1px 2px rgba(0,0,0,0.02);
+      display: flex; align-items: center; gap: 10px;
+      background: #f8fafc; padding: 6px 12px; border-radius: 8px;
+      border: 1px solid #e2e8f0; box-shadow: 0 1px 2px rgba(0,0,0,0.02);
     }
-    .nav-user-info {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      font-size: 0.85rem;
-    }
-    .nav-user-email {
-      color: #166534;
-      font-weight: bold;
-      max-width: 160px;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      white-space: nowrap;
-    }
+    .nav-user-info { display: flex; align-items: center; gap: 8px; font-size: 0.85rem; }
+    .nav-user-email { color: #166534; font-weight: bold; max-width: 160px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
     .btn-nav-logout {
-      background: #ef4444;
-      color: #ffffff;
-      border: none;
-      padding: 4px 10px;
-      border-radius: 6px;
-      cursor: pointer;
-      font-size: 0.75rem;
-      font-weight: 600;
-      transition: background 0.2s, transform 0.1s;
+      background: #ef4444; color: #ffffff; border: none; padding: 4px 10px;
+      border-radius: 6px; cursor: pointer; font-size: 0.75rem; font-weight: 600;
     }
-    .btn-nav-logout:hover {
-      background: #dc2626;
-      transform: translateY(-1px);
+    .btn-nav-logout:hover { background: #dc2626; }
+
+    /* 🖨️ 列印與轉 PDF 預覽調整彈窗樣式 */
+    #printModalOverlay {
+      display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(0,0,0,0.6); z-index: 1000; justify-content: center; align-items: center;
+    }
+    #printModalContent {
+      background: #fff; width: 90%; max-width: 800px; max-height: 90vh;
+      border-radius: 10px; padding: 24px; display: flex; flex-direction: column; overflow-y: auto;
     }
 
-    @media screen and (max-width: 768px) {
-      .image-upload-grid { grid-template-columns: 1fr; }
+    @media print {
+      body * { visibility: hidden; }
+      #printableArea, #printableArea * { visibility: visible; }
+      #printableArea { position: absolute; left: 0; top: 0; width: 100%; }
+      .no-print { display: none !important; }
     }
   </style>
 </head>
@@ -237,7 +187,6 @@
           <button onclick="exportOrdersToCSV()" class="btn-export">📥 匯出 Excel / CSV</button>
         </div>
 
-        <!-- 🔍 進階多元搜尋列 -->
         <div style="display:flex; gap:10px; margin-bottom:16px; flex-wrap:wrap;">
           <input type="text" id="searchKeyword" placeholder="🔍 輸入關鍵字搜尋..." oninput="filterOrdersTable()" style="flex:1; min-width:200px; padding:8px 12px; border:1px solid #d1d5db; border-radius:6px;">
           <select id="searchField" onchange="filterOrdersTable()" style="padding:8px; border:1px solid #d1d5db; border-radius:6px;">
@@ -288,7 +237,7 @@
 
         <!-- 💵 點鈔機防呆輸入區 -->
         <div style="background: #f8fafc; border: 1px solid #cbd5e1; padding: 16px; border-radius: 8px; margin-bottom: 16px;">
-          <h3 style="margin-top:0; font-size:1rem; color:#1f2937;">💵 越盾現金點鈔機小幫手 (免人工心算)</h3>
+          <h3 style="margin-top:0; font-size:1rem; color:#1f2937;">💵 越盾現金點鈔機小幫手</h3>
           <div style="overflow-x: auto;">
             <table class="cash-counter-table">
               <thead>
@@ -305,27 +254,27 @@
               </thead>
               <tbody>
                 <tr>
-                  <td><strong>張數輸入：</strong></td>
+                  <td><strong>張數：</strong></td>
                   <td><input type="number" id="note500k" min="0" value="0" oninput="calculateCashTotal()" style="width:60px; text-align:center;"></td>
                   <td><input type="number" id="note200k" min="0" value="0" oninput="calculateCashTotal()" style="width:60px; text-align:center;"></td>
                   <td><input type="number" id="note100k" min="0" value="0" oninput="calculateCashTotal()" style="width:60px; text-align:center;"></td>
                   <td><input type="number" id="note50k" min="0" value="0" oninput="calculateCashTotal()" style="width:60px; text-align:center;"></td>
                   <td><input type="number" id="note20k" min="0" value="0" oninput="calculateCashTotal()" style="width:60px; text-align:center;"></td>
                   <td><input type="number" id="note10k" min="0" value="0" oninput="calculateCashTotal()" style="width:60px; text-align:center;"></td>
-                  <td><input type="number" id="noteOther" min="0" value="0" oninput="calculateCashTotal()" style="width:90px; text-align:center;" placeholder="輸入總額"></td>
+                  <td><input type="number" id="noteOther" min="0" value="0" oninput="calculateCashTotal()" style="width:90px; text-align:center;"></td>
                 </tr>
               </tbody>
             </table>
           </div>
           <div style="display:flex; justify-content:space-between; align-items:center; margin-top:10px;">
-            <span style="font-size:0.85rem; color:#6b7280;">💡 輸入各面額張數後，實際收到總金額將自動帶入下方。</span>
+            <span style="font-size:0.85rem; color:#6b7280;">💡 自動計算實際收到總金額。</span>
             <div>實際點收總金額：<strong id="cashTotalDisplay" style="color:#16a34a; font-size:1.1rem;">0 ₫</strong></div>
           </div>
         </div>
 
         <div class="form-group" style="margin-bottom:16px;">
           <label for="actualReceivedAmount" style="font-weight:bold; margin-bottom:6px; display:block;">實際收到總金額 (VND)：</label>
-          <input type="number" id="actualReceivedAmount" placeholder="輸入或由點鈔機自動計算" style="width:100%; padding:8px; border:1px solid #d1d5db; border-radius:6px; font-weight:bold; font-size:1.05rem;">
+          <input type="number" id="actualReceivedAmount" style="width:100%; padding:8px; border:1px solid #d1d5db; border-radius:6px; font-weight:bold; font-size:1.05rem;">
         </div>
 
         <button type="button" onclick="executeReconciliation()" class="btn-reconcile" style="padding:10px 20px; font-size:1rem;">🚀 開始 AI 智慧機率差額排查</button>
@@ -334,7 +283,7 @@
       </div>
     </div>
 
-    <!-- 標籤頁 3：上架新周邊商品 (採用簡潔直覺的卡片排版) -->
+    <!-- 標籤頁 3：上架新周邊商品 -->
     <div id="tabProductAdd" class="tab-content">
       <div class="admin-card">
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
@@ -353,7 +302,7 @@
               <input type="number" id="prodPrice" min="0" step="500" required placeholder="150000">
             </div>
             <div class="form-group">
-              <label for="prodStock">限量庫存數量 (防超售) *：</label>
+              <label for="prodStock">限量庫存數量 *：</label>
               <input type="number" id="prodStock" min="1" required placeholder="50">
             </div>
             <div class="form-group">
@@ -366,15 +315,11 @@
             </div>
           </div>
 
-          <!-- ⚙️ 簡潔直覺的動態規格選項卡片清單區 -->
           <div style="margin-top:20px; margin-bottom:20px;">
-            <label style="font-weight:bold; color:#111827; display:block; margin-bottom:8px;">⚙️ 商品規格與選項設定 (簡潔清單排版)</label>
-            <div id="optionsCardsContainer">
-              <!-- 動態產生的規格卡片會在這裡顯示 -->
-            </div>
+            <label style="font-weight:bold; color:#111827; display:block; margin-bottom:8px;">⚙️ 商品規格與選項設定</label>
+            <div id="optionsCardsContainer"></div>
           </div>
 
-          <!-- 🖼️ 圖片上傳區 -->
           <div class="form-group">
             <label>🖼️ 商品圖片上傳 (最多 3 張)</label>
             <div class="image-upload-grid">
@@ -438,14 +383,14 @@
     <!-- 標籤頁 5：繳費單預覽與即時樣式微調 -->
     <div id="tabPrintPreview" class="tab-content">
       <div class="admin-card">
-        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
-          <h2>🖨️ 各班繳費單即時預覽與排版微調</h2>
-          <div style="display:flex; gap:10px;">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; flex-wrap:wrap; gap:10px;">
+          <h2>🖨️ 各班繳費單預覽、轉 PDF 與 Canva 匯出</h2>
+          <div style="display:flex; gap:10px; flex-wrap:wrap;">
             <select id="previewClassSelect" onchange="renderPrintPreview()" style="padding:6px; border:1px solid #d1d5db; border-radius:4px;"></select>
-            <button onclick="window.print()" class="btn-print">🖨️ 確認無誤直接列印 PDF</button>
+            <button onclick="openPrintPreviewModal()" class="btn-print">🖨️ 預覽、調整並轉 PDF / 存檔</button>
           </div>
         </div>
-        <p style="font-size:0.85rem; color:#6b7280;">您可以在此預覽列印格式，確認金額與學生班級座號無誤後即可輸出。</p>
+        <p style="font-size:0.85rem; color:#6b7280;">點擊上方按鈕可開啟專屬預覽視窗，支援線上調整標題文字、直接存檔列印 PDF，或複製內容匯至 Canva 進行美化設計。</p>
         
         <div id="printPreviewContainer" class="preview-box">
           <div style="text-align:center; color:#6b7280;">請先選擇班級進行預覽...</div>
@@ -453,6 +398,37 @@
       </div>
     </div>
 
+  </div>
+
+  <!-- 🖨️ 互動式預覽與調整彈窗 (支援 Canva 匯出、PDF 調整與列印) -->
+  <div id="printModalOverlay">
+    <div id="printModalContent">
+      <div class="no-print" style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid #e5e7eb; padding-bottom:12px; margin-bottom:15px;">
+        <h3 style="margin:0; font-size:1.2rem;">📄 繳費清單 PDF 預覽與排版調整</h3>
+        <button onclick="closePrintModal()" style="background:#ef4444; color:#fff; border:none; padding:6px 12px; border-radius:6px; cursor:pointer; font-weight:bold;">關閉視窗</button>
+      </div>
+
+      <!-- 可線上調整的標題設定 -->
+      <div class="no-print" style="background:#f8fafc; padding:12px; border-radius:8px; margin-bottom:15px; border:1px solid #e2e8f0; display:grid; grid-template-columns: 1fr 1fr; gap:10px;">
+        <div>
+          <label style="font-size:0.85rem; font-weight:bold; display:block; margin-bottom:4px;">調整單據大標題：</label>
+          <input type="text" id="modalCustomTitle" value="TSSC13TH 周邊預購繳費清單" oninput="updateModalPreviewText()" style="width:100%; padding:6px; border:1px solid #d1d5db; border-radius:4px;">
+        </div>
+        <div>
+          <label style="font-size:0.85rem; font-weight:bold; display:block; margin-bottom:4px;">調整備註/注意事項：</label>
+          <input type="text" id="modalCustomRemark" value="請各班幹部協助於期限內收齊並繳交至學生會。" oninput="updateModalPreviewText()" style="width:100%; padding:6px; border:1px solid #d1d5db; border-radius:4px;">
+        </div>
+      </div>
+
+      <!-- 實際列印渲染區域 -->
+      <div id="printableArea" style="flex:1; overflow-y:auto; padding:20px; background:#fff; border:1px solid #e5e7eb;"></div>
+
+      <!-- 底部操作按鈕 -->
+      <div class="no-print" style="display:flex; justify-content:flex-end; gap:12px; margin-top:20px; border-top:1px solid #e5e7eb; padding-top:15px;">
+        <button onclick="copyHtmlForCanva()" class="btn-black" style="background:#7c3aed;">🎨 複製 HTML 格式以匯至 Canva</button>
+        <button onclick="window.print()" class="btn-print">🖨️ 直接存檔 / 列印為 PDF</button>
+      </div>
+    </div>
   </div>
 
   <script>
@@ -469,15 +445,14 @@
       checkSessionTimeout();
       loadAdminProducts();
       loadAllOrders();
-      addOptionCard(); // 預設新增一組選項卡片
+      addOptionCard();
     };
 
-    // ⏱️ 檢查登入是否逾時（30分鐘過期或關閉分頁自動登出）
     function checkSessionTimeout() {
       const loginTime = sessionStorage.getItem('tss_login_time');
       const savedEmail = sessionStorage.getItem('tss_logged_email');
       const now = Date.now();
-      const TIMEOUT_LIMIT = 30 * 60 * 1000; // 30 分鐘
+      const TIMEOUT_LIMIT = 30 * 60 * 1000;
 
       if (!savedEmail || !loginTime || (now - Number(loginTime) > TIMEOUT_LIMIT)) {
         logout(true);
@@ -486,7 +461,6 @@
       }
     }
 
-    // Google OAuth 驗證邏輯
     function handleCredentialResponse(response) {
       const responsePayload = parseJwt(response.credential);
       const email = responsePayload.email;
@@ -541,7 +515,6 @@
       if (tabId === 'tabReconcile') initReconcileDropdown();
     }
 
-    // ⚙️ 簡潔直覺的動態規格選項卡片管理
     function addOptionCard() {
       const container = document.getElementById('optionsCardsContainer');
       const cardId = 'opt-card-' + Date.now();
@@ -663,8 +636,9 @@
 
     async function loadAllOrders() {
       const tbody = document.getElementById('adminOrderTableBody');
+      const email = sessionStorage.getItem('tss_logged_email') || "";
       try {
-        const res = await fetch(`${GAS_API_URL}?action=getAllOrders`);
+        const res = await fetch(`${GAS_API_URL}?action=getAllOrders&email=${encodeURIComponent(email)}`);
         const result = await res.json();
         
         if (result.status === "success") {
@@ -681,9 +655,11 @@
           document.getElementById('statPendingOrders').innerText = pendingCount + " 筆";
 
           renderOrdersTable(globalOrdersData);
+        } else {
+          tbody.innerHTML = `<tr><td colspan="6" style="text-align:center; color:#ef4444;">${result.message || '載入失敗，請確認是否已使用管理員 Google 帳號登入。'}</td></tr>`;
         }
       } catch (e) {
-        tbody.innerHTML = `<tr><td colspan="6" style="text-align:center; color:#ef4444;">訂單載入失敗。</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="6" style="text-align:center; color:#ef4444;">訂單載入網路錯誤。</td></tr>`;
       }
     }
 
@@ -735,7 +711,6 @@
       renderOrdersTable(filtered);
     }
 
-    // 💵 點鈔機即時計算加總
     function calculateCashTotal() {
       const n500k = parseInt(document.getElementById('note500k').value) || 0;
       const n200k = parseInt(document.getElementById('note200k').value) || 0;
@@ -746,12 +721,10 @@
       const other = parseInt(document.getElementById('noteOther').value) || 0;
 
       const total = (n500k * 500000) + (n200k * 200000) + (n100k * 100000) + (n50k * 50000) + (n20k * 20000) + (n10k * 10000) + other;
-      
       document.getElementById('cashTotalDisplay').innerText = formatVND(total);
       document.getElementById('actualReceivedAmount').value = total;
     }
 
-    // 🧮 AI 智慧對帳下拉與預期總額初始化
     function initReconcileDropdown() {
       let classGroups = {};
       globalOrdersData.forEach(o => {
@@ -780,7 +753,6 @@
       document.getElementById('cashTotalDisplay').innerText = formatVND(expected);
     }
 
-    // 🚀 AI 智慧機率差額排查核心
     function executeReconciliation() {
       let className = document.getElementById('reconcileClassSelect').value;
       let actual = Number(document.getElementById('actualReceivedAmount').value);
@@ -804,40 +776,13 @@
         if (Number(o.total_price) === target) {
           probabilities.push({
             level: "🔥 機率最高 (單人金額完全吻合差額)",
-            desc: `學生 <strong>${o.name}</strong> 訂單金額 (${formatVND(o.total_price)}) 剛好等於差額。`,
-            orderIds: [o.order_id]
+            desc: `學生 <strong>${o.name}</strong> 訂單金額 (${formatVND(o.total_price)}) 剛好等於差額。`
           });
         }
       });
 
-      let foundPairs = [];
-      for (let i = 0; i < orders.length; i++) {
-        for (let j = i + 1; j < orders.length; j++) {
-          if (Number(orders[i].total_price) + Number(orders[j].total_price) === target) {
-            foundPairs.push([orders[i], orders[j]]);
-          }
-        }
-      }
-      if (foundPairs.length > 0) {
-        foundPairs.slice(0, 3).forEach(pair => {
-          probabilities.push({
-            level: "⚡ 機率次高 (兩人加總等於差額)",
-            desc: `<strong>${pair[0].name}</strong> (${formatVND(pair[0].total_price)}) + <strong>${pair[1].name}</strong> (${formatVND(pair[1].total_price)}) 合計等於差額。`,
-            orderIds: [pair[0].order_id, pair[1].order_id]
-          });
-        });
-      }
-
-      if (Math.abs(diff) <= 100000 && Math.abs(diff) % 10000 === 0) {
-        probabilities.push({
-          level: "💡 可能原因：人員找零或數錯錢",
-          desc: `實際金額與預期相差 ${formatVND(diff)}，極可能是點鈔找零時多找或少算面額。`
-        });
-      }
-
       let html = `<div style="padding:20px; background:#fef2f2; border:1px solid #fecaca; border-radius:8px; color:#991b1b;">
-        <h3 style="margin-top:0; color:#b91c1c;">⚠️ 發現金額差額：${formatVND(diff)}</h3>
-        <p style="font-size:0.9rem; color:#7f1d1d;">系統已依發生機率由高至低為您列出可能原因與可疑項目：</p>`;
+        <h3 style="margin-top:0; color:#b91c1c;">⚠️ 發現金額差額：${formatVND(diff)}</h3>`;
 
       if (probabilities.length > 0) {
         html += `<div style="display:flex; flex-direction:column; gap:10px; margin-bottom:16px;">`;
@@ -851,8 +796,10 @@
       }
 
       html += `<div style="margin-top:16px; border-top:1px dashed #f87171; padding-top:12px;">
-        <strong>📋 本班所有訂單核對清單（人工審查與一鍵批次更新）：</strong><br>
-        <small style="color:#7f1d1d;">勾選確定已收到款項的訂單，點擊下方按鈕將「其餘未勾選」的項目自動更新為已付款。</small>
+        <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px; margin-bottom:8px;">
+          <strong>📋 本班訂單核對清單與未繳款催繳：</strong>
+          <button type="button" onclick="generateDunningPDF('${className}')" class="btn-black" style="padding:6px 12px; font-size:0.85rem;">📄 產生未繳款 PDF 催繳通知單</button>
+        </div>
         <div style="max-height:220px; overflow-y:auto; background:#fff; padding:10px; border:1px solid #cbd5e1; border-radius:6px; margin-top:8px;">
           ${orders.map(o => `
             <div style="display:flex; align-items:center; justify-content:space-between; padding:6px 0; border-bottom:1px solid #f1f5f9;">
@@ -860,12 +807,12 @@
                 <input type="checkbox" class="recon-checkbox" value="${o.order_id}" ${o.status === '已付款' ? 'checked' : ''}>
                 <span><strong>${o.name}</strong> - ${o.product_title} (${o.selected_option || '預設'}) - <span style="color:#0284c7; font-weight:bold;">${formatVND(o.total_price)}</span></span>
               </label>
-              <span style="font-size:0.75rem; padding:2px 6px; background:#f3f4f6; border-radius:4px;">目前狀態: ${o.status}</span>
+              <span style="font-size:0.75rem; padding:2px 6px; background:#f3f4f6; border-radius:4px;">狀態: ${o.status}</span>
             </div>
           `).join('')}
         </div>
         <button type="button" onclick="confirmBatchUpdateUnchecked()" class="btn-black" style="margin-top:14px; width:100%; padding: 10px;">
-          ✅ 確認審查完畢：將未勾選項目自動批次更新為「已付款」
+          ✅ 將未勾選項目自動批次更新為「已付款」
         </button>
       </div>
     </div>`;
@@ -873,27 +820,164 @@
       resArea.innerHTML = html;
     }
 
-    // 🛡️ 防呆批次更新未勾選項目
-    async function confirmBatchUpdateUnchecked() {
+    function generateDunningPDF(className) {
       const checkboxes = document.querySelectorAll('.recon-checkbox');
-      let uncheckedOrderIds = [];
+      let unpaidOrders = [];
       checkboxes.forEach(cb => {
         if (!cb.checked) {
-          uncheckedOrderIds.push(cb.value);
+          let order = globalOrdersData.find(o => o.order_id === cb.value);
+          if (order) unpaidOrders.push(order);
         }
       });
 
-      if (uncheckedOrderIds.length === 0) {
-        alert('【防呆提示】所有項目皆已勾選，沒有需要自動更新的項目！');
+      if (unpaidOrders.length === 0) {
+        alert("【提示】該班目前沒有未繳款項目！");
         return;
       }
 
-      if (!confirm(`【安全防呆確認】您確定要將這 ${uncheckedOrderIds.length} 筆未勾選的訂單狀態全部自動更新為「已付款」嗎？`)) {
+      let unpaidTotal = unpaidOrders.reduce((sum, o) => sum + Number(o.total_price || 0), 0);
+      let htmlContent = `
+        <div style="padding: 20px; font-family: sans-serif;">
+          <h2 style="text-align:center; border-bottom:2px solid #000; padding-bottom:10px;">TSSC13TH 周邊商城 - 催繳通知單 (${className})</h2>
+          <p>下列同學尚未完成預購款項繳交，請各班幹部協助催收：</p>
+          <table style="width:100%; border-collapse:collapse; margin-top:15px;">
+            <thead>
+              <tr style="background:#f3f4f6;">
+                <th style="border:1px solid #333; padding:8px;">姓名</th>
+                <th style="border:1px solid #333; padding:8px;">學號信箱</th>
+                <th style="border:1px solid #333; padding:8px;">品項與規格</th>
+                <th style="border:1px solid #333; padding:8px;">金額</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${unpaidOrders.map(o => `
+                <tr>
+                  <td style="border:1px solid #333; padding:8px;"><strong>${o.name}</strong></td>
+                  <td style="border:1px solid #333; padding:8px;"><small>${o.email}</small></td>
+                  <td style="border:1px solid #333; padding:8px;">${o.product_title} (${o.selected_option})</td>
+                  <td style="border:1px solid #333; padding:8px; color:#b91c1c; font-weight:bold;">${Number(o.total_price).toLocaleString()} ₫</td>
+                </tr>
+              `).join('')}
+            </tbody>
+          </table>
+          <div style="margin-top:15px; text-align:right; font-weight:bold;">未繳總金額：${unpaidTotal.toLocaleString()} ₫</div>
+        </div>
+      `;
+      
+      document.getElementById('printableArea').innerHTML = htmlContent;
+      document.getElementById('printModalOverlay').style.display = 'flex';
+    }
+
+    function initPrintPreviewDropdown() {
+      let classGroups = {};
+      globalOrdersData.forEach(o => {
+        let match = o.name.match(/\(([^)]+)\)/);
+        let className = match ? match[1].trim().toUpperCase() : "未分類班級";
+        if (!classGroups[className]) classGroups[className] = [];
+        classGroups[className].push(o);
+      });
+
+      const select = document.getElementById('previewClassSelect');
+      select.innerHTML = Object.keys(classGroups).map(c => `<option value="${c}">${c}</option>`).join('');
+      renderPrintPreview();
+    }
+
+    function renderPrintPreview() {
+      const className = document.getElementById('previewClassSelect').value;
+      const container = document.getElementById('printPreviewContainer');
+      if (!className) {
+        container.innerHTML = `<div style="text-align:center; color:#6b7280;">目前無班級資料。</div>`;
         return;
       }
+
+      let orders = globalOrdersData.filter(o => {
+        let match = o.name.match(/\(([^)]+)\)/);
+        let cName = match ? match[1].trim().toUpperCase() : "未分類班級";
+        return cName === className;
+      });
+
+      let classTotal = orders.reduce((sum, o) => sum + Number(o.total_price), 0);
+      
+      let html = `
+        <h2 style="border-bottom:2px solid #000; padding-bottom:6px; margin-bottom:15px; display:flex; justify-content:space-between;">
+          <span>TSSC13TH 周邊預購繳費清單 - 班級：${className}</span>
+          <span style="font-size: 0.9rem; font-weight: normal;">日期：${new Date().toLocaleDateString()}</span>
+        </h2>
+        <table style="width:100%; border-collapse:collapse; margin-top:10px;">
+          <thead>
+            <tr style="background:#f3f4f6;">
+              <th style="border:1px solid #333; padding:8px;">序號</th>
+              <th style="border:1px solid #333; padding:8px;">學生姓名</th>
+              <th style="border:1px solid #333; padding:8px;">學號信箱</th>
+              <th style="border:1px solid #333; padding:8px;">預購品項與規格</th>
+              <th style="border:1px solid #333; padding:8px;">數量</th>
+              <th style="border:1px solid #333; padding:8px;">應繳金額 (VND)</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${orders.map((o, index) => `
+              <tr>
+                <td style="border:1px solid #333; padding:8px; text-align:center;">${index + 1}</td>
+                <td style="border:1px solid #333; padding:8px;"><strong>${o.name}</strong></td>
+                <td style="border:1px solid #333; padding:8px;"><small>${o.email}</small></td>
+                <td style="border:1px solid #333; padding:8px;">${o.product_title} (${o.selected_option || '預設'})</td>
+                <td style="border:1px solid #333; padding:8px; text-align:center;">${o.quantity}</td>
+                <td style="border:1px solid #333; padding:8px;"><strong>${Number(o.total_price).toLocaleString()} ₫</strong></td>
+              </tr>
+            `).join('')}
+          </tbody>
+        </table>
+        <div style="margin-top:15px; font-weight:bold; text-align:right;">
+          總人數：${orders.length} 人 | 應收總金額：<span style="color:#0284c7; font-size:1.1rem;">${classTotal.toLocaleString()} ₫</span>
+        </div>
+      `;
+      container.innerHTML = html;
+    }
+
+    function openPrintPreviewModal() {
+      const container = document.getElementById('printPreviewContainer');
+      document.getElementById('printableArea').innerHTML = container.innerHTML;
+      document.getElementById('printModalOverlay').style.display = 'flex';
+    }
+
+    function closePrintModal() {
+      document.getElementById('printModalOverlay').style.display = 'none';
+    }
+
+    function updateModalPreviewText() {
+      // 即時連動標題調整
+      const title = document.getElementById('modalCustomTitle').value;
+      const printable = document.getElementById('printableArea');
+      let header = printable.querySelector('h2');
+      if(header) {
+        header.innerHTML = `<span>${title}</span> <span style="font-size:0.9rem; font-weight:normal;">日期：${new Date().toLocaleDateString()}</span>`;
+      }
+    }
+
+    function copyHtmlForCanva() {
+      const content = document.getElementById('printableArea').innerHTML;
+      const tempTextArea = document.createElement('textarea');
+      tempTextArea.value = content;
+      document.body.appendChild(tempTextArea);
+      tempTextArea.select();
+      document.execCommand('copy');
+      document.body.removeChild(tempTextArea);
+      alert('📋 已成功將表格 HTML 格式複製到剪貼簿！您可以直接貼至 Canva 進行美化設計。');
+    }
+
+    async function confirmBatchUpdateUnchecked() {
+      const checkboxes = document.querySelectorAll('.recon-checkbox');
+      let uncheckedOrderIds = [];
+      checkboxes.forEach(cb => { if (!cb.checked) uncheckedOrderIds.push(cb.value); });
+
+      if (uncheckedOrderIds.length === 0) {
+        alert('【提示】所有項目皆已勾選！');
+        return;
+      }
+
+      if (!confirm(`確定將這 ${uncheckedOrderIds.length} 筆未勾選的訂單更新為「已付款」嗎？`)) return;
 
       const email = sessionStorage.getItem('tss_logged_email') || "";
-
       try {
         for (let orderId of uncheckedOrderIds) {
           await fetch(GAS_API_URL, {
@@ -901,12 +985,10 @@
             body: JSON.stringify({ action: "updateOrderStatus", email: email, orderId: orderId, newStatus: "已付款" })
           });
         }
-        alert('🎉 批次對帳與狀態更新成功！');
+        alert('🎉 批次更新成功！');
         loadAllOrders();
         initReconcileDropdown();
-      } catch (e) {
-        alert('批次更新發生錯誤，請檢查網路連線。');
-      }
+      } catch (e) { alert('更新發生錯誤。'); }
     }
 
     async function changeOrderStatus(orderId, newStatus) {
@@ -964,84 +1046,9 @@
         document.getElementById('optionsCardsContainer').innerHTML = "";
         addOptionCard();
         uploadedImages = ["", "", ""];
-        for(let i=1; i<=3; i++) {
-          document.getElementById(`preview-img-${i}`).classList.add('hidden');
-          document.getElementById(`placeholder-${i}`).classList.remove('hidden');
-          document.getElementById(`btn-remove-${i}`).classList.add('hidden');
-        }
         loadAdminProducts();
         switchTab({ currentTarget: document.querySelectorAll('.tab-btn')[0] }, 'tabOrders');
       }
-    }
-
-    function initPrintPreviewDropdown() {
-      let classGroups = {};
-      globalOrdersData.forEach(o => {
-        let match = o.name.match(/\(([^)]+)\)/);
-        let className = match ? match[1].trim().toUpperCase() : "未分類班級";
-        if (!classGroups[className]) classGroups[className] = [];
-        classGroups[className].push(o);
-      });
-
-      const select = document.getElementById('previewClassSelect');
-      select.innerHTML = Object.keys(classGroups).map(c => `<option value="${c}">${c}</option>`).join('');
-      renderPrintPreview();
-    }
-
-    function renderPrintPreview() {
-      const className = document.getElementById('previewClassSelect').value;
-      const container = document.getElementById('printPreviewContainer');
-      if (!className) {
-        container.innerHTML = `<div style="text-align:center; color:#6b7280;">目前無班級資料。</div>`;
-        return;
-      }
-
-      let orders = globalOrdersData.filter(o => {
-        let match = o.name.match(/\(([^)]+)\)/);
-        let cName = match ? match[1].trim().toUpperCase() : "未分類班級";
-        return cName === className;
-      });
-
-      let classTotal = 0;
-      container.innerHTML = `
-        <h2 style="border-bottom:2px solid #000; padding-bottom:6px; margin-bottom:15px; display:flex; justify-content:space-between;">
-          <span>TSSC13TH 周邊預購繳費清單 - 班級：${className}</span>
-          <span style="font-size: 0.9rem; font-weight: normal;">列印日期：${new Date().toLocaleDateString()}</span>
-        </h2>
-        <table style="width:100%; border-collapse:collapse; margin-top:10px;">
-          <thead>
-            <tr style="background:#f3f4f6;">
-              <th style="border:1px solid #333; padding:8px;">序號</th>
-              <th style="border:1px solid #333; padding:8px;">學生姓名</th>
-              <th style="border:1px solid #333; padding:8px;">學號信箱</th>
-              <th style="border:1px solid #333; padding:8px;">預購品項與規格</th>
-              <th style="border:1px solid #333; padding:8px;">數量</th>
-              <th style="border:1px solid #333; padding:8px;">應繳金額 (VND)</th>
-              <th style="border:1px solid #333; padding:8px;">簽收 / 備註</th>
-            </tr>
-          </thead>
-          <tbody>
-            ${orders.map((o, index) => {
-              classTotal += Number(o.total_price);
-              let cleanName = o.name.replace(/\([^)]+\)/g, '').trim();
-              return `
-                <tr>
-                  <td style="border:1px solid #333; padding:8px; text-align:center;">${index + 1}</td>
-                  <td style="border:1px solid #333; padding:8px;"><strong>${cleanName}</strong></td>
-                  <td style="border:1px solid #333; padding:8px;"><small>${o.email}</small></td>
-                  <td style="border:1px solid #333; padding:8px;">${o.product_title} (${o.selected_option || '預設'})</td>
-                  <td style="border:1px solid #333; padding:8px; text-align:center;">${o.quantity}</td>
-                  <td style="border:1px solid #333; padding:8px;"><strong>${Number(o.total_price).toLocaleString()} ₫</strong></td>
-                  <td style="border:1px solid #333; padding:8px;"></td>
-                </tr>
-              `;
-            }).join('')}
-          </tbody>
-        </table>
-        <div style="margin-top:15px; font-weight:bold; text-align:right;">
-          本班總計人數：${orders.length} 人 | 本班應收總金額：<span style="color:#0284c7; font-size:1.1rem;">${classTotal.toLocaleString()} ₫</span>
-        </div>
-      `;
     }
 
     function exportOrdersToCSV() {

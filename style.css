@@ -3,7 +3,7 @@
    ========================================== */
 
 /* 1. 基礎設定 (Reset & Core) */
-* {
+*, *::before, *::after {
   box-sizing: border-box;
 }
 
@@ -39,6 +39,7 @@ header {
   position: sticky;
   top: 0;
   z-index: 100;
+  flex-wrap: wrap;
 }
 
 .nav-brand {
@@ -54,12 +55,13 @@ header {
   width: 32px;
   object-fit: contain;
   filter: brightness(0) saturate(100%);
-
 }
 
 .nav-links {
   display: flex;
   gap: 16px;
+  align-items: center;
+  flex-wrap: wrap;
 }
 
 .nav-links a {
@@ -330,6 +332,8 @@ header {
   box-sizing: border-box;
   outline: none;
   transition: border-color 0.2s;
+  background-color: #ffffff;
+  color: #111827;
 }
 
 .form-group input:focus, 
@@ -345,9 +349,9 @@ header {
   display: block;
 }
 
-/* 10. 按鈕控制項 (Buttons) */
-.btn-primary, .submit-btn, .action-btn {
-  background-color: #2563eb;
+/* 10. 全域按鈕控制項 (Buttons - 統一支援黑底白字風格) */
+.btn-primary, .submit-btn, .action-btn, .btn-black {
+  background-color: #000000;
   color: #ffffff;
   border: none;
   padding: 12px 24px;
@@ -359,11 +363,11 @@ header {
   width: 100%;
 }
 
-.btn-primary:hover, .submit-btn:hover, .action-btn:hover {
-  background-color: #1d4ed8;
+.btn-primary:hover, .submit-btn:hover, .action-btn:hover, .btn-black:hover {
+  background-color: #333333;
 }
 
-.btn-primary:disabled, .submit-btn:disabled, .action-btn:disabled {
+.btn-primary:disabled, .submit-btn:disabled, .action-btn:disabled, .btn-black:disabled {
   background-color: #9ca3af;
   cursor: not-allowed;
 }
@@ -405,4 +409,9 @@ header {
   height: 40px;
   object-fit: cover;
   border-radius: 4px;
+}
+
+/* 13. 通用工具類別 (Utility Classes) */
+.hidden {
+  display: none !important;
 }
