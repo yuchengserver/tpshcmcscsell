@@ -47,6 +47,28 @@
       font-weight: bold;
       color: #dc2626; /* 蝦皮紅 */
     }
+    .stock-badge {
+      display: inline-block;
+      background: #f3f4f6;
+      color: #374151;
+      font-size: 0.8rem;
+      padding: 2px 8px;
+      border-radius: 4px;
+      margin-top: 6px;
+      font-weight: 600;
+    }
+
+    /* 三欄式排版：姓名、班級、座號 */
+    .form-row-three {
+      display: grid;
+      grid-template-columns: 2fr 1fr 1fr;
+      gap: 12px;
+    }
+    @media (max-width: 640px) {
+      .form-row-three {
+        grid-template-columns: 1fr;
+      }
+    }
 
     /* 🔐 右上角導覽列登入精緻化 CSS 樣式 */
     .nav-auth-container {
@@ -136,19 +158,27 @@
           <h3 id="previewTitle">載入中或未選擇特定商品...</h3>
           <p id="previewDesc">請從首頁瀏覽商品，或在此確認您選購的單品資訊。</p>
           <div id="previewPrice" class="price">-- ₫</div>
+          <div id="previewStock" class="stock-badge">庫存載入中...</div>
         </div>
       </div>
 
       <form id="orderForm" onsubmit="submitOrder(event)" style="margin-top: 24px;">
-        <!-- 隱藏的商品 ID -->
+        <!-- 隱藏的商品 ID 與庫存 -->
         <input type="hidden" id="productId" name="productId">
+        <input type="hidden" id="productStock" name="productStock" value="0">
 
         <!-- 動態規格選項容器 -->
         <div id="productOptionsContainer"></div>
 
+        <!-- 👤 拆解為三格：真實姓名、班級、座號 -->
         <div class="form-group" style="margin-bottom: 16px;">
-          <label for="studentName" style="display: block; font-weight: bold; margin-bottom: 6px; color: #374151;">真實姓名 / 班級座號：</label>
-          <input type="text" id="studentName" required placeholder="例如：Nguyen Van A (12A1)" style="width: 100%; padding: 10px; border: 1px solid #d1d5db; border-radius: 6px; font-size: 1rem;">
+          <label style="display: block; font-weight: bold; margin-bottom: 6px; color: #374151;">訂購者身分資料 (姓名 / 班級 / 座號) *：</label>
+          <div class="form-row-three">
+            <input type="text" id="inputName" required placeholder="真實姓名 (例: Nguyen Van A)" style="padding: 10px; border: 1px solid #d1d5db; border-radius: 6px; font-size: 1rem;">
+            <input type="text" id="inputClass" required placeholder="班級 (例: 12A1)" style="padding: 10px; border: 1px solid #d1d5db; border-radius: 6px; font-size: 1rem;">
+            <input type="text" id="inputSeat" required placeholder="座號 (例: 15)" style="padding: 10px; border: 1px solid #d1d5db; border-radius: 6px; font-size: 1rem;">
+          </div>
+          <small style="color: #6b7280; margin-top: 4px; display: block;">系統將自動組合成格式存入後台對帳清單中。</small>
         </div>
 
         <div class="form-group" style="margin-bottom: 16px;">
@@ -189,6 +219,7 @@
       } else {
         document.getElementById('previewTitle').innerText = "未指定特定商品";
         document.getElementById('previewDesc').innerText = "建議您直接至首頁瀏覽商品或使用購物車結算。";
+        document.getElementById('previewStock').style.display = 'none';
       }
     };
 
@@ -200,9 +231,9 @@
       const TIMEOUT_LIMIT = 30 * 60 * 1000; // 30 分鐘
 
       if (!savedEmail || !loginTime || (now - Number(loginTime) > TIMEOUT_LIMIT)) {
-        logout(true); // 逾時或初次開啟自動登出
+        logout(true);
       } else {
-        setAuthenticatedEmail(savedEmail);
+        setNavLoggedIn(savedEmail);
       }
     }
 
@@ -221,7 +252,7 @@
 
       sessionStorage.setItem('tss_logged_email', email);
       sessionStorage.setItem('tss_login_time', Date.now());
-      setAuthenticatedEmail(email);
+      setNavLoggedIn(email);
     }
 
     function parseJwt(token) {
@@ -233,7 +264,7 @@
       return JSON.parse(jsonPayload);
     }
 
-    function setAuthenticatedEmail(email) {
+    function setNavLoggedIn(email) {
       authenticatedEmail = email;
       document.getElementById('navNotLoggedIn').style.display = 'none';
       document.getElementById('navIsLoggedIn').style.display = 'flex';
@@ -242,7 +273,7 @@
       const btn = document.getElementById('submitBtn');
       if (btn) {
         btn.disabled = false;
-        btn.style.background = "#2563eb";
+        btn.style.background = "#000000"; // 黑底白字
         btn.style.cursor = "pointer";
         btn.innerText = "🚀 確認送出預購訂單";
       }
@@ -301,6 +332,20 @@
             currentProductPrice = Number(product.price);
             document.getElementById('previewPrice').innerText = formatVND(currentProductPrice);
             
+            // 記錄當前商品庫存到隱藏欄位
+            const stock = parseInt(product.stock) || 0;
+            document.getElementById('productStock').value = stock;
+            const stockBadge = document.getElementById('previewStock');
+            if (stock > 0) {
+              stockBadge.innerText = `目前剩餘庫存：${stock} 件`;
+              stockBadge.style.background = "#dcfce7";
+              stockBadge.style.color = "#166534";
+            } else {
+              stockBadge.innerText = `⚠️ 目前已售完 (送出將自動轉為候補登記)`;
+              stockBadge.style.background = "#fee2e2";
+              stockBadge.style.color = "#991b1b";
+            }
+            
             const optContainer = document.getElementById('productOptionsContainer');
             let optArray = parseOptions(product.options);
             
@@ -337,6 +382,25 @@
       const optionInput = document.getElementById('productOption');
       const selectedOption = optionInput ? optionInput.value : '預設';
 
+      // 取得三格輸入資料並自動組合成後台統一格式：「姓名 (班級 座號)」
+      const nameVal = document.getElementById('inputName').value.trim();
+      const classVal = document.getElementById('inputClass').value.trim();
+      const seatVal = document.getElementById('inputSeat').value.trim();
+      const combinedName = `${nameVal} (${classVal} ${seatVal}號)`;
+
+      const quantity = parseInt(document.getElementById('quantity').value) || 1;
+      const stock = parseInt(document.getElementById('productStock').value) || 0;
+
+      // 📦 檢查庫存：若數量大於庫存或庫存為 0，提示並自動轉為候補
+      let orderStatus = "待付款";
+      if (stock <= 0 || quantity > stock) {
+        const confirmWaitlist = confirm(`【庫存提示】目前此商品庫存僅剩 ${stock} 件（您欲購買 ${quantity} 件）。是否同意自動轉為「候補中」進行登記排隊？`);
+        if (!confirmWaitlist) {
+          return;
+        }
+        orderStatus = "候補中";
+      }
+
       if (!productId) {
         alert('尚未選擇任何商品，請返回首頁重新選擇！');
         return;
@@ -351,10 +415,11 @@
         action: "submitOrder",
         productId: productId,
         email: authenticatedEmail,
-        name: document.getElementById('studentName').value,
-        quantity: document.getElementById('quantity').value,
+        name: combinedName,
+        quantity: quantity,
         selected_option: selectedOption,
-        remark: document.getElementById('remark').value
+        remark: document.getElementById('remark').value,
+        status: orderStatus // 傳遞狀態（待付款或候補中）
       };
 
       const btn = document.getElementById('submitBtn');

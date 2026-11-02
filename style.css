@@ -100,6 +100,16 @@ header {
   gap: 8px;
 }
 
+/* ⚙️ 規格選項設定標題與按鈕左右並排 (一貼左、一貼右) */
+.options-header-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+  border-bottom: 2px solid #f1f5f9;
+  padding-bottom: 8px;
+}
+
 /* 5. 提示與公告區塊 (Notice Box) */
 .notice-box {
   background: #ffffff;
@@ -411,7 +421,33 @@ header {
   border-radius: 4px;
 }
 
-/* 13. 通用工具類別 (Utility Classes) */
+/* 13. 列印與 Canva 匯出預覽彈窗樣式 (Print Modal) */
+#printModalOverlay {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.6);
+  z-index: 1000;
+  justify-content: center;
+  align-items: center;
+}
+
+#printModalContent {
+  background: #fff;
+  width: 90%;
+  max-width: 850px;
+  max-height: 90vh;
+  border-radius: 10px;
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+}
+
+/* 14. 通用工具類別 (Utility Classes) */
 .hidden {
   display: none !important;
 }

@@ -52,12 +52,12 @@
       position: absolute;
       top: 8px;
       left: 8px;
-      background: rgba(15, 23, 42, 0.75);
+      background: rgba(15, 23, 42, 0.85);
       color: #fff;
-      font-size: 0.72rem;
-      padding: 2px 8px;
+      font-size: 0.75rem;
+      padding: 3px 8px;
       border-radius: 4px;
-      font-weight: 500;
+      font-weight: 600;
     }
 
     .shopee-content {
@@ -286,15 +286,9 @@
       <input type="text" id="searchInput" placeholder="🔍 輸入關鍵字搜尋周邊商品..." oninput="filterProducts()">
     </div>
 
-    <!-- 目前開放中項目 -->
-    <div class="section-title">✨ 目前開放中的項目</div>
-    <div id="openProductsGrid" class="product-grid">
-      <div class="empty-state">載入中...</div>
-    </div>
-
-    <!-- 即將開始 / 預告中項目 -->
-    <div class="section-title">⏳ 即將開始 / 預告中</div>
-    <div id="upcomingProductsGrid" class="product-grid">
+    <!-- 統一的商品展示總區塊 -->
+    <div class="section-title">🛍️ 全部周邊商品列表</div>
+    <div id="productsGrid" class="product-grid">
       <div class="empty-state">載入中...</div>
     </div>
 
@@ -315,21 +309,19 @@
       updateCartCount();
     };
 
-    // ⏱️ 檢查登入逾時與確保重新整理/關閉網頁時強制登出
     function checkSessionTimeout() {
       const loginTime = sessionStorage.getItem('tss_login_time');
       const savedEmail = sessionStorage.getItem('tss_logged_email');
       const now = Date.now();
-      const TIMEOUT_LIMIT = 30 * 60 * 1000; // 30 分鐘
+      const TIMEOUT_LIMIT = 30 * 60 * 1000;
 
       if (!savedEmail || !loginTime || (now - Number(loginTime) > TIMEOUT_LIMIT)) {
-        logout(true); // 逾時或初次開啟自動登出
+        logout(true);
       } else {
         setNavLoggedIn(savedEmail);
       }
     }
 
-    // Google OAuth 驗證邏輯
     function handleCredentialResponse(response) {
       const responsePayload = parseJwt(response.credential);
       const email = responsePayload.email;
@@ -342,7 +334,6 @@
         return;
       }
 
-      // 儲存在 sessionStorage 中，關閉瀏覽器或分頁即自動失效
       sessionStorage.setItem('tss_logged_email', email);
       sessionStorage.setItem('tss_login_time', Date.now());
       setNavLoggedIn(email);
@@ -395,12 +386,11 @@
           });
           renderProducts(allProducts);
         } else {
-          document.getElementById('openProductsGrid').innerHTML = `<div class="empty-state">載入商品失敗：${result.message}</div>`;
+          document.getElementById('productsGrid').innerHTML = `<div class="empty-state">載入商品失敗：${result.message}</div>`;
         }
       } catch (error) {
         console.error("無法連線至後端：", error);
-        document.getElementById('openProductsGrid').innerHTML = `<div class="empty-state">目前暫無項目。</div>`;
-        document.getElementById('upcomingProductsGrid').innerHTML = `<div class="empty-state">目前暫無項目。</div>`;
+        document.getElementById('productsGrid').innerHTML = `<div class="empty-state">目前暫無項目。</div>`;
       }
     }
 
@@ -419,28 +409,19 @@
     }
 
     function renderProducts(products) {
-      const openGrid = document.getElementById('openProductsGrid');
-      const upcomingGrid = document.getElementById('upcomingProductsGrid');
+      const grid = document.getElementById('productsGrid');
 
-      const openList = products.filter(p => p.status === '開放中');
-      const upcomingList = products.filter(p => p.status === '預告中' || p.status === '即將開始');
-
-      if (openList.length === 0) {
-        openGrid.innerHTML = `<div class="empty-state">目前暫無項目。</div>`;
+      if (products.length === 0) {
+        grid.innerHTML = `<div class="empty-state">目前查無相關周邊商品。</div>`;
       } else {
-        openGrid.innerHTML = openList.map(p => createShopeeCardHTML(p, true)).join('');
-      }
-
-      if (upcomingList.length === 0) {
-        upcomingGrid.innerHTML = `<div class="empty-state">目前暫無項目。</div>`;
-      } else {
-        upcomingGrid.innerHTML = upcomingList.map(p => createShopeeCardHTML(p, false)).join('');
+        grid.innerHTML = products.map(p => createShopeeCardHTML(p)).join('');
       }
     }
 
-    function createShopeeCardHTML(p, isOpen) {
+    function createShopeeCardHTML(p) {
       const imgSrc = p.img1 ? p.img1 : 'tpshcmcsc.png';
       const optArray = parseOptions(p.options);
+      const isOpen = (p.status === '開放中');
       
       if (!productStates[p.product_id]) {
         productStates[p.product_id] = { selectedOption: optArray[0] || '預設', quantity: 1 };
@@ -476,14 +457,14 @@
       ` : `
         <div class="shopee-price-row" style="margin-top:8px;">
           <span class="shopee-price">${formatVND(p.price)}</span>
-          <button class="shopee-btn-buy" style="background:#9ca3af; cursor:not-allowed;" disabled>敬請期待</button>
+          <button class="shopee-btn-buy" style="background:#9ca3af; cursor:not-allowed;" disabled>${p.status || '未開放'}</button>
         </div>
       `;
 
       return `
         <div class="shopee-card">
           <div class="shopee-img-box">
-            <span class="shopee-badge">庫存: ${p.stock}</span>
+            <span class="shopee-badge">${p.status || '未知'} | 庫存: ${p.stock}</span>
             <img src="${imgSrc}" alt="${p.title}" onerror="this.onerror=null; this.src='tpshcmcsc.png';">
           </div>
           <div class="shopee-content">
@@ -525,7 +506,7 @@
       if (existing) {
         existing.quantity += state.quantity;
       } else {
-        cart.push({ ...product, quantity: state.quantity, selected_option: state.selectedOption });
+        cart.push({ ...product, quantity: state.quantity, selected_option: state.selectedOption, stock: product.stock });
       }
 
       localStorage.setItem('tss_cart', JSON.stringify(cart));
@@ -538,7 +519,7 @@
       if (!product) return;
 
       const state = productStates[productId] || { selectedOption: '預設', quantity: 1 };
-      let cart = [{ ...product, quantity: state.quantity, selected_option: state.selectedOption }];
+      let cart = [{ ...product, quantity: state.quantity, selected_option: state.selectedOption, stock: product.stock }];
       
       localStorage.setItem('tss_cart', JSON.stringify(cart));
       location.href = "cart.html";

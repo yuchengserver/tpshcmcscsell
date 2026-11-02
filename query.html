@@ -39,9 +39,13 @@
       border-radius: 12px;
       font-weight: 600;
       font-size: 0.8rem;
-      background: #e0f2fe;
-      color: #0369a1;
     }
+    /* 狀態專屬顏色標籤 */
+    .status-pending { background: #fef3c7; color: #d97706; } /* 待付款 */
+    .status-paid { background: #dcfce7; color: #166534; }    /* 已付款 */
+    .status-waitlist { background: #e0f2fe; color: #0284c7; } /* 候補中 */
+    .status-cancelled { background: #fee2e2; color: #991b1b; } /* 已取消 */
+
     .order-body-grid {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
@@ -54,6 +58,20 @@
       font-size: 1.1rem;
       font-weight: bold;
       color: #dc2626; /* 蝦皮紅 */
+    }
+    .btn-cancel-order {
+      background: #fef2f2;
+      color: #dc2626;
+      border: 1px solid #fecaca;
+      padding: 4px 10px;
+      border-radius: 6px;
+      font-size: 0.78rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    .btn-cancel-order:hover {
+      background: #fee2e2;
     }
 
     /* 🔐 右上角導覽列登入精緻化 CSS 樣式 */
@@ -147,6 +165,7 @@
 
   <script>
     const GAS_API_URL = "https://script.google.com/macros/s/AKfycbx7o4EJKoFsiJojM3FfS0pqj8n77mrdDR318Srn7DRy0kkFjMvogprtnHD0loSKqcB0/exec";
+    let currentLoggedEmail = "";
 
     function formatVND(amount) {
       return new Intl.NumberFormat('vi-VN').format(amount) + ' ₫';
@@ -167,6 +186,7 @@
         logout(true); // 逾時或初次開啟自動登出
       } else {
         setNavLoggedIn(savedEmail);
+        currentLoggedEmail = savedEmail;
         fetchUserOrders(savedEmail);
       }
     }
@@ -187,6 +207,7 @@
       sessionStorage.setItem('tss_logged_email', email);
       sessionStorage.setItem('tss_login_time', Date.now());
       setNavLoggedIn(email);
+      currentLoggedEmail = email;
       fetchUserOrders(email);
     }
 
@@ -208,6 +229,7 @@
     function logout(isSilent = false) {
       sessionStorage.removeItem('tss_logged_email');
       sessionStorage.removeItem('tss_login_time');
+      currentLoggedEmail = "";
       
       document.getElementById('navNotLoggedIn').style.display = 'block';
       document.getElementById('navIsLoggedIn').style.display = 'none';
@@ -234,26 +256,38 @@
           } else {
             resDiv.innerHTML = `
               <h3 style="color:#1f2937; font-size: 1.1rem; border-bottom: 2px solid #e5e7eb; padding-bottom: 8px; margin-bottom: 16px;">📦 您的預購訂單列表 (${result.data.length} 筆)：</h3>
-              ${result.data.map(o => `
-                <div class="order-card">
-                  <div class="order-header">
-                    <span class="order-id">訂單編號：<strong>${o.order_id}</strong></span>
-                    <span class="order-status-badge">${o.status}</span>
+              ${result.data.map(o => {
+                let badgeClass = "status-pending";
+                if (o.status === "已付款") badgeClass = "status-paid";
+                else if (o.status === "候補中") badgeClass = "status-waitlist";
+                else if (o.status === "已取消") badgeClass = "status-cancelled";
+
+                // 只有「待付款」或「候補中」的訂單可以由本人自行取消
+                let canCancel = (o.status === "待付款" || o.status === "候補中");
+                let cancelBtnHtml = canCancel ? `<button type="button" class="btn-cancel-order" onclick="cancelOrder('${o.order_id}')">🗑️ 取消訂單</button>` : '';
+
+                return `
+                  <div class="order-card">
+                    <div class="order-header">
+                      <span class="order-id">訂單編號：<strong>${o.order_id}</strong></span>
+                      <span class="order-status-badge ${badgeClass}">${o.status}</span>
+                    </div>
+                    <div style="font-weight: 600; color: #1f2937; font-size: 1.02rem; margin-bottom: 6px;">
+                      🛍️ ${o.product_title || o.title}
+                    </div>
+                    <div class="order-body-grid">
+                      <div>規格選項：<span style="color:#059669; font-weight:bold;">${o.selected_option || '預設'}</span></div>
+                      <div>預購數量：<strong>${o.quantity}</strong> 件</div>
+                      <div>應繳總金額：<span class="order-total-price">${formatVND(o.total_price)}</span></div>
+                    </div>
+                    ${o.remark ? `<div style="color:#6b7280; font-size:0.85rem; margin-top:6px; background:#f8fafc; padding:6px 8px; border-radius:4px;">備註：${o.remark}</div>` : ''}
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 10px; padding-top: 6px; border-top: 1px dashed #f1f5f9;">
+                      <small style="color:#9ca3af;">下單時間：${o.timestamp}</small>
+                      ${cancelBtnHtml}
+                    </div>
                   </div>
-                  <div style="font-weight: 600; color: #1f2937; font-size: 1.02rem; margin-bottom: 6px;">
-                    🛍️ ${o.product_title || o.title}
-                  </div>
-                  <div class="order-body-grid">
-                    <div>規格選項：<span style="color:#059669; font-weight:bold;">${o.selected_option || '預設'}</span></div>
-                    <div>預購數量：<strong>${o.quantity}</strong> 件</div>
-                    <div>應繳總金額：<span class="order-total-price">${formatVND(o.total_price)}</span></div>
-                  </div>
-                  ${o.remark ? `<div style="color:#6b7280; font-size:0.85rem; margin-top:6px; background:#f8fafc; padding:6px 8px; border-radius:4px;">備註：${o.remark}</div>` : ''}
-                  <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 10px; padding-top: 6px; border-top: 1px dashed #f1f5f9;">
-                    <small style="color:#9ca3af;">下單時間：${o.timestamp}</small>
-                  </div>
-                </div>
-              `).join('')}
+                `;
+              }).join('')}
             `;
           }
         } else {
@@ -261,6 +295,36 @@
         }
       } catch (e) {
         resDiv.innerHTML = `<div class="empty-state" style="color:#ef4444; text-align:center; padding:20px;">查詢過程發生網路錯誤，請重新整理頁面試試。</div>`;
+      }
+    }
+
+    // 🗑️ 用戶自行取消訂單功能
+    async function cancelOrder(orderId) {
+      if (!confirm(`您確定要取消訂單編號 [${orderId}] 嗎？取消後將無法復原。`)) {
+        return;
+      }
+
+      if (!currentLoggedEmail) {
+        alert("請先完成登入！");
+        return;
+      }
+
+      try {
+        const response = await fetch(GAS_API_URL, {
+          method: "POST",
+          body: JSON.stringify({
+            action: "updateOrderStatus",
+            email: currentLoggedEmail,
+            orderId: orderId,
+            newStatus: "已取消"
+          })
+        });
+        const result = await response.json();
+        alert(result.message || "訂單已成功取消！");
+        // 重新撈取訂單列表
+        fetchUserOrders(currentLoggedEmail);
+      } catch (err) {
+        alert("取消訂單發生網路錯誤，請稍後再試。");
       }
     }
   </script>

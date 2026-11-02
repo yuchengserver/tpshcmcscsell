@@ -77,6 +77,18 @@
       background: #fee2e2;
     }
 
+    /* 三欄式排版：姓名、班級、座號 */
+    .form-row-three {
+      display: grid;
+      grid-template-columns: 2fr 1fr 1fr;
+      gap: 12px;
+    }
+    @media (max-width: 640px) {
+      .form-row-three {
+        grid-template-columns: 1fr;
+      }
+    }
+
     /* 🔐 右上角導覽列登入精緻化 CSS 樣式 */
     .nav-auth-container {
       display: flex;
@@ -166,9 +178,15 @@
         <h3 style="margin-bottom: 16px; font-size: 1.1rem; color: #1f2937;">📝 填寫結算與實名驗證資料</h3>
 
         <form onsubmit="submitCheckout(event)">
+          <!-- 👤 拆解為三格：真實姓名、班級、座號 -->
           <div class="form-group" style="margin-bottom: 16px;">
-            <label for="studentName" style="display: block; font-weight: bold; margin-bottom: 6px; color: #374151;">真實姓名 / 班級座號：</label>
-            <input type="text" id="studentName" required placeholder="例如：Nguyen Van A (12A1)" style="width: 100%; padding: 10px; border: 1px solid #d1d5db; border-radius: 6px; font-size: 1rem;">
+            <label style="display: block; font-weight: bold; margin-bottom: 6px; color: #374151;">訂購者身分資料 (姓名 / 班級 / 座號) *：</label>
+            <div class="form-row-three">
+              <input type="text" id="inputName" required placeholder="真實姓名 (例: Nguyen Van A)" style="padding: 10px; border: 1px solid #d1d5db; border-radius: 6px; font-size: 1rem;">
+              <input type="text" id="inputClass" required placeholder="班級 (例: 12A1)" style="padding: 10px; border: 1px solid #d1d5db; border-radius: 6px; font-size: 1rem;">
+              <input type="text" id="inputSeat" required placeholder="座號 (例: 15)" style="padding: 10px; border: 1px solid #d1d5db; border-radius: 6px; font-size: 1rem;">
+            </div>
+            <small style="color: #6b7280; margin-top: 4px; display: block;">系統將自動組合成格式存入後台對帳清單中。</small>
           </div>
 
           <button type="submit" id="submitBtn" class="submit-btn" disabled style="background:#9ca3af; cursor:not-allowed; width: 100%; padding: 12px; border: none; border-radius: 6px; color: #fff; font-weight: bold; font-size: 1rem;">🚀 請先完成右上角 Google 登入後始可送出</button>
@@ -186,14 +204,12 @@
       checkSessionTimeout();
     };
 
-    // ⏱️ 檢查登入逾時與確保重新整理/關閉網頁時登出
     function checkSessionTimeout() {
       const loginTime = sessionStorage.getItem('tss_login_time');
       const savedEmail = sessionStorage.getItem('tss_logged_email');
       const now = Date.now();
       const TIMEOUT_LIMIT = 30 * 60 * 1000; // 30 分鐘
 
-      // 如果沒有 sessionStorage（代表剛開新分頁或關閉過久），強制清空登入
       if (!savedEmail || !loginTime || (now - Number(loginTime) > TIMEOUT_LIMIT)) {
         logout(true);
       } else {
@@ -217,7 +233,6 @@
         return;
       }
 
-      // 儲存在 sessionStorage 中，關閉瀏覽器或分頁即自動失效
       sessionStorage.setItem('tss_logged_email', email);
       sessionStorage.setItem('tss_login_time', Date.now());
       setAuthenticatedEmail(email);
@@ -241,7 +256,7 @@
       const btn = document.getElementById('submitBtn');
       if (btn) {
         btn.disabled = false;
-        btn.style.background = "#2563eb";
+        btn.style.background = "#000000"; // 黑底白字
         btn.style.cursor = "pointer";
         btn.innerText = "🚀 確認送出所有購物車訂單";
       }
@@ -324,7 +339,7 @@
                   <img src="${item.img1 || 'tpshcmcsc.png'}" alt="商品圖" class="cart-item-img" onerror="this.src='tpshcmcsc.png';">
                   <div>
                     <h4 class="cart-item-title">${item.title}</h4>
-                    <div class="cart-item-price">單價：${formatVND(item.price)}</div>
+                    <div class="cart-item-price">單價：${formatVND(item.price)} | 庫存：${item.stock || '無限'}</div>
                     ${optionSelectorHtml}
                   </div>
                 </div>
@@ -350,6 +365,7 @@
       `;
     }
 
+    // 🛡️ 購物車數量防呆檢查（不可高於商品庫存）
     function updateItemQuantity(index, val) {
       let cart = JSON.parse(localStorage.getItem('tss_cart') || '[]');
       let qty = parseInt(val);
@@ -358,7 +374,15 @@
         renderCart();
         return;
       }
-      cart[index].quantity = qty;
+
+      let maxStock = parseInt(cart[index].stock) || 9999;
+      if (qty > maxStock) {
+        alert(`【庫存限制】「${cart[index].title}」目前庫存僅剩 ${maxStock} 件，無法購買超過庫存的數量！`);
+        cart[index].quantity = maxStock;
+      } else {
+        cart[index].quantity = qty;
+      }
+
       localStorage.setItem('tss_cart', JSON.stringify(cart));
       renderCart();
     }
@@ -385,9 +409,12 @@
         return;
       }
 
-      const name = document.getElementById('studentName').value.trim();
-      let cart = JSON.parse(localStorage.getItem('tss_cart') || '[]');
+      const nameVal = document.getElementById('inputName').value.trim();
+      const classVal = document.getElementById('inputClass').value.trim();
+      const seatVal = document.getElementById('inputSeat').value.trim();
+      const combinedName = `${nameVal} (${classVal} ${seatVal}號)`;
 
+      let cart = JSON.parse(localStorage.getItem('tss_cart') || '[]');
       if (cart.length === 0) {
         alert('購物車是空的！');
         return;
@@ -405,7 +432,7 @@
               action: "submitOrder",
               productId: item.product_id,
               email: authenticatedEmail,
-              name: name,
+              name: combinedName,
               quantity: item.quantity,
               selected_option: item.selected_option || '預設',
               remark: "購物車批次結算"
