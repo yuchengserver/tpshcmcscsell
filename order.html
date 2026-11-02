@@ -47,21 +47,81 @@
       font-weight: bold;
       color: #dc2626; /* 蝦皮紅 */
     }
+
+    /* 🔐 右上角導覽列登入精緻化 CSS 樣式 */
+    .nav-auth-container {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      background: #f8fafc;
+      padding: 6px 12px;
+      border-radius: 8px;
+      border: 1px solid #e2e8f0;
+      box-shadow: 0 1px 2px rgba(0,0,0,0.02);
+    }
+    .nav-user-info {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 0.85rem;
+    }
+    .nav-user-email {
+      color: #166534;
+      font-weight: bold;
+      max-width: 160px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    .btn-nav-logout {
+      background: #ef4444;
+      color: #ffffff;
+      border: none;
+      padding: 4px 10px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 0.75rem;
+      font-weight: 600;
+      transition: background 0.2s, transform 0.1s;
+    }
+    .btn-nav-logout:hover {
+      background: #dc2626;
+      transform: translateY(-1px);
+    }
   </style>
 </head>
 <body>
 
-  <!-- 頂部導覽列 (統一設計排版) -->
-  <header>
+  <!-- 頂部導覽列 (統一排版，登入移至右上角) -->
+  <header style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; padding: 12px 24px;">
     <div class="nav-brand">
       <img src="tpshcmcsc.png" alt="TSSC13TH 標誌" onerror="this.src='tpshcmcsc.png'">
       <span>TSSC13TH 公投與周邊專區</span>
     </div>
-    <nav class="nav-links">
+    
+    <nav class="nav-links" style="display: flex; align-items: center; gap: 16px; flex-wrap: wrap;">
       <a href="index.html">首頁與通知</a>
       <a href="cart.html">🛒 購物車結算</a>
       <a href="query.html">📋 查詢我的訂單</a>
       <a href="admin.html">⚙️ 管理員後台</a>
+
+      <!-- 🔐 右上角導覽列 Google 登入狀態 -->
+      <div class="nav-auth-container">
+        <div id="navNotLoggedIn">
+          <div id="g_id_onload" 
+               data-client_id="434067788519-6s6r01fhhtn2d5200hmu2aqsh9v6dtoh.apps.googleusercontent.com" 
+               data-callback="handleCredentialResponse" 
+               data-auto_prompt="false">
+          </div>
+          <div class="g_id_signin" data-type="compact" data-size="medium" data-theme="outline"></div>
+        </div>
+
+        <div id="navIsLoggedIn" class="nav-user-info" style="display: none;">
+          <span style="color: #64748b;">已登入:</span>
+          <span id="navUserEmail" class="nav-user-email"></span>
+          <button type="button" class="btn-nav-logout" onclick="logout()">登出</button>
+        </div>
+      </div>
     </nav>
   </header>
 
@@ -79,30 +139,8 @@
         </div>
       </div>
 
-      <!-- 🔐 Google 身分驗證區塊 -->
-      <div id="authBox" style="margin-top: 24px; padding: 16px; background: #f3f4f6; border-radius: 8px; border: 1px solid #e5e7eb;">
-        <div id="notLoggedIn" style="text-align: center;">
-          <p style="margin-bottom: 12px; font-weight: bold; color: #374151;">🔒 下單前請先透過學校官方帳號進行實名認證：</p>
-          <div id="g_id_onload" 
-               data-client_id="434067788519-6s6r01fhhtn2d5200hmu2aqsh9v6dtoh.apps.googleusercontent.com" 
-               data-callback="handleCredentialResponse" 
-               data-auto_prompt="false">
-          </div>
-          <div class="g_id_signin" data-type="standard" data-size="large" data-theme="outline" data-text="sign_in_with" data-shape="rectangular" data-logo_alignment="left"></div>
-          <small style="display:block; margin-top:8px; color:#6b7280;">⚠️ 必須使用 7 位數字學號之 @tshcmc.edu.vn 信箱登入。</small>
-        </div>
-
-        <div id="isLoggedIn" style="display:none; justify-content:space-between; align-items:center;">
-          <div>
-            <small style="color: #6b7280;">已驗證學校身分信箱：</small><br>
-            <strong id="verifiedEmailDisplay" style="color: #166534; font-size: 1.05rem;"></strong>
-          </div>
-          <button type="button" onclick="logout()" style="padding: 6px 12px; background: #ef4444; color: #fff; border: none; border-radius: 6px; cursor: pointer; font-size: 0.85rem;">切換帳號</button>
-        </div>
-      </div>
-
       <form id="orderForm" onsubmit="submitOrder(event)" style="margin-top: 24px;">
-        <!-- 隱藏的商品 ID 與 已驗證信箱 -->
+        <!-- 隱藏的商品 ID -->
         <input type="hidden" id="productId" name="productId">
 
         <!-- 動態規格選項容器 -->
@@ -128,7 +166,7 @@
           <textarea id="remark" rows="2" placeholder="其他特殊需求或備註..." style="width: 100%; padding: 10px; border: 1px solid #d1d5db; border-radius: 6px; font-size: 1rem;"></textarea>
         </div>
 
-        <button type="submit" id="submitBtn" class="submit-btn" disabled style="background:#9ca3af; cursor:not-allowed; width: 100%; padding: 12px; border: none; border-radius: 6px; color: #fff; font-weight: bold; font-size: 1rem;">🚀 請先完成 Google 登入後始可送出</button>
+        <button type="submit" id="submitBtn" class="submit-btn" disabled style="background:#9ca3af; cursor:not-allowed; width: 100%; padding: 12px; border: none; border-radius: 6px; color: #fff; font-weight: bold; font-size: 1rem;">🚀 請先完成右上角 Google 登入後始可送出</button>
       </form>
     </div>
   </div>
@@ -139,6 +177,8 @@
     let authenticatedEmail = "";
 
     window.onload = async function() {
+      checkSessionTimeout();
+
       // 1. 載入商品資訊
       const urlParams = new URLSearchParams(window.location.search);
       const prodId = urlParams.get('id');
@@ -150,13 +190,21 @@
         document.getElementById('previewTitle').innerText = "未指定特定商品";
         document.getElementById('previewDesc').innerText = "建議您直接至首頁瀏覽商品或使用購物車結算。";
       }
+    };
 
-      // 2. 檢查舊登入狀態
-      let savedEmail = localStorage.getItem('tss_logged_email');
-      if (savedEmail) {
+    // ⏱️ 檢查登入是否逾時（30分鐘過期或關閉分頁自動登出）
+    function checkSessionTimeout() {
+      const loginTime = sessionStorage.getItem('tss_login_time');
+      const savedEmail = sessionStorage.getItem('tss_logged_email');
+      const now = Date.now();
+      const TIMEOUT_LIMIT = 30 * 60 * 1000; // 30 分鐘
+
+      if (!savedEmail || !loginTime || (now - Number(loginTime) > TIMEOUT_LIMIT)) {
+        logout(true); // 逾時或初次開啟自動登出
+      } else {
         setAuthenticatedEmail(savedEmail);
       }
-    };
+    }
 
     // Google OAuth 驗證邏輯
     function handleCredentialResponse(response) {
@@ -171,7 +219,8 @@
         return;
       }
 
-      localStorage.setItem('tss_logged_email', email);
+      sessionStorage.setItem('tss_logged_email', email);
+      sessionStorage.setItem('tss_login_time', Date.now());
       setAuthenticatedEmail(email);
     }
 
@@ -186,35 +235,45 @@
 
     function setAuthenticatedEmail(email) {
       authenticatedEmail = email;
-      document.getElementById('notLoggedIn').style.display = 'none';
-      document.getElementById('isLoggedIn').style.display = 'flex';
-      document.getElementById('verifiedEmailDisplay').innerText = email;
+      document.getElementById('navNotLoggedIn').style.display = 'none';
+      document.getElementById('navIsLoggedIn').style.display = 'flex';
+      document.getElementById('navUserEmail').innerText = email;
 
       const btn = document.getElementById('submitBtn');
-      btn.disabled = false;
-      btn.style.background = "#2563eb";
-      btn.style.cursor = "pointer";
-      btn.innerText = "🚀 確認送出預購訂單";
+      if (btn) {
+        btn.disabled = false;
+        btn.style.background = "#2563eb";
+        btn.style.cursor = "pointer";
+        btn.innerText = "🚀 確認送出預購訂單";
+      }
     }
 
-    function logout() {
-      localStorage.removeItem('tss_logged_email');
+    function logout(isSilent = false) {
+      sessionStorage.removeItem('tss_logged_email');
+      sessionStorage.removeItem('tss_login_time');
       authenticatedEmail = "";
-      document.getElementById('notLoggedIn').style.display = 'block';
-      document.getElementById('isLoggedIn').style.display = 'none';
+      
+      document.getElementById('navNotLoggedIn').style.display = 'block';
+      document.getElementById('navIsLoggedIn').style.display = 'none';
+      document.getElementById('navUserEmail').innerText = "";
 
       const btn = document.getElementById('submitBtn');
-      btn.disabled = true;
-      btn.style.background = "#9ca3af";
-      btn.style.cursor = "not-allowed";
-      btn.innerText = "🚀 請先完成 Google 登入後始可送出";
+      if (btn) {
+        btn.disabled = true;
+        btn.style.background = "#9ca3af";
+        btn.style.cursor = "not-allowed";
+        btn.innerText = "🚀 請先完成右上角 Google 登入後始可送出";
+      }
+
+      if (!isSilent) {
+        alert("已成功登出帳號！");
+      }
     }
 
     function formatVND(amount) {
       return new Intl.NumberFormat('vi-VN').format(amount) + ' ₫';
     }
 
-    // 解析選項 (相容 JSON 或逗號分隔)
     function parseOptions(optionsStr) {
       if (!optionsStr || optionsStr.trim() === "") return [];
       try {
@@ -242,7 +301,6 @@
             currentProductPrice = Number(product.price);
             document.getElementById('previewPrice').innerText = formatVND(currentProductPrice);
             
-            // 動態產生規格選項下拉選單
             const optContainer = document.getElementById('productOptionsContainer');
             let optArray = parseOptions(product.options);
             
@@ -285,7 +343,7 @@
       }
       
       if (!authenticatedEmail) {
-        alert('請先點擊上方按鈕完成 Google 帳號登入！');
+        alert('請先完成右上角 Google 帳號登入！');
         return;
       }
 
