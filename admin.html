@@ -196,9 +196,10 @@
     </div>
 
     <!-- 標籤頁 3：上架新商品 -->
+<!-- 標籤頁 3：上架新商品 (含最多 3 張照片設定) -->
     <div id="tabProductAdd" class="tab-content">
       <div class="admin-card">
-        <h2 style="margin-bottom: 20px;">🛍️ 上架全新周邊商品</h2>
+        <h2 style="margin-bottom: 20px;">🛍️ 上架全新周邊商品 (支援最多 3 張圖片)</h2>
         <form id="productForm" onsubmit="handleProductSubmit(event)">
           <div class="form-grid">
             <div class="form-group"><label>商品名稱 *：</label><input type="text" id="prodTitle" required placeholder="例: TSSC13TH 紀念衣服"></div>
@@ -210,8 +211,18 @@
             </div>
           </div>
 
+          <!-- 📸 商品照片設定區 (最多三張) -->
+          <div style="margin-top:20px; background:#f8fafc; padding:16px; border-radius:8px; border:1px solid #e2e8f0;">
+            <strong style="color:#111827; font-size:1.05rem; display:block; margin-bottom:12px;">📸 商品照片設定 (最多 3 張圖片網址)</strong>
+            <div class="form-grid">
+              <div class="form-group" style="margin-bottom:10px;"><label>圖片 1 網址 (主圖) *：</label><input type="text" id="prodImg1" required placeholder="https://... (必填)"></div>
+              <div class="form-group" style="margin-bottom:10px;"><label>圖片 2 網址 (選填)：</label><input type="text" id="prodImg2" placeholder="https://..."></div>
+              <div class="form-group full-width" style="margin-bottom:0;"><label>圖片 3 網址 (選填)：</label><input type="text" id="prodImg3" placeholder="https://..."></div>
+            </div>
+          </div>
+
           <!-- ⚙️ 規格組設定區 -->
-          <div style="margin-top:24px; background:#f8fafc; padding:16px; border-radius:8px; border:1px solid #e2e8f0;">
+          <div style="margin-top:20px; background:#f8fafc; padding:16px; border-radius:8px; border:1px solid #e2e8f0;">
             <div class="options-header-row">
               <strong style="color:#111827; font-size:1.05rem;">⚙️ 商品規格與選項設定</strong>
               <button type="button" onclick="addOptionCard()" class="btn-admin-action" style="padding:6px 14px; font-size:0.85rem;">＋ 新增規格選項組</button>
@@ -224,7 +235,6 @@
         </form>
       </div>
     </div>
-
     <!-- 標籤頁 4：庫存管理 -->
     <div id="tabProductManage" class="tab-content">
       <div class="admin-card">
@@ -692,6 +702,26 @@
       document.body.appendChild(a);
       a.click();
       document.body.removeChild(a);
+    }
+    async function handleProductSubmit(e) {
+      e.preventDefault();
+      const email = sessionStorage.getItem('tss_logged_email') || "";
+      const data = {
+        action: "addProduct", email,
+        title: document.getElementById('prodTitle').value,
+        price: document.getElementById('prodPrice').value,
+        stock: document.getElementById('prodStock').value,
+        status: document.getElementById('prodStatus').value,
+        img1: document.getElementById('prodImg1').value,
+        img2: document.getElementById('prodImg2').value,
+        img3: document.getElementById('prodImg3').value,
+        options: buildOptionsJson(),
+        description: document.getElementById('prodDesc').value
+      };
+      const res = await fetch(GAS_API_URL, { method: "POST", body: JSON.stringify(data) });
+      const result = await res.json();
+      alert(result.message);
+      if(result.status === "success") { loadAdminProducts(); document.getElementById('productForm').reset(); }
     }
   </script>
 </body>
