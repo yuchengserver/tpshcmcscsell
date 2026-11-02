@@ -5,11 +5,13 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>TSS13TH 周邊商城 - 智慧管理員後台</title>
   <link rel="stylesheet" href="style.css">
+  <!-- 引入 Google Sign-In SDK -->
+  <script src="https://accounts.google.com/gsi/client" async defer></script>
   <style>
     /* 分頁標籤樣式 */
     .admin-tabs { display: flex; gap: 8px; margin-bottom: 20px; border-bottom: 2px solid #e5e7eb; padding-bottom: 10px; flex-wrap: wrap; }
     .tab-btn { background: #f3f4f6; border: none; padding: 10px 20px; border-radius: 8px; cursor: pointer; font-weight: bold; font-size: 0.95rem; color: #4b5563; transition: all 0.2s; }
-    .tab-btn.active { background: #2563eb; color: #fff; box-shadow: 0 4px 6px rgba(37,99,235,0.2); }
+    .tab-btn.active { background: #000000; color: #fff; box-shadow: 0 4px 6px rgba(0,0,0,0.2); }
     .tab-content { display: none; }
     .tab-content.active { display: block; animation: fadeIn 0.3s ease-in-out; }
 
@@ -19,7 +21,10 @@
     .stat-card .label { font-size: 0.9rem; color: #6b7280; font-weight: 500; }
     .stat-card .num { font-size: 1.6rem; font-weight: bold; color: #0284c7; margin-top: 6px; }
 
-    /* 按鈕樣式 */
+    /* 黑底白字通用按鈕風格 */
+    .btn-black { background-color: #000000; color: #ffffff; border: none; padding: 8px 16px; border-radius: 6px; cursor: pointer; font-weight: bold; font-size: 0.9rem; transition: background 0.2s; }
+    .btn-black:hover { background-color: #333333; }
+    
     .btn-export { background-color: #166534; color: #fff; border: none; padding: 8px 16px; border-radius: 6px; cursor: pointer; font-weight: bold; font-size: 0.9rem; }
     .btn-export:hover { background-color: #15803d; }
     .btn-print { background-color: #2563eb; color: #fff; border: none; padding: 8px 16px; border-radius: 6px; cursor: pointer; font-weight: bold; font-size: 0.9rem; }
@@ -79,6 +84,35 @@
     }
     .btn-remove-img:hover { background: #dc2626; }
 
+    /* 📋 簡潔好用的表單項目卡片排版 (參考截圖風格) */
+    .form-item-card {
+      background: #fdfdfd;
+      border: 1px solid #e5e7eb;
+      border-radius: 8px;
+      padding: 16px;
+      margin-bottom: 14px;
+      position: relative;
+      box-shadow: 0 1px 2px rgba(0,0,0,0.02);
+    }
+    .form-item-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 10px;
+    }
+    .btn-delete-item {
+      background: #fff1f2;
+      color: #e11d48;
+      border: 1px solid #fecdd3;
+      padding: 4px 10px;
+      border-radius: 6px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    .btn-delete-item:hover { background: #ffe4e6; }
+
     /* 預覽繳費單專區 */
     .preview-box { background: #fff; border: 1px solid #cbd5e1; padding: 30px; border-radius: 8px; margin-top: 15px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
 
@@ -87,6 +121,47 @@
     .cash-counter-table th, .cash-counter-table td { border: 1px solid #e5e7eb; padding: 6px 10px; text-align: center; }
     .cash-counter-table th { background: #f3f4f6; color: #374151; }
 
+    /* 🔐 右上角導覽列登入精緻化 CSS 樣式 */
+    .nav-auth-container {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      background: #f8fafc;
+      padding: 6px 12px;
+      border-radius: 8px;
+      border: 1px solid #e2e8f0;
+      box-shadow: 0 1px 2px rgba(0,0,0,0.02);
+    }
+    .nav-user-info {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 0.85rem;
+    }
+    .nav-user-email {
+      color: #166534;
+      font-weight: bold;
+      max-width: 160px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    .btn-nav-logout {
+      background: #ef4444;
+      color: #ffffff;
+      border: none;
+      padding: 4px 10px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 0.75rem;
+      font-weight: 600;
+      transition: background 0.2s, transform 0.1s;
+    }
+    .btn-nav-logout:hover {
+      background: #dc2626;
+      transform: translateY(-1px);
+    }
+
     @media screen and (max-width: 768px) {
       .image-upload-grid { grid-template-columns: 1fr; }
     }
@@ -94,17 +169,36 @@
 </head>
 <body>
 
-  <!-- 頂部導覽列 -->
-  <header>
+  <!-- 頂部導覽列 (右上角統一 Google 登入與登出) -->
+  <header style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; padding: 12px 24px;">
     <div class="nav-brand">
       <img src="tpshcmcsc.png" alt="TSSC13TH 標誌" style="filter: brightness(0) saturate(100%);">
       <span>TSSC13TH 周邊商城智慧管理後台</span>
     </div>
-    <nav class="nav-links">
+    
+    <nav class="nav-links" style="display: flex; align-items: center; gap: 16px; flex-wrap: wrap;">
       <a href="index.html">首頁與通知</a>
       <a href="cart.html">🛒 購物車結算</a>
       <a href="query.html">📋 查詢我的訂單</a>
       <a href="admin.html" class="active">⚙️ 管理員後台</a>
+
+      <!-- 🔐 右上角導覽列 Google 登入狀態 -->
+      <div class="nav-auth-container">
+        <div id="navNotLoggedIn">
+          <div id="g_id_onload" 
+               data-client_id="434067788519-6s6r01fhhtn2d5200hmu2aqsh9v6dtoh.apps.googleusercontent.com" 
+               data-callback="handleCredentialResponse" 
+               data-auto_prompt="false">
+          </div>
+          <div class="g_id_signin" data-type="compact" data-size="medium" data-theme="outline"></div>
+        </div>
+
+        <div id="navIsLoggedIn" class="nav-user-info" style="display: none;">
+          <span style="color: #64748b;">已登入:</span>
+          <span id="navUserEmail" class="nav-user-email"></span>
+          <button type="button" class="btn-nav-logout" onclick="logout()">登出</button>
+        </div>
+      </div>
     </nav>
   </header>
 
@@ -175,7 +269,7 @@
       </div>
     </div>
 
-    <!-- 標籤頁 2：AI 智慧班級對帳中心 (獨立分頁 + 點鈔機防呆 + 機率排序 + 一鍵自動更新) -->
+    <!-- 標籤頁 2：AI 智慧班級對帳中心 -->
     <div id="tabReconcile" class="tab-content">
       <div class="admin-card">
         <h2>🧮 班級自動對帳與 AI 差額排查中心</h2>
@@ -192,7 +286,7 @@
           </div>
         </div>
 
-        <!-- 💵 點鈔機防呆輸入區 (越盾面額計算) -->
+        <!-- 💵 點鈔機防呆輸入區 -->
         <div style="background: #f8fafc; border: 1px solid #cbd5e1; padding: 16px; border-radius: 8px; margin-bottom: 16px;">
           <h3 style="margin-top:0; font-size:1rem; color:#1f2937;">💵 越盾現金點鈔機小幫手 (免人工心算)</h3>
           <div style="overflow-x: auto;">
@@ -240,22 +334,26 @@
       </div>
     </div>
 
-    <!-- 標籤頁 3：上架新周邊商品 -->
+    <!-- 標籤頁 3：上架新周邊商品 (採用簡潔直覺的卡片排版) -->
     <div id="tabProductAdd" class="tab-content">
       <div class="admin-card">
-        <h2>🛍️ 上架新周邊商品 (最多 3 張圖片與 JSON 規格)</h2>
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
+          <h2 style="margin:0; border:none; padding:0;">🛍️ 上架新周邊商品</h2>
+          <button type="button" onclick="addOptionCard()" class="btn-black">＋ 新增規格選項組</button>
+        </div>
+
         <form id="productForm" onsubmit="handleProductSubmit(event)">
           <div class="form-grid">
             <div class="form-group">
-              <label for="prodTitle">商品名稱：</label>
+              <label for="prodTitle">商品名稱 *：</label>
               <input type="text" id="prodTitle" required placeholder="例如：TSS 13th 紀念帽T">
             </div>
             <div class="form-group">
-              <label for="prodPrice">價格 (越盾 VND)：</label>
+              <label for="prodPrice">價格 (越盾 VND) *：</label>
               <input type="number" id="prodPrice" min="0" step="500" required placeholder="150000">
             </div>
             <div class="form-group">
-              <label for="prodStock">限量庫存數量 (防超售)：</label>
+              <label for="prodStock">限量庫存數量 (防超售) *：</label>
               <input type="number" id="prodStock" min="1" required placeholder="50">
             </div>
             <div class="form-group">
@@ -268,15 +366,12 @@
             </div>
           </div>
 
-          <!-- 動態 JSON 規格選項產生器 -->
-          <div class="form-group" style="margin-top:16px; background:#f9fafb; padding:16px; border-radius:8px; border:1px solid #e5e7eb;">
-            <label style="font-weight:bold; color:#111827;">⚙️ 尺寸與顏色規格選項 (JSON 動態產生)</label>
-            <div style="display:flex; gap:10px; margin-bottom:10px;">
-              <input type="text" id="optionNameInput" placeholder="選項類別 (例如: 尺寸)" style="flex:1; padding:6px; border:1px solid #d1d5db; border-radius:4px;">
-              <input type="text" id="optionValuesInput" placeholder="項目值 (逗號隔開, 例: S, M, L)" style="flex:2; padding:6px; border:1px solid #d1d5db; border-radius:4px;">
-              <button type="button" onclick="addOptionToJson()" style="background:#0284c7; color:#fff; border:none; padding:6px 12px; border-radius:4px; cursor:pointer;">➕ 新增選項</button>
+          <!-- ⚙️ 簡潔直覺的動態規格選項卡片清單區 -->
+          <div style="margin-top:20px; margin-bottom:20px;">
+            <label style="font-weight:bold; color:#111827; display:block; margin-bottom:8px;">⚙️ 商品規格與選項設定 (簡潔清單排版)</label>
+            <div id="optionsCardsContainer">
+              <!-- 動態產生的規格卡片會在這裡顯示 -->
             </div>
-            <textarea id="prodOptionsJson" rows="2" readonly style="width:100%; background:#fff; font-family:monospace; font-size:0.85rem;" placeholder='{}'>{}</textarea>
           </div>
 
           <!-- 🖼️ 圖片上傳區 -->
@@ -306,11 +401,12 @@
             </div>
           </div>
 
-          <div class="form-group full-width">
+          <div class="form-group full-width" style="margin-top:16px;">
             <label for="prodDesc">商品詳細說明：</label>
             <textarea id="prodDesc" rows="2" placeholder="材質與尺寸說明..."></textarea>
           </div>
-          <button type="submit" id="submitBtn" class="action-btn">🚀 立即上架周邊商品</button>
+
+          <button type="submit" id="submitBtn" class="btn-black" style="width: 100%; padding: 12px; font-size: 1rem; margin-top: 10px;">🚀 立即上架周邊商品</button>
         </form>
       </div>
     </div>
@@ -326,7 +422,7 @@
                 <th>ID</th>
                 <th>商品名稱</th>
                 <th>價格 (VND)</th>
-                <th>JSON 規格設定</th>
+                <th>規格設定</th>
                 <th>即時庫存</th>
                 <th>狀態調整</th>
               </tr>
@@ -363,7 +459,6 @@
     const GAS_API_URL = "https://script.google.com/macros/s/AKfycbx7o4EJKoFsiJojM3FfS0pqj8n77mrdDR318Srn7DRy0kkFjMvogprtnHD0loSKqcB0/exec";
     let globalOrdersData = [];
     let globalProductsData = [];
-    let currentOptionsObj = {};
     let uploadedImages = ["", "", ""];
 
     function formatVND(amount) {
@@ -371,9 +466,71 @@
     }
 
     window.onload = function() {
+      checkSessionTimeout();
       loadAdminProducts();
       loadAllOrders();
+      addOptionCard(); // 預設新增一組選項卡片
     };
+
+    // ⏱️ 檢查登入是否逾時（30分鐘過期或關閉分頁自動登出）
+    function checkSessionTimeout() {
+      const loginTime = sessionStorage.getItem('tss_login_time');
+      const savedEmail = sessionStorage.getItem('tss_logged_email');
+      const now = Date.now();
+      const TIMEOUT_LIMIT = 30 * 60 * 1000; // 30 分鐘
+
+      if (!savedEmail || !loginTime || (now - Number(loginTime) > TIMEOUT_LIMIT)) {
+        logout(true);
+      } else {
+        setNavLoggedIn(savedEmail);
+      }
+    }
+
+    // Google OAuth 驗證邏輯
+    function handleCredentialResponse(response) {
+      const responsePayload = parseJwt(response.credential);
+      const email = responsePayload.email;
+
+      const studentRegex = /^\d{7}@tshcmc\.edu\.vn$/;
+      const isAdmin = (email === "yucheng.server@gmail.com");
+
+      if (!studentRegex.test(email) && !isAdmin) {
+        alert('【身分拒絕】本系統僅限使用學校官方信箱（@tshcmc.edu.vn）登入後台！');
+        return;
+      }
+
+      sessionStorage.setItem('tss_logged_email', email);
+      sessionStorage.setItem('tss_login_time', Date.now());
+      setNavLoggedIn(email);
+    }
+
+    function parseJwt(token) {
+      var base64Url = token.split('.')[1];
+      var base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+      var jsonPayload = decodeURIComponent(atob(base64).split('').map(function(c) {
+          return '%' + ('0' + c.charCodeAt(0).toString(16)).slice(-2);
+      }).join(''));
+      return JSON.parse(jsonPayload);
+    }
+
+    function setNavLoggedIn(email) {
+      document.getElementById('navNotLoggedIn').style.display = 'none';
+      document.getElementById('navIsLoggedIn').style.display = 'flex';
+      document.getElementById('navUserEmail').innerText = email;
+    }
+
+    function logout(isSilent = false) {
+      sessionStorage.removeItem('tss_logged_email');
+      sessionStorage.removeItem('tss_login_time');
+      
+      document.getElementById('navNotLoggedIn').style.display = 'block';
+      document.getElementById('navIsLoggedIn').style.display = 'none';
+      document.getElementById('navUserEmail').innerText = "";
+
+      if (!isSilent) {
+        alert("已成功登出管理員帳號！");
+      }
+    }
 
     function switchTab(evt, tabId) {
       document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
@@ -382,6 +539,56 @@
       evt.currentTarget.classList.add('active');
       if (tabId === 'tabPrintPreview') initPrintPreviewDropdown();
       if (tabId === 'tabReconcile') initReconcileDropdown();
+    }
+
+    // ⚙️ 簡潔直覺的動態規格選項卡片管理
+    function addOptionCard() {
+      const container = document.getElementById('optionsCardsContainer');
+      const cardId = 'opt-card-' + Date.now();
+      
+      const cardDiv = document.createElement('div');
+      cardDiv.className = 'form-item-card';
+      cardDiv.id = cardId;
+      cardDiv.innerHTML = `
+        <div class="form-item-header">
+          <strong style="font-size: 0.9rem; color: #374151;">規格類別設定</strong>
+          <button type="button" class="btn-delete-item" onclick="removeOptionCard('${cardId}')">刪除此組</button>
+        </div>
+        <div style="display: grid; grid-template-columns: 1fr 2fr; gap: 10px;">
+          <div>
+            <label style="font-size: 0.8rem; color: #6b7280; display: block; margin-bottom: 4px;">選項名稱 (例: 尺寸)</label>
+            <input type="text" class="opt-name-input" placeholder="尺寸" style="width: 100%; padding: 8px; border: 1px solid #d1d5db; border-radius: 6px; font-size: 0.9rem;">
+          </div>
+          <div>
+            <label style="font-size: 0.8rem; color: #6b7280; display: block; margin-bottom: 4px;">選項值 (逗號隔開, 例: S, M, L)</label>
+            <input type="text" class="opt-val-input" placeholder="S, M, L, XL" style="width: 100%; padding: 8px; border: 1px solid #d1d5db; border-radius: 6px; font-size: 0.9rem;">
+          </div>
+        </div>
+      `;
+      container.appendChild(cardDiv);
+    }
+
+    function removeOptionCard(cardId) {
+      const card = document.getElementById(cardId);
+      if (card) card.remove();
+    }
+
+    function buildOptionsJson() {
+      let optionsObj = {};
+      const cards = document.querySelectorAll('.form-item-card');
+      cards.forEach(card => {
+        const nameInput = card.querySelector('.opt-name-input');
+        const valInput = card.querySelector('.opt-val-input');
+        if (nameInput && valInput) {
+          let key = nameInput.value.trim();
+          let valStr = valInput.value.trim();
+          if (key && valStr) {
+            let vals = valStr.split(',').map(v => v.trim()).filter(v => v);
+            optionsObj[key] = vals;
+          }
+        }
+      });
+      return JSON.stringify(optionsObj);
     }
 
     function triggerFileInput(index) {
@@ -421,20 +628,6 @@
       placeholder.classList.remove('hidden');
       removeBtn.classList.add('hidden');
       fileInput.value = "";
-    }
-
-    function addOptionToJson() {
-      const key = document.getElementById('optionNameInput').value.trim();
-      const valStr = document.getElementById('optionValuesInput').value.trim();
-      if (!key || !valStr) {
-        alert('請完整輸入選項類別與項目值！');
-        return;
-      }
-      const vals = valStr.split(',').map(v => v.trim()).filter(v => v);
-      currentOptionsObj[key] = vals;
-      document.getElementById('prodOptionsJson').value = JSON.stringify(currentOptionsObj);
-      document.getElementById('optionNameInput').value = '';
-      document.getElementById('optionValuesInput').value = '';
     }
 
     async function loadAdminProducts() {
@@ -583,7 +776,6 @@
       let expected = orders.reduce((sum, o) => sum + Number(o.total_price || 0), 0);
       document.getElementById('expectedTotalDisplay').innerText = formatVND(expected);
       document.getElementById('actualReceivedAmount').value = expected;
-      // 清空點鈔機
       ['note500k', 'note200k', 'note100k', 'note50k', 'note20k', 'note10k', 'noteOther'].forEach(id => document.getElementById(id).value = 0);
       document.getElementById('cashTotalDisplay').innerText = formatVND(expected);
     }
@@ -606,10 +798,7 @@
         return;
       }
 
-      // 排查分析
       let probabilities = [];
-
-      // 1. 檢查是否有單人金額剛好等於缺額 (機率最高)
       let target = Math.abs(diff);
       orders.forEach(o => {
         if (Number(o.total_price) === target) {
@@ -621,7 +810,6 @@
         }
       });
 
-      // 2. 檢查是否有兩人組合金額等於差額 (機率次高)
       let foundPairs = [];
       for (let i = 0; i < orders.length; i++) {
         for (let j = i + 1; j < orders.length; j++) {
@@ -640,7 +828,6 @@
         });
       }
 
-      // 3. 數錯錢 / 找零猜測 (若誤差為 10,000 ~ 50,000 等常見找零面額)
       if (Math.abs(diff) <= 100000 && Math.abs(diff) % 10000 === 0) {
         probabilities.push({
           level: "💡 可能原因：人員找零或數錯錢",
@@ -655,7 +842,6 @@
       if (probabilities.length > 0) {
         html += `<div style="display:flex; flex-direction:column; gap:10px; margin-bottom:16px;">`;
         probabilities.forEach((p, idx) => {
-          html => html; // placeholder
           html += `<div style="background:#fff; padding:12px; border:1px solid #fca5a5; border-radius:6px;">
             <div style="font-weight:bold; color:#b91c1c; margin-bottom:4px;">${idx + 1}. ${p.level}</div>
             <div style="font-size:0.9rem; color:#374151;">${p.desc}</div>
@@ -678,7 +864,7 @@
             </div>
           `).join('')}
         </div>
-        <button type="button" onclick="confirmBatchUpdateUnchecked()" style="margin-top:14px; background:#16a34a; color:#white; border:none; padding:10px 16px; border-radius:6px; font-weight:bold; cursor:pointer; width:100%; color:#fff;">
+        <button type="button" onclick="confirmBatchUpdateUnchecked()" class="btn-black" style="margin-top:14px; width:100%; padding: 10px;">
           ✅ 確認審查完畢：將未勾選項目自動批次更新為「已付款」
         </button>
       </div>
@@ -702,15 +888,17 @@
         return;
       }
 
-      if (!confirm(`【安全防呆確認】您確定要將這 ${uncheckedOrderIds.length筆} 未勾選的訂單狀態全部自動更新為「已付款」嗎？`)) {
+      if (!confirm(`【安全防呆確認】您確定要將這 ${uncheckedOrderIds.length} 筆未勾選的訂單狀態全部自動更新為「已付款」嗎？`)) {
         return;
       }
+
+      const email = sessionStorage.getItem('tss_logged_email') || "";
 
       try {
         for (let orderId of uncheckedOrderIds) {
           await fetch(GAS_API_URL, {
             method: "POST",
-            body: JSON.stringify({ action: "updateOrderStatus", orderId: orderId, newStatus: "已付款" })
+            body: JSON.stringify({ action: "updateOrderStatus", email: email, orderId: orderId, newStatus: "已付款" })
           });
         }
         alert('🎉 批次對帳與狀態更新成功！');
@@ -722,10 +910,11 @@
     }
 
     async function changeOrderStatus(orderId, newStatus) {
+      const email = sessionStorage.getItem('tss_logged_email') || "";
       try {
         const res = await fetch(GAS_API_URL, {
           method: "POST",
-          body: JSON.stringify({ action: "updateOrderStatus", orderId: orderId, newStatus: newStatus })
+          body: JSON.stringify({ action: "updateOrderStatus", email: email, orderId: orderId, newStatus: newStatus })
         });
         const result = await res.json();
         alert(result.message);
@@ -734,46 +923,52 @@
     }
 
     async function updateProductStock(productId, newStock) {
+      const email = sessionStorage.getItem('tss_logged_email') || "";
       await fetch(GAS_API_URL, {
         method: "POST",
-        body: JSON.stringify({ action: "updateProduct", productId: productId, newStock: newStock })
+        body: JSON.stringify({ action: "updateProduct", email: email, productId: productId, newStock: newStock })
       });
     }
 
     async function updateProductStatus(productId, newStatus) {
+      const email = sessionStorage.getItem('tss_logged_email') || "";
       await fetch(GAS_API_URL, {
         method: "POST",
-        body: JSON.stringify({ action: "updateProduct", productId: productId, newStatus: newStatus })
+        body: JSON.stringify({ action: "updateProduct", email: email, productId: productId, newStatus: newStatus })
       });
     }
 
     async function handleProductSubmit(e) {
       e.preventDefault();
+      const email = sessionStorage.getItem('tss_logged_email') || "";
+
       const productData = {
         action: "addProduct",
+        email: email,
         title: document.getElementById('prodTitle').value,
         price: document.getElementById('prodPrice').value,
         stock: document.getElementById('prodStock').value,
         status: document.getElementById('prodStatus').value,
-        options: document.getElementById('prodOptionsJson').value,
+        options: buildOptionsJson(),
         img1: uploadedImages[0],
         img2: uploadedImages[1],
         img3: uploadedImages[2],
         description: document.getElementById('prodDesc').value
       };
+
       const res = await fetch(GAS_API_URL, { method: "POST", body: JSON.stringify(productData) });
       const result = await res.json();
       alert(result.message);
       if (result.status === "success") {
         document.getElementById('productForm').reset();
-        currentOptionsObj = {};
+        document.getElementById('optionsCardsContainer').innerHTML = "";
+        addOptionCard();
         uploadedImages = ["", "", ""];
         for(let i=1; i<=3; i++) {
           document.getElementById(`preview-img-${i}`).classList.add('hidden');
           document.getElementById(`placeholder-${i}`).classList.remove('hidden');
           document.getElementById(`btn-remove-${i}`).classList.add('hidden');
         }
-        document.getElementById('prodOptionsJson').value = '{}';
         loadAdminProducts();
         switchTab({ currentTarget: document.querySelectorAll('.tab-btn')[0] }, 'tabOrders');
       }
