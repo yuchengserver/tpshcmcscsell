@@ -259,6 +259,7 @@
     </div>
 
     <!-- 標籤頁 5：PDF 列印與排版自訂 -->
+   <!-- 標籤頁 5：PDF 列印與排版自訂 -->
     <div id="tabPrintPreview" class="tab-content">
       <div class="admin-card">
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px; flex-wrap:wrap; gap:12px;">
@@ -270,8 +271,9 @@
           </div>
         </div>
 
-        <!-- 🎛️ PDF 排版與樣式即時編輯控制台 -->
-        <div style="background:#f8fafc; padding:16px; border-radius:8px; border:1px solid #e2e8f0; margin-bottom:20px; display:grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap:12px;">
+        <!-- 🎛️ PDF 排版與自由自訂欄位名稱控制台 -->
+        <div style="background:#f8fafc; padding:16px; border-radius:8px; border:1px solid #e2e8f0; margin-bottom:20px; display:grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap:12px;">
+          
           <div class="form-group" style="margin:0;">
             <label style="font-weight:600; font-size:0.85rem;">字體大小 (Font Size)：</label>
             <select id="styleFontSize" onchange="renderPrintPreview()" style="padding:6px; border:1px solid #d1d5db; border-radius:6px; width:100%;">
@@ -281,6 +283,7 @@
               <option value="17px">特大 (17px)</option>
             </select>
           </div>
+
           <div class="form-group" style="margin:0;">
             <label style="font-weight:600; font-size:0.85rem;">表格行高與間距 (Padding)：</label>
             <select id="stylePadding" onchange="renderPrintPreview()" style="padding:6px; border:1px solid #d1d5db; border-radius:6px; width:100%;">
@@ -289,15 +292,26 @@
               <option value="12px 14px">寬鬆</option>
             </select>
           </div>
-          <div class="form-group" style="margin:0; display:flex; flex-direction:column; gap:6px;">
-            <label style="font-weight:600; font-size:0.85rem;">顯示欄位自訂：</label>
-            <div style="display:flex; gap:12px; font-size:0.85rem; align-items:center; height:32px;">
-              <label><input type="checkbox" id="chkShowEmail" checked onchange="renderPrintPreview()"> 學號信箱</label>
-              <label><input type="checkbox" id="chkShowCheckbox" checked onchange="renderPrintPreview()"> 繳費核勾格</label>
+
+          <!-- ✏️ 自訂額外欄位 1 (原信箱欄) -->
+          <div class="form-group" style="margin:0;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
+              <label style="font-weight:600; font-size:0.85rem;"><input type="checkbox" id="chkShowCol1" checked onchange="renderPrintPreview()"> 顯示副欄位 1：</label>
             </div>
+            <input type="text" id="col1CustomTitle" value="學號信箱" oninput="renderPrintPreview()" placeholder="欄位標題 (例: 學生信箱/座號)" style="padding:6px; border:1px solid #d1d5db; border-radius:6px; font-size:0.85rem; width:100%;">
           </div>
+
+          <!-- ✏️ 自訂簽核/核勾欄位 2 (原核勾欄) -->
+          <div class="form-group" style="margin:0;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
+              <label style="font-weight:600; font-size:0.85rem;"><input type="checkbox" id="chkShowCol2" checked onchange="renderPrintPreview()"> 顯示末尾核勾/簽名欄：</label>
+            </div>
+            <input type="text" id="col2CustomTitle" value="繳費核勾" oninput="renderPrintPreview()" placeholder="欄位標題 (例: 簽名/備註)" style="padding:6px; border:1px solid #d1d5db; border-radius:6px; font-size:0.85rem; width:100%;">
+          </div>
+
+          <!-- 自訂主標題與副標題 -->
           <div class="form-group full-width" style="margin:0; grid-column:1 / -1;">
-            <label style="font-weight:600; font-size:0.85rem;">自訂標題 / 副標題 / 補充說明：</label>
+            <label style="font-weight:600; font-size:0.85rem;">自訂報表標題與備註：</label>
             <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px; margin-top:4px;">
               <input type="text" id="customPrintTitle" value="TSSC13TH 周邊預購繳費清單" oninput="renderPrintPreview()" placeholder="主標題" style="padding:6px; border:1px solid #d1d5db; border-radius:6px;">
               <input type="text" id="customPrintSubtitle" value="請各班負責人確認金額後進行收費與核銷" oninput="renderPrintPreview()" placeholder="副標題" style="padding:6px; border:1px solid #d1d5db; border-radius:6px;">
@@ -305,25 +319,10 @@
           </div>
         </div>
 
+        <!-- 預覽輸出畫布 -->
         <div id="printPreviewContainer" class="card" style="margin-top:15px;"><div style="text-align:center; color:#6b7280; padding:20px;">請選擇班級...</div></div>
       </div>
     </div>
-  </div>
-
-  <!-- 🖨️ 預覽彈窗 -->
-  <div id="printModalOverlay" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.6); z-index:1000; justify-content:center; align-items:center;">
-    <div style="background:#fff; width:90%; max-width:850px; max-height:90vh; border-radius:10px; padding:24px; display:flex; flex-direction:column; overflow-y:auto;">
-      <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid #e5e7eb; padding-bottom:10px; margin-bottom:15px;">
-        <h3 style="margin:0;">📄 PDF 預覽與樣式排版</h3>
-        <button onclick="closePrintModal()" style="background:#ef4444; color:#fff; border:none; padding:6px 12px; border-radius:6px; cursor:pointer; font-weight:600;">關閉</button>
-      </div>
-      <div id="printableArea" style="flex:1; overflow-y:auto; padding:20px; background:#fff; border:1px solid #e5e7eb;"></div>
-      <div style="display:flex; justify-content:flex-end; gap:12px; margin-top:20px; border-top:1px solid #e5e7eb; padding-top:15px;">
-        <button onclick="exportCanvaCSV()" class="btn-admin-canva">🎨 下載 Canva CSV 檔</button>
-        <button onclick="window.print()" class="btn-admin-print">🖨️ 直接列印 / 存為 PDF</button>
-      </div>
-    </div>
-  </div>
 
   <script>
     const GAS_API_URL = "https://script.google.com/macros/s/AKfycbx7o4EJKoFsiJojM3FfS0pqj8n77mrdDR318Srn7DRy0kkFjMvogprtnHD0loSKqcB0/exec";
@@ -640,18 +639,24 @@ async function handleProductSubmit(e) {
       renderPrintPreview();
     }
 
-    // 🖨️ 渲染含即時排版樣式調整的 PDF 報表
+   // 🖨️ 渲染含完全自訂標題與欄位名稱的 PDF 報表
     function renderPrintPreview() {
       let c = document.getElementById('previewClassSelect').value;
       let orders = globalOrdersData.filter(o => o.name.toUpperCase().includes(c));
       let total = orders.reduce((sum, o) => sum + Number(o.total_price), 0);
 
-      let title = document.getElementById('customPrintTitle').value;
-      let subtitle = document.getElementById('customPrintSubtitle').value;
+      // 讀取自訂標題與字體樣式
+      let title = document.getElementById('customPrintTitle').value || '周邊預購繳費清單';
+      let subtitle = document.getElementById('customPrintSubtitle').value || '';
       let fontSize = document.getElementById('styleFontSize').value;
       let cellPadding = document.getElementById('stylePadding').value;
-      let showEmail = document.getElementById('chkShowEmail').checked;
-      let showCheckbox = document.getElementById('chkShowCheckbox').checked;
+
+      // 讀取自訂欄位開關與自訂欄位名稱
+      let showCol1 = document.getElementById('chkShowCol1').checked;
+      let col1Title = document.getElementById('col1CustomTitle').value.trim() || '學號信箱';
+
+      let showCol2 = document.getElementById('chkShowCol2').checked;
+      let col2Title = document.getElementById('col2CustomTitle').value.trim() || '繳費核勾';
 
       document.getElementById('printPreviewContainer').innerHTML = `
         <div style="text-align:center; margin-bottom:15px;">
@@ -661,28 +666,28 @@ async function handleProductSubmit(e) {
         <style>
           .dynamic-print-table { width: 100%; border-collapse: collapse; font-size: ${fontSize}; }
           .dynamic-print-table th, .dynamic-print-table td { border: 1px solid #d1d5db; padding: ${cellPadding}; text-align: left; }
-          .dynamic-print-table th { background: #f3f4f6; color: #1f2937; }
+          .dynamic-print-table th { background: #f3f4f6; color: #1f2937; font-weight: bold; }
         </style>
         <table class="dynamic-print-table">
           <thead>
             <tr>
-              <th>序號</th>
+              <th style="width: 50px;">序號</th>
               <th>姓名</th>
-              ${showEmail ? '<th>學號信箱</th>' : ''}
+              ${showCol1 ? `<th>${col1Title}</th>` : ''}
               <th>品項與規格</th>
               <th>金額 (VND)</th>
-              ${showCheckbox ? '<th style="text-align:center;">繳費核勾</th>' : ''}
+              ${showCol2 ? `<th style="text-align:center;">${col2Title}</th>` : ''}
             </tr>
           </thead>
           <tbody>
             ${orders.map((o, i) => `
               <tr>
-                <td>${i+1}</td>
+                <td style="text-align:center;">${i+1}</td>
                 <td><strong>${o.name}</strong></td>
-                ${showEmail ? `<td><small>${o.email}</small></td>` : ''}
+                ${showCol1 ? `<td><small>${o.email}</small></td>` : ''}
                 <td>${o.product_title} (${o.selected_option || '預設'}) x ${o.quantity}</td>
                 <td><strong>${Number(o.total_price).toLocaleString()} ₫</strong></td>
-                ${showCheckbox ? '<td style="text-align:center; font-size:1.2rem;">□</td>' : ''}
+                ${showCol2 ? '<td style="text-align:center; font-size:1.1rem; color:#9ca3af;">□</td>' : ''}
               </tr>`).join('')}
           </tbody>
         </table>
