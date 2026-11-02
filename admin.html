@@ -1,5 +1,21 @@
 <!DOCTYPE html>
 <html lang="zh-Hant">
+  <head>
+  <script>
+    // ⚡ 零延遲防閃爍機制：在網頁載入瞬間直接預先鎖定導覽列樣式
+    (function() {
+      const email = sessionStorage.getItem('tss_logged_email');
+      const loginTime = sessionStorage.getItem('tss_login_time');
+      if (email && loginTime && (Date.now() - Number(loginTime) <= 30 * 60 * 1000)) {
+        // 如果有效登入，直接建立預先隱藏未登入、顯示已登入的 CSS 規則
+        document.styleSheets[0] && document.styleSheets[0].insertRule ? 
+          document.styleSheets[0].insertRule('#navNotLoggedIn { display: none !important; }', 0) :
+          document.write('<style>#navNotLoggedIn { display: none !important; } #navIsLoggedIn { display: flex !important; }</style>');
+      }
+    })();
+  </script>
+  <!-- 其他原本的 CSS 與 meta 標籤 -->
+</head>
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -60,24 +76,7 @@
     .nav-user-email { color: #166534; font-weight: bold; max-width: 140px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
     .btn-nav-logout { background: #ef4444; color: #fff; border: none; padding: 4px 10px; border-radius: 6px; cursor: pointer; font-size: 0.75rem; font-weight: bold; }
   </style>
-  <script>
-  // ⚡ 全域防閃爍引擎：在 DOM 載入前瞬間完成驗證與樣式套用
-  (function() {
-    const savedEmail = sessionStorage.getItem('tss_logged_email');
-    const loginTime = sessionStorage.getItem('tss_login_time');
-    
-    // 檢查是否有登入紀錄且在 30 分鐘有效時間內
-    if (savedEmail && loginTime && (Date.now() - Number(loginTime) <= 30 * 60 * 1000)) {
-      // 若已登入，直接注入 CSS 強制預先隱藏未登入按鈕、顯示已登入態，零延遲不閃爍
-      document.write(`
-        <style>
-          #navNotLoggedIn { display: none !important; }
-          #navIsLoggedIn { display: flex !important; }
-        </style>
-      `);
-    }
-  })();
-</script>
+  
 </head>
 <body>
 
@@ -333,92 +332,98 @@
           </div>
         </div>
 
-        <!-- 🎛️ PDF 排版與 4 個自訂欄位位置控制台 -->
-        <div style="background:#f8fafc; padding:20px; border-radius:10px; border:1px solid #e2e8f0; margin-bottom:20px; display:grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap:16px; align-items: start;">
+      <!-- 🎛️ PDF 排版與自訂欄位控制台 (整齊美觀版) -->
+        <div style="background:#f8fafc; padding:20px; border-radius:10px; border:1px solid #e2e8f0; margin-bottom:20px;">
           
-          <!-- 字體大小 -->
-          <div class="form-group" style="margin:0;">
-            <label style="font-weight:600; font-size:0.88rem; margin-bottom:6px; color:#374151;">字體大小 (Font Size)：</label>
-            <select id="styleFontSize" onchange="renderPrintPreview()" style="padding:8px; border:1px solid #d1d5db; border-radius:6px; width:100%; background:#fff;">
-              <option value="11px">小 (11px)</option>
-              <option value="13px" selected>標準 (13px)</option>
-              <option value="15px">大 (15px)</option>
-              <option value="17px">特大 (17px)</option>
-            </select>
-          </div>
-
-          <!-- 表格行高與間距 -->
-          <div class="form-group" style="margin:0;">
-            <label style="font-weight:600; font-size:0.88rem; margin-bottom:6px; color:#374151;">表格行高與間距 (Padding)：</label>
-            <select id="stylePadding" onchange="renderPrintPreview()" style="padding:8px; border:1px solid #d1d5db; border-radius:6px; width:100%; background:#fff;">
-              <option value="4px 6px">緊湊</option>
-              <option value="8px 10px" selected>舒適 (標準)</option>
-              <option value="12px 14px">寬鬆</option>
-            </select>
-          </div>
-
-          <!-- 📝 自訂欄位 1 -->
-          <div class="form-group" style="margin:0; background:#fff; padding:12px; border-radius:8px; border:1px solid #e2e8f0;">
-            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
-              <label style="font-weight:600; font-size:0.85rem; display:flex; align-items:center; gap:6px; cursor:pointer;">
-                <input type="checkbox" id="chkShowCol1" checked onchange="renderPrintPreview()"> 啟用欄位 1
-              </label>
-              <select id="posCol1" onchange="renderPrintPreview()" style="font-size:0.8rem; padding:2px 4px; border:1px solid #d1d5db; border-radius:4px;">
-                <option value="after_name">排在姓名後</option>
-                <option value="after_product">排在品項後</option>
-                <option value="end" selected>排在最後方</option>
+          <!-- 第一行：字體大小、表格行距 -->
+          <div style="display:grid; grid-template-columns: 1fr 1fr; gap:16px; margin-bottom:16px;">
+            <div class="form-group" style="margin:0;">
+              <label style="font-weight:600; font-size:0.88rem; margin-bottom:6px; color:#374151; display:block;">字體大小 (Font Size)：</label>
+              <select id="styleFontSize" onchange="renderPrintPreview()" style="padding:8px; border:1px solid #d1d5db; border-radius:6px; width:100%; background:#fff;">
+                <option value="11px">小 (11px)</option>
+                <option value="13px" selected>標準 (13px)</option>
+                <option value="15px">大 (15px)</option>
+                <option value="17px">特大 (17px)</option>
               </select>
             </div>
-            <input type="text" id="col1CustomTitle" value="學號信箱" oninput="renderPrintPreview()" placeholder="欄位標題" style="padding:6px; border:1px solid #d1d5db; border-radius:6px; font-size:0.85rem; width:100%;">
-          </div>
 
-          <!-- 📝 自訂欄位 2 -->
-          <div class="form-group" style="margin:0; background:#fff; padding:12px; border-radius:8px; border:1px solid #e2e8f0;">
-            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
-              <label style="font-weight:600; font-size:0.85rem; display:flex; align-items:center; gap:6px; cursor:pointer;">
-                <input type="checkbox" id="chkShowCol2" checked onchange="renderPrintPreview()"> 啟用欄位 2
-              </label>
-              <select id="posCol2" onchange="renderPrintPreview()" style="font-size:0.8rem; padding:2px 4px; border:1px solid #d1d5db; border-radius:4px;">
-                <option value="after_name">排在姓名後</option>
-                <option value="after_product">排在品項後</option>
-                <option value="end" selected>排在最後方</option>
+            <div class="form-group" style="margin:0;">
+              <label style="font-weight:600; font-size:0.88rem; margin-bottom:6px; color:#374151; display:block;">表格行高與間距 (Padding)：</label>
+              <select id="stylePadding" onchange="renderPrintPreview()" style="padding:8px; border:1px solid #d1d5db; border-radius:6px; width:100%; background:#fff;">
+                <option value="4px 6px">緊湊</option>
+                <option value="8px 10px" selected>舒適 (標準)</option>
+                <option value="12px 14px">寬鬆</option>
               </select>
             </div>
-            <input type="text" id="col2CustomTitle" value="繳費核勾" oninput="renderPrintPreview()" placeholder="欄位標題" style="padding:6px; border:1px solid #d1d5db; border-radius:6px; font-size:0.85rem; width:100%;">
           </div>
 
-          <!-- 📝 自訂欄位 3 (新增) -->
-          <div class="form-group" style="margin:0; background:#fff; padding:12px; border-radius:8px; border:1px solid #e2e8f0;">
-            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
-              <label style="font-weight:600; font-size:0.85rem; display:flex; align-items:center; gap:6px; cursor:pointer;">
-                <input type="checkbox" id="chkShowCol3" onchange="renderPrintPreview()"> 啟用欄位 3
-              </label>
-              <select id="posCol3" onchange="renderPrintPreview()" style="font-size:0.8rem; padding:2px 4px; border:1px solid #d1d5db; border-radius:4px;">
-                <option value="after_name">排在姓名後</option>
-                <option value="after_product">排在品項後</option>
-                <option value="end" selected>排在最後方</option>
+          <!-- 第二行：4 個自訂欄位設定卡片 (均勻 4 欄) -->
+          <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap:12px; margin-bottom:16px;">
+            
+            <!-- 欄位 1 -->
+            <div style="background:#fff; padding:12px; border-radius:8px; border:1px solid #e2e8f0; display:flex; flex-direction:column; gap:8px;">
+              <div style="display:flex; align-items:center; justify-content:space-between;">
+                <label style="font-weight:600; font-size:0.85rem; display:flex; align-items:center; gap:6px; cursor:pointer; margin:0;">
+                  <input type="checkbox" id="chkShowCol1" checked onchange="renderPrintPreview()"> 啟用欄位 1
+                </label>
+              </div>
+              <input type="text" id="col1CustomTitle" value="學號信箱" oninput="renderPrintPreview()" placeholder="欄位標題" style="padding:6px 8px; border:1px solid #d1d5db; border-radius:6px; font-size:0.85rem; width:100%;">
+              <select id="posCol1" onchange="renderPrintPreview()" style="font-size:0.8rem; padding:6px; border:1px solid #d1d5db; border-radius:6px; background:#f9fafb;">
+                <option value="after_name">位置：排在姓名後</option>
+                <option value="after_product">位置：排在品項後</option>
+                <option value="end" selected>位置：排在最後方</option>
               </select>
             </div>
-            <input type="text" id="col3CustomTitle" value="備註說明" oninput="renderPrintPreview()" placeholder="欄位標題" style="padding:6px; border:1px solid #d1d5db; border-radius:6px; font-size:0.85rem; width:100%;">
-          </div>
 
-          <!-- 📝 自訂欄位 4 (新增) -->
-          <div class="form-group" style="margin:0; background:#fff; padding:12px; border-radius:8px; border:1px solid #e2e8f0;">
-            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
-              <label style="font-weight:600; font-size:0.85rem; display:flex; align-items:center; gap:6px; cursor:pointer;">
-                <input type="checkbox" id="chkShowCol4" onchange="renderPrintPreview()"> 啟用欄位 4
-              </label>
-              <select id="posCol4" onchange="renderPrintPreview()" style="font-size:0.8rem; padding:2px 4px; border:1px solid #d1d5db; border-radius:4px;">
-                <option value="after_name">排在姓名後</option>
-                <option value="after_product">排在品項後</option>
-                <option value="end" selected>排在最後方</option>
+            <!-- 欄位 2 -->
+            <div style="background:#fff; padding:12px; border-radius:8px; border:1px solid #e2e8f0; display:flex; flex-direction:column; gap:8px;">
+              <div style="display:flex; align-items:center; justify-content:space-between;">
+                <label style="font-weight:600; font-size:0.85rem; display:flex; align-items:center; gap:6px; cursor:pointer; margin:0;">
+                  <input type="checkbox" id="chkShowCol2" checked onchange="renderPrintPreview()"> 啟用欄位 2
+                </label>
+              </div>
+              <input type="text" id="col2CustomTitle" value="繳費核勾" oninput="renderPrintPreview()" placeholder="欄位標題" style="padding:6px 8px; border:1px solid #d1d5db; border-radius:6px; font-size:0.85rem; width:100%;">
+              <select id="posCol2" onchange="renderPrintPreview()" style="font-size:0.8rem; padding:6px; border:1px solid #d1d5db; border-radius:6px; background:#f9fafb;">
+                <option value="after_name">位置：排在姓名後</option>
+                <option value="after_product">位置：排在品項後</option>
+                <option value="end" selected>位置：排在最後方</option>
               </select>
             </div>
-            <input type="text" id="col4CustomTitle" value="領取簽名" oninput="renderPrintPreview()" placeholder="欄位標題" style="padding:6px; border:1px solid #d1d5db; border-radius:6px; font-size:0.85rem; width:100%;">
+
+            <!-- 欄位 3 -->
+            <div style="background:#fff; padding:12px; border-radius:8px; border:1px solid #e2e8f0; display:flex; flex-direction:column; gap:8px;">
+              <div style="display:flex; align-items:center; justify-content:space-between;">
+                <label style="font-weight:600; font-size:0.85rem; display:flex; align-items:center; gap:6px; cursor:pointer; margin:0;">
+                  <input type="checkbox" id="chkShowCol3" onchange="renderPrintPreview()"> 啟用欄位 3
+                </label>
+              </div>
+              <input type="text" id="col3CustomTitle" value="備註說明" oninput="renderPrintPreview()" placeholder="欄位標題" style="padding:6px 8px; border:1px solid #d1d5db; border-radius:6px; font-size:0.85rem; width:100%;">
+              <select id="posCol3" onchange="renderPrintPreview()" style="font-size:0.8rem; padding:6px; border:1px solid #d1d5db; border-radius:6px; background:#f9fafb;">
+                <option value="after_name">位置：排在姓名後</option>
+                <option value="after_product">位置：排在品項後</option>
+                <option value="end" selected>位置：排在最後方</option>
+              </select>
+            </div>
+
+            <!-- 欄位 4 -->
+            <div style="background:#fff; padding:12px; border-radius:8px; border:1px solid #e2e8f0; display:flex; flex-direction:column; gap:8px;">
+              <div style="display:flex; align-items:center; justify-content:space-between;">
+                <label style="font-weight:600; font-size:0.85rem; display:flex; align-items:center; gap:6px; cursor:pointer; margin:0;">
+                  <input type="checkbox" id="chkShowCol4" onchange="renderPrintPreview()"> 啟用欄位 4
+                </label>
+              </div>
+              <input type="text" id="col4CustomTitle" value="領取簽名" oninput="renderPrintPreview()" placeholder="欄位標題" style="padding:6px 8px; border:1px solid #d1d5db; border-radius:6px; font-size:0.85rem; width:100%;">
+              <select id="posCol4" onchange="renderPrintPreview()" style="font-size:0.8rem; padding:6px; border:1px solid #d1d5db; border-radius:6px; background:#f9fafb;">
+                <option value="after_name">位置：排在姓名後</option>
+                <option value="after_product">位置：排在品項後</option>
+                <option value="end" selected>位置：排在最後方</option>
+              </select>
+            </div>
+
           </div>
 
-          <!-- 自訂報表標題與備註 (佔滿整行) -->
-          <div class="form-group full-width" style="margin:0; grid-column:1 / -1; border-top: 1px solid #e5e7eb; padding-top: 12px;">
+          <!-- 第三行：自訂報表標題與備註 -->
+          <div style="border-top: 1px solid #e5e7eb; padding-top: 12px;">
             <label style="font-weight:600; font-size:0.88rem; margin-bottom:6px; color:#374151; display:block;">自訂報表標題與備註：</label>
             <div style="display:grid; grid-template-columns: 1fr 1fr; gap:12px;">
               <input type="text" id="customPrintTitle" value="TSSC13TH 周邊預購繳費清單" oninput="renderPrintPreview()" placeholder="主標題" style="padding:8px; border:1px solid #d1d5db; border-radius:6px; background:#fff; font-size:0.9rem;">

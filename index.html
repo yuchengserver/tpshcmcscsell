@@ -1,5 +1,21 @@
 <!DOCTYPE html>
 <html lang="zh-Hant">
+  <head>
+  <script>
+    // ⚡ 零延遲防閃爍機制：在網頁載入瞬間直接預先鎖定導覽列樣式
+    (function() {
+      const email = sessionStorage.getItem('tss_logged_email');
+      const loginTime = sessionStorage.getItem('tss_login_time');
+      if (email && loginTime && (Date.now() - Number(loginTime) <= 30 * 60 * 1000)) {
+        // 如果有效登入，直接建立預先隱藏未登入、顯示已登入的 CSS 規則
+        document.styleSheets[0] && document.styleSheets[0].insertRule ? 
+          document.styleSheets[0].insertRule('#navNotLoggedIn { display: none !important; }', 0) :
+          document.write('<style>#navNotLoggedIn { display: none !important; } #navIsLoggedIn { display: flex !important; }</style>');
+      }
+    })();
+  </script>
+  <!-- 其他原本的 CSS 與 meta 標籤 -->
+</head>
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
