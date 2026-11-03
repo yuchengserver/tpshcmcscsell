@@ -312,30 +312,30 @@
 
     <!-- 標籤頁 2：AI 對帳與輔助點鈔中心 -->
     <div id="tabReconcile" class="tab-content">
-      <div class="admin-card">
-        <h2>🧮 班級自動對帳與輕量點鈔系統</h2>
-        <p style="color:#6b7280; font-size:0.9rem; margin-bottom:16px;">選擇班級檢視預期金額，並透過下方輕量級「紙鈔面額計算機」統計現金，金額吻合即可一鍵核銷！</p>
+      <div class="admin-card" style="background:#ffffff; padding:24px; border-radius:12px; border:1px solid #e2e8f0; box-shadow:0 1px 3px rgba(0,0,0,0.02); max-width:900px; margin:0 auto;">
+        <h2 style="margin-top:0; font-size:1.15rem; color:#0f172a; margin-bottom:8px;">🧮 班級自動對帳與智慧催繳系統</h2>
+        <p style="color:#64748b; font-size:0.9rem; margin-bottom:20px;">選擇班級檢視預期金額，並透過下方輕量級「紙鈔面額計算機」統計現金。若發現短少，系統將自動溯源並生成專業 PDF 催繳單！</p>
         
-        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:16px; margin-bottom:16px;">
+        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:16px; margin-bottom:20px;">
           <div>
-            <label style="font-weight:bold; display:block; margin-bottom:6px;">選擇對帳班級：</label>
-            <select id="reconcileClassSelect" onchange="updateReconcileExpected()" style="width:100%; padding:10px; border:1px solid #d1d5db; border-radius:6px; font-size:1rem;"></select>
+            <label style="font-weight:700; display:block; margin-bottom:6px; color:#475569; font-size:0.88rem;">選擇對帳班級：</label>
+            <select id="reconcileClassSelect" onchange="updateReconcileExpected()" style="width:100%; padding:10px 12px; border:1px solid #cbd5e1; border-radius:8px; font-size:0.95rem; background:#fff; outline:none;"></select>
           </div>
           <div>
-            <label style="font-weight:bold; display:block; margin-bottom:6px;">系統預期總金額：</label>
-            <div id="expectedTotalDisplay" style="font-weight:bold; color:#0284c7; font-size:1.3rem; margin-top:6px;">0 ₫</div>
+            <label style="font-weight:700; display:block; margin-bottom:6px; color:#475569; font-size:0.88rem;">系統預期總金額 (Expected)：</label>
+            <div id="expectedTotalDisplay" style="padding:10px 12px; background:#f1f5f9; border-radius:8px; font-size:1.1rem; font-weight:800; color:#0284c7;">0 ₫</div>
           </div>
         </div>
 
-        <!-- 💵 輕量化輔助點鈔機框架 -->
-        <div class="cashier-box" style="background:#f8fafc; padding:20px; border-radius:10px; border:1px solid #e2e8f0; margin-bottom:20px;">
+        <!-- 💵 輕量化輔助點鈔機框架 (固定寬度絕不晃動) -->
+        <div class="cashier-box" style="background:#f8fafc; padding:20px; border-radius:12px; border:1px solid #e2e8f0; margin-bottom:20px;">
           <h4 style="margin:0 0 12px 0; font-size:1rem; color:#1e293b; font-weight:700;">💵 現金輔助點鈔計算機 (越南盾面額)</h4>
           <table class="cashier-table">
             <thead>
               <tr>
-                <th style="background:#f1f5f9; color:#374151; font-weight:bold;">面額 (VND)</th>
-                <th style="text-align:center; background:#f1f5f9; color:#374151; font-weight:bold;">數量 (張)</th>
-                <th style="text-align:right; background:#f1f5f9; color:#374151; font-weight:bold;">小計</th>
+                <th>面額 (VND)</th>
+                <th style="text-align:center;">數量 (張/枚)</th>
+                <th style="text-align:right;">小計</th>
               </tr>
             </thead>
             <tbody>
@@ -378,12 +378,12 @@
           </table>
         </div>
 
-        <div class="form-group" style="margin-bottom:16px;">
-          <label style="font-weight:bold; display:block; margin-bottom:6px;">實際收到總金額 (VND)：</label>
-          <input type="number" id="actualReceivedAmount" style="width:100%; padding:10px; border:1px solid #d1d5db; border-radius:6px; font-weight:bold; font-size:1.1rem; color:#dc2626;" value="0">
+        <div class="form-group" style="margin-bottom:20px; display:flex; justify-content:space-between; align-items:center; background:#f8fafc; padding:14px 18px; border-radius:10px; border:1px solid #e2e8f0;">
+          <label style="font-weight:700; color:#334155;">實際收到總金額 (VND)：</label>
+          <input type="number" id="actualReceivedAmount" readonly style="width:180px; padding:8px 12px; border:1px solid #cbd5e1; border-radius:8px; font-weight:800; font-size:1.15rem; color:#dc2626; background:#fff; text-align:right;" value="0">
         </div>
 
-        <button type="button" onclick="executeReconciliation()" class="btn-admin-action" style="width:100%; padding:12px; font-size:1.05rem;">🚀 開始自動對帳與核銷訂單</button>
+        <button type="button" onclick="executeReconciliation()" class="btn-admin-action" style="width:100%; padding:12px; font-size:1rem; border-radius:8px; cursor:pointer;">🚀 開始自動對帳與智慧核銷</button>
         <div id="reconcileResultArea" style="margin-top:20px;"></div>
       </div>
     </div>
@@ -913,32 +913,43 @@
       renderOrdersTable(filtered);
     }
 
+    // 📊 初始化對帳下拉選單
     function initReconcileDropdown() {
-  let groups = {};
-  globalOrdersData.forEach(o => {
-    // 直接讀取獨立的班級欄位 (若後端屬性為 class_name)
-    let c = (o.class_name || "未分類").trim().toUpperCase();
-    if (!groups[c]) groups[c] = [];
-    groups[c].push(o);
-  });
-  document.getElementById('previewClassSelect').innerHTML = Object.keys(groups).map(c => `<option value="${c}">${c}</option>`).join('');
-  renderPrintPreview();
-}
+      let groups = {};
+      globalOrdersData.forEach(o => {
+        // 直接讀取獨立的班級欄位
+        let c = (o.class_name || "未分類").trim().toUpperCase();
+        if (!groups[c]) groups[c] = [];
+        groups[c].push(o);
+      });
+      
+      const selectEl = document.getElementById('reconcileClassSelect');
+      if (selectEl) {
+        selectEl.innerHTML = Object.keys(groups).map(c => `<option value="${c}">${c}</option>`).join('');
+        updateReconcileExpected(); // 初始化時同步更新預期金額
+      }
+    }
 
+    // 📈 更新該班級應收金額與重設點鈔機
     function updateReconcileExpected() {
       let c = document.getElementById('reconcileClassSelect').value;
-      let orders = globalOrdersData.filter(o => o.name.toUpperCase().includes(c));
+      // 🌟 修正：精準比對班級欄位，避免用名字模糊搜尋
+      let orders = globalOrdersData.filter(o => String(o.class_name || "").trim().toUpperCase() === c);
       let expected = orders.reduce((sum, o) => sum + Number(o.total_price || 0), 0);
+      
       document.getElementById('expectedTotalDisplay').innerText = formatVND(expected);
       document.querySelectorAll('.cashier-table input').forEach(input => input.value = 0);
       calculateCashierTotal();
+      document.getElementById('reconcileResultArea').innerHTML = "";
     }
 
+    // 🧮 計算點鈔機小計與總額
     function calculateCashierTotal() {
       let total = 0;
       document.querySelectorAll('.cashier-table tbody tr').forEach(row => {
-        let denom = Number(row.querySelector('input').dataset.val);
-        let count = Number(row.querySelector('input').value) || 0;
+        let inputEl = row.querySelector('input');
+        let denom = Number(inputEl.dataset.val);
+        let count = Number(inputEl.value) || 0;
         let sub = denom * count;
         row.querySelector('.sub-cash').innerText = formatVND(sub);
         total += sub;
@@ -946,30 +957,89 @@
       document.getElementById('actualReceivedAmount').value = total;
     }
 
+    // 🚀 執行智慧對帳與催繳單生成（含防呆提示與已繳/尚須繳分析）
     async function executeReconciliation() {
       let c = document.getElementById('reconcileClassSelect').value;
       let actual = Number(document.getElementById('actualReceivedAmount').value);
-      let orders = globalOrdersData.filter(o => o.name.toUpperCase().includes(c));
+      // 🌟 修正：精準比對班級欄位
+      let orders = globalOrdersData.filter(o => String(o.class_name || "").trim().toUpperCase() === c);
       let expected = orders.reduce((sum, o) => sum + Number(o.total_price || 0), 0);
       let diff = actual - expected;
       let resArea = document.getElementById('reconcileResultArea');
       const email = sessionStorage.getItem('tss_logged_email') || "";
 
+      if (orders.length === 0) {
+        alert("該班級無任何訂單資料！");
+        return;
+      }
+
       if (diff === 0) {
+        // 1. 金額完美吻合，自動更新該班訂單狀態為已付款
         try {
           for (let o of orders) {
             if (o.status !== '已付款') {
               await fetch(GAS_API_URL, {
                 method: "POST",
-                body: JSON.stringify({ action: "updateOrderStatus", email: email, orderId: o.order_id, newStatus: "已付款" })
+                body: JSON.stringify({ action: "updateOrderStatus", email, orderId: o.order_id, newStatus: "已付款" })
               });
             }
           }
-          resArea.innerHTML = `<div style="padding:15px; background:#f0fdf4; color:#166534; border-radius:6px; font-weight:bold;">✅ 金額完美吻合 (${formatVND(expected)})！系統已自動將該班所有消費者的訂單狀態更新為「已付款」。</div>`;
+          resArea.innerHTML = `<div style="padding:16px; background:#f0fdf4; color:#166534; border:1px solid #bbf7d0; border-radius:8px; font-weight:600;">✅ 金額完美吻合 (${formatVND(expected)})！系統已自動將該班所有消費者的訂單狀態更新為「已付款」。</div>`;
           loadAllOrders();
-        } catch(e) { alert("自動更新失敗"); }
+        } catch(e) { alert("自動更新狀態發生錯誤"); }
+      } else if (diff < 0) {
+        // 2. ⚠️ 金額短少 (少錢)，自動溯源欠繳項目並生成專業 PDF 催繳單
+        let shortage = Math.abs(diff);
+        
+        let dunningHtml = `
+          <div style="padding:20px; background:#fef2f2; border:1px solid #fecaca; border-radius:10px; color:#991b1b;">
+            <div style="font-weight:800; font-size:1.05rem; margin-bottom:6px;">⚠️ 金額有誤！點鈔短少差額：${formatVND(shortage)}</div>
+            <p style="margin:0 0 14px 0; font-size:0.9rem; color:#b91c1c;">提示：點數結果與系統應收金額不符，請人工再次確認是否有點鈔數錯或找零錯誤！系統已為您自動分析尚須繳納之欠繳清單：</p>
+            
+            <div style="background:#ffffff; padding:16px; border-radius:8px; border:1px solid #fca5a5; margin-bottom:16px; color:#1e293b;">
+              <h4 style="margin:0 0 8px 0; color:#0f172a; text-align:center; font-size:1.1rem;">📢 TSSC13TH 官方周邊預購補繳催繳通知單</h4>
+              <p style="margin:0 0 10px 0; font-size:0.88rem; color:#475569; text-align:center;">班級：<strong>${c}</strong> | 應收總額：${formatVND(expected)} | 實際點收：${formatVND(actual)}</p>
+              
+              <table style="width:100%; border-collapse:collapse; font-size:0.88rem; margin-top:10px;">
+                <thead>
+                  <tr style="background:#f1f5f9; color:#334155;">
+                    <th style="border:1px solid #cbd5e1; padding:8px; text-align:left;">訂購人 / 學生</th>
+                    <th style="border:1px solid #cbd5e1; padding:8px; text-align:left;">欠繳品項與規格</th>
+                    <th style="border:1px solid #cbd5e1; padding:8px; text-align:right;">已繳納金額</th>
+                    <th style="border:1px solid #cbd5e1; padding:8px; text-align:right; color:#dc2626;">尚須繳納</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  ${orders.map(o => {
+                    let isPaid = o.status === '已付款';
+                    let paidAmt = isPaid ? Number(o.total_price) : 0;
+                    let dueAmt = isPaid ? 0 : Number(o.total_price);
+                    return `
+                      <tr>
+                        <td style="border:1px solid #cbd5e1; padding:8px;"><strong>${o.name}</strong><br><small style="color:#64748b;">${o.email}</small></td>
+                        <td style="border:1px solid #cbd5e1; padding:8px;">${o.product_title} (${o.selected_option || '預設'}) x ${o.quantity}</td>
+                        <td style="border:1px solid #cbd5e1; padding:8px; text-align:right;">${formatVND(paidAmt)}</td>
+                        <td style="border:1px solid #cbd5e1; padding:8px; text-align:right; font-weight:bold; color:#dc2626;">${formatVND(dueAmt)}</td>
+                      </tr>
+                    `;
+                  }).join('')}
+                </tbody>
+              </table>
+              <div style="margin-top:15px; text-align:right; font-size:1rem; font-weight:bold; color:#dc2626;">
+                本班尚須補繳總金額：${formatVND(shortage)}
+              </div>
+              <div style="margin-top:20px; text-align:center; font-size:0.8rem; color:#64748b; border-top:1px solid #e2e8f0; padding-top:10px;">
+                胡志明市臺灣學校學生會 TSSC13TH © 2026 yucheng
+              </div>
+            </div>
+
+            <button type="button" class="btn-admin-print" onclick="window.print()" style="width:100%; padding:10px; font-weight:bold; border-radius:6px; cursor:pointer;">🖨️ 列印 / 匯出此份催繳單 PDF</button>
+          </div>
+        `;
+        resArea.innerHTML = dunningHtml;
       } else {
-        resArea.innerHTML = `<div style="padding:15px; background:#fef2f2; color:#991b1b; border-radius:6px; font-weight:bold;">⚠️ 金額有誤！差額：${formatVND(diff)}。請重新點算現金。</div>`;
+        // 3. 現金超收提示
+        resArea.innerHTML = `<div style="padding:16px; background:#eff6ff; color:#1d4ed8; border:1px solid #bfdbfe; border-radius:8px; font-weight:600;">ℹ️ 點鈔金額大於系統應收總額，超收現金：${formatVND(diff)}。請再次確認是否有點數計算錯誤或找零。</div>`;
       }
     }
 
