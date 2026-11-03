@@ -988,17 +988,52 @@
     }
 
     async function changeOrderStatus(orderId, newStatus) {
+      // 1. ⚡ 立即更新本地全域資料，達成零延遲響應
+      const targetOrder = globalOrdersData.find(o => o.order_id === orderId);
+      if (targetOrder) {
+        targetOrder.status = newStatus;
+      }
+      
+      // 2. 靜默發送請求給 Google Apps Script (GAS) 後台更新
       const email = sessionStorage.getItem('tss_logged_email') || "";
-      await fetch(GAS_API_URL, { method: "POST", body: JSON.stringify({ action: "updateOrderStatus", email, orderId, newStatus }) });
-      loadAllOrders();
+      try {
+        await fetch(GAS_API_URL, { 
+          method: "POST", 
+          body: JSON.stringify({ action: "updateOrderStatus", email, orderId, newStatus }) 
+        });
+      } catch (err) {
+        console.error("狀態同步至雲端失敗", err);
+        alert("網路異常，部分狀態可能未同步至雲端試算表。");
+        loadAllOrders(); // 發生錯誤時才重新載入校正
+      }
     }
 
+    // 📦 快速更新商品庫存
+   // 📦 快速更新商品庫存
     async function updateStock(productId, newStock) {
-      alert(`商品 ${productId} 庫存已暫存更新為 ${newStock}`);
+      const email = sessionStorage.getItem('tss_logged_email') || "";
+      try {
+        await fetch(GAS_API_URL, {
+          method: "POST",
+          body: JSON.stringify({ action: "updateProductStock", email, productId, newStock })
+        });
+        // 靜默成功，不彈跳視窗干擾操作
+      } catch (err) {
+        console.error("庫存更新失敗", err);
+      }
     }
 
+    // 🏷️ 快速更新商品狀態 (開放中/預告中/已完售)
     async function updateStatus(productId, newStatus) {
-      alert(`商品 ${productId} 狀態已變更為 ${newStatus}`);
+      const email = sessionStorage.getItem('tss_logged_email') || "";
+      try {
+        await fetch(GAS_API_URL, {
+          method: "POST",
+          body: JSON.stringify({ action: "updateProductStatus", email, productId, newStatus })
+        });
+      } catch (err) {
+        console.error("商品狀態更新失敗", err);
+      }
     }
 
     function exportOrdersToCSV() {
