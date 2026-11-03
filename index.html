@@ -24,8 +24,7 @@
   <!-- 引入 Google Sign-In SDK -->
   <script src="https://accounts.google.com/gsi/client" async defer></script>
   <style>
-    /* 🛒 蝦皮風格商品網格佈局 */
-    .product-grid {
+  .product-grid {
       display: grid;
       grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
       gap: 16px;
@@ -102,7 +101,7 @@
       color: #dc2626; /* 蝦皮紅 */
     }
 
-    /* 🪟 彈出式小視窗 (Modal) 樣式 */
+    /* 🪟 升級版彈出式小視窗 (Modal) 排版 */
     #productModalOverlay {
       display: none;
       position: fixed;
@@ -115,18 +114,20 @@
       justify-content: center;
       align-items: center;
       padding: 16px;
+      box-sizing: border-box;
     }
     .modal-card {
       background: #ffffff;
       width: 100%;
-      max-width: 520px;
-      border-radius: 12px;
+      max-width: 560px;
+      border-radius: 14px;
       overflow: hidden;
-      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+      box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
       display: flex;
       flex-direction: column;
       max-height: 90vh;
       animation: modalFadeIn 0.2s ease-out;
+      box-sizing: border-box;
     }
     @keyframes modalFadeIn {
       from { transform: translateY(10px); opacity: 0; }
@@ -136,12 +137,12 @@
       display: flex;
       justify-content: space-between;
       align-items: center;
-      padding: 14px 20px;
+      padding: 16px 22px;
       border-bottom: 1px solid #e5e7eb;
       background: #f8fafc;
     }
     .modal-body {
-      padding: 20px;
+      padding: 22px;
       overflow-y: auto;
       flex: 1;
     }
@@ -149,7 +150,7 @@
       width: 100%;
       height: 220px;
       object-fit: cover;
-      border-radius: 8px;
+      border-radius: 10px;
       margin-bottom: 14px;
       border: 1px solid #e2e8f0;
       background: #f1f5f9;
@@ -157,16 +158,16 @@
     
     /* 規格標籤與數量器 */
     .modal-options-label {
-      font-size: 0.85rem;
+      font-size: 0.9rem;
       font-weight: bold;
       color: #374151;
-      margin-bottom: 6px;
+      margin-bottom: 8px;
     }
     .shopee-pills-container {
       display: flex;
       flex-wrap: wrap;
       gap: 6px;
-      margin-bottom: 14px;
+      margin-bottom: 16px;
     }
     .shopee-pill {
       background: #f3f4f6;
@@ -186,14 +187,27 @@
       font-weight: 600;
     }
 
-    /* 三欄式填單：姓名、班級、座號 */
+    /* 三欄式填單：姓名、班級、座號 (防擠壓設計) */
     .form-row-three {
       display: grid;
       grid-template-columns: 2fr 1fr 1fr;
       gap: 10px;
-      margin-bottom: 14px;
+      margin-bottom: 16px;
     }
-    @media (max-width: 500px) {
+    .form-row-three input {
+      padding: 10px 12px;
+      border: 1px solid #d1d5db;
+      border-radius: 8px;
+      font-size: 0.9rem;
+      width: 100%;
+      box-sizing: border-box;
+      outline: none;
+    }
+    .form-row-three input:focus {
+      border-color: #2563eb;
+      box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+    }
+    @media (max-width: 600px) {
       .form-row-three { grid-template-columns: 1fr; }
     }
 
@@ -236,6 +250,51 @@
     .btn-nav-logout:hover {
       background: #dc2626;
       transform: translateY(-1px);
+    }
+
+    /* 📱 手機側邊隱藏選單 (Mobile Drawer) 樣式 */
+    .mobile-menu-btn {
+      display: none;
+      background: none;
+      border: none;
+      font-size: 1.5rem;
+      cursor: pointer;
+      color: #1f2937;
+    }
+    .mobile-drawer-overlay {
+      display: none;
+      position: fixed;
+      top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(0,0,0,0.5);
+      z-index: 2000;
+    }
+    .mobile-drawer {
+      position: fixed;
+      top: 0; left: -280px; width: 280px; height: 100%;
+      background: #ffffff;
+      z-index: 2001;
+      box-shadow: 4px 0 15px rgba(0,0,0,0.1);
+      transition: left 0.3s ease;
+      display: flex;
+      flex-direction: column;
+      padding: 20px;
+      box-sizing: border-box;
+    }
+    .mobile-drawer.open { left: 0; }
+    .mobile-drawer a {
+      padding: 12px 16px;
+      color: #374151;
+      text-decoration: none;
+      font-weight: 600;
+      border-radius: 8px;
+      margin-bottom: 6px;
+      transition: background 0.2s;
+    }
+    .mobile-drawer a:hover { background: #f3f4f6; color: #2563eb; }
+
+    @media (max-width: 768px) {
+      .desktop-nav-links { display: none !important; }
+      .mobile-menu-btn { display: block !important; }
     }
   </style>
   <script>
@@ -317,46 +376,53 @@
 
   </div>
 
-  <!-- 🪟 點擊商品後彈出的互動視窗 (Modal) -->
-  <div id="productModalOverlay">
-    <div class="modal-card">
-      <div class="modal-header">
-        <h3 id="modalTitle" style="margin:0; font-size:1.1rem; color:#111827;">商品詳細與選購</h3>
-        <button onclick="closeProductModal()" style="background:#ef4444; color:#fff; border:none; padding:4px 10px; border-radius:6px; cursor:pointer; font-weight:bold;">✕</button>
+ <!-- 🪟 點擊商品後彈出的互動視窗 (Modal 升級美化版) -->
+  <div id="productModalOverlay" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); z-index:1000; align-items:center; justify-content:center; padding:16px; box-sizing:border-box;">
+    <div class="modal-card" style="background:#fff; width:100%; max-width:560px; border-radius:14px; box-shadow:0 10px 25px rgba(0,0,0,0.15); overflow:hidden; max-height:90vh; display:flex; flex-direction:column; box-sizing:border-box;">
+      
+      <!-- 頂部標題列 -->
+      <div class="modal-header" style="display:flex; justify-content:space-between; align-items:center; padding:18px 24px; border-bottom:1px solid #f3f4f6; background:#f9fafb;">
+        <h3 id="modalTitle" style="margin:0; font-size:1.2rem; font-weight:700; color:#1f2937;">商品詳細與選購</h3>
+        <button onclick="closeProductModal()" style="background:#fee2e2; color:#dc2626; border:none; width:32px; height:32px; border-radius:50%; cursor:pointer; font-weight:bold; display:flex; align-items:center; justify-content:center; font-size:0.9rem;">✕</button>
       </div>
-      <div class="modal-body">
-        <img id="modalImg" class="modal-img" src="tpshcmcsc.png" alt="商品圖片" onerror="this.src='tpshcmcsc.png'">
-        <div id="modalStatusBadge" style="display:inline-block; padding:3px 8px; border-radius:4px; font-size:0.78rem; font-weight:600; margin-bottom:8px;"></div>
-        <p id="modalDesc" style="color:#4b5563; font-size:0.9rem; margin:0 0 14px 0; line-height:1.5;"></p>
-        <div id="modalPrice" style="font-size:1.25rem; font-weight:bold; color:#dc2626; margin-bottom:14px;">0 ₫</div>
+
+      <!-- 捲動內容區 -->
+      <div class="modal-body" style="padding:24px; overflow-y:auto; flex:1;">
+        <div style="width:100%; height:220px; border-radius:10px; overflow:hidden; margin-bottom:16px; background:#f3f4f6;">
+          <img id="modalImg" class="modal-img" src="tpshcmcsc.png" alt="商品圖片" onerror="this.src='tpshcmcsc.png'" style="width:100%; height:100%; object-fit:cover;">
+        </div>
+
+        <div id="modalStatusBadge" style="display:inline-block; padding:4px 10px; border-radius:6px; font-size:0.8rem; font-weight:600; margin-bottom:10px;"></div>
+        <p id="modalDesc" style="color:#4b5563; font-size:0.95rem; margin:0 0 16px 0; line-height:1.6;"></p>
+        <div id="modalPrice" style="font-size:1.4rem; font-weight:700; color:#dc2626; margin-bottom:18px;">0 ₫</div>
 
         <!-- 動態規格選項容器 -->
-        <div id="modalOptionsContainer"></div>
+        <div id="modalOptionsContainer" style="margin-bottom:16px;"></div>
 
         <!-- 購買數量調整器 -->
-        <div style="margin-bottom: 16px;">
-          <label style="font-size:0.85rem; font-weight:bold; color:#374151; display:block; margin-bottom:6px;">購買數量：</label>
-          <div style="display:flex; align-items:center; width:120px; border:1px solid #d1d5db; border-radius:6px; overflow:hidden;">
-            <button type="button" onclick="adjustModalQty(-1)" style="background:#f3f4f6; border:none; width:36px; height:36px; font-weight:bold; cursor:pointer;">-</button>
-            <input type="text" id="modalQtyInput" value="1" readonly style="flex:1; height:36px; border:none; text-align:center; font-size:1rem; outline:none;">
-            <button type="button" onclick="adjustModalQty(1)" style="background:#f3f4f6; border:none; width:36px; height:36px; font-weight:bold; cursor:pointer;">+</button>
+        <div style="margin-bottom: 20px;">
+          <label style="font-size:0.9rem; font-weight:600; color:#374151; display:block; margin-bottom:8px;">購買數量：</label>
+          <div style="display:flex; align-items:center; width:130px; border:1px solid #d1d5db; border-radius:8px; overflow:hidden;">
+            <button type="button" onclick="adjustModalQty(-1)" style="background:#f3f4f6; border:none; width:40px; height:40px; font-weight:bold; cursor:pointer; font-size:1.1rem;">-</button>
+            <input type="text" id="modalQtyInput" value="1" readonly style="flex:1; height:40px; border:none; text-align:center; font-size:1rem; outline:none; background:#fff;">
+            <button type="button" onclick="adjustModalQty(1)" style="background:#f3f4f6; border:none; width:40px; height:40px; font-weight:bold; cursor:pointer; font-size:1.1rem;">+</button>
           </div>
         </div>
 
-        <!-- 👤 實名填單區 (姓名、班級、座號) -->
-        <div style="margin-bottom: 16px;">
-          <label style="font-size:0.85rem; font-weight:bold; color:#374151; display:block; margin-bottom:6px;">訂購者身分資料 (姓名 / 班級 / 座號) *：</label>
-          <div class="form-row-three">
-            <input type="text" id="modalInputName" required placeholder="真實姓名 (例: Nguyen Van A)" style="padding:9px; border:1px solid #d1d5db; border-radius:6px; font-size:0.9rem;">
-            <input type="text" id="modalInputClass" required placeholder="班級 (例: 12A1)" style="padding:9px; border:1px solid #d1d5db; border-radius:6px; font-size:0.9rem;">
-            <input type="text" id="modalInputSeat" required placeholder="座號 (例: 15)" style="padding:9px; border:1px solid #d1d5db; border-radius:6px; font-size:0.9rem;">
+        <!-- 👤 實名填單區 (姓名、班級、座號) - 完美防擠壓網格 -->
+        <div style="margin-bottom: 24px;">
+          <label style="font-size:0.9rem; font-weight:600; color:#374151; display:block; margin-bottom:8px;">訂購者身分資料 (姓名 / 班級 / 座號) *：</label>
+          <div class="identity-grid">
+            <input type="text" id="modalInputName" required placeholder="真實姓名 (例: Nguyen)">
+            <input type="text" id="modalInputClass" required placeholder="班級 (12A1)">
+            <input type="text" id="modalInputSeat" required placeholder="座號 (15)">
           </div>
         </div>
 
         <!-- 底部按鈕群組 -->
-        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px; margin-top:20px;">
-          <button type="button" onclick="modalAddToCart()" style="background:#eff6ff; color:#2563eb; border:1px solid #bfdbfe; border-radius:8px; padding:12px; font-weight:600; cursor:pointer;">🛒 加入購物車</button>
-          <button type="button" onclick="modalSubmitDirectOrder()" id="modalSubmitBtn" style="background:#2563eb; color:#ffffff; border:none; border-radius:8px; padding:12px; font-weight:600; cursor:pointer;">⚡ 確認送出預購</button>
+        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:12px;">
+          <button type="button" onclick="modalAddToCart()" style="background:#eff6ff; color:#2563eb; border:1px solid #bfdbfe; border-radius:8px; padding:14px; font-weight:600; cursor:pointer; font-size:0.95rem;">🛒 加入購物車</button>
+          <button type="button" onclick="modalSubmitDirectOrder()" id="modalSubmitBtn" style="background:#2563eb; color:#ffffff; border:none; border-radius:8px; padding:14px; font-weight:600; cursor:pointer; font-size:0.95rem;">⚡ 確認送出預購</button>
         </div>
       </div>
     </div>
