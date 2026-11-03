@@ -14,7 +14,7 @@
       }
     })();
   </script>
-  
+
 </head>
 <head>
   <meta charset="UTF-8">
@@ -24,73 +24,199 @@
   <!-- 引入 Google Sign-In SDK -->
   <script src="https://accounts.google.com/gsi/client" async defer></script>
   <style>
+    /* 🌐 全局字體與平滑渲染 */
+    body {
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      background-color: #f8fafc;
+      color: #1e293b;
+      margin: 0;
+      padding: 0;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* 🏷️ 頂部導覽列品牌標誌 */
     .nav-brand {
-  display: flex !important;
-  align-items: center !important;
-  gap: 12px;
-  font-size: 20px !important;
-  font-weight: 700;
-  color: #1b1f23;
-  text-decoration: none;
-  transition: opacity 0.2s;
+      display: flex !important;
+      align-items: center !important;
+      gap: 12px;
+      font-size: 1.1rem !important;
+      font-weight: 700;
+      color: #0f172a;
+      text-decoration: none;
     }
     .nav-logo {
-  height: 38px;
-  width: auto;
-  object-fit: contain;
-  filter: brightness(0) ;
-}
-    .admin-tabs { display: flex; gap: 8px; margin-bottom: 20px; border-bottom: 2px solid #e5e7eb; padding-bottom: 10px; flex-wrap: wrap; }
-    .tab-btn { background: #f3f4f6; border: none; padding: 10px 18px; border-radius: 8px; cursor: pointer; font-weight: bold; font-size: 0.95rem; color: #4b5563; transition: all 0.2s; }
-    .tab-btn:hover { background: #e5e7eb; color: #111827; }
-    .tab-btn.active { background: #000000; color: #fff; box-shadow: 0 4px 6px rgba(0,0,0,0.15); }
+      height: 34px;
+      width: auto;
+      object-fit: contain;
+    }
+
+    /* 🗂️ 現代感分頁標籤 (Tabs) */
+    .admin-tabs {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 24px;
+      border-bottom: 1px solid #e2e8f0;
+      padding-bottom: 12px;
+      flex-wrap: wrap;
+    }
+    .tab-btn {
+      background: #ffffff;
+      border: 1px solid #e2e8f0;
+      padding: 10px 20px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: 600;
+      font-size: 0.9rem;
+      color: #64748b;
+      transition: all 0.2s ease;
+      box-shadow: 0 1px 2px rgba(0,0,0,0.02);
+    }
+    .tab-btn:hover {
+      background: #f1f5f9;
+      color: #0f172a;
+      border-color: #cbd5e1;
+    }
+    .tab-btn.active {
+      background: #0f172a;
+      color: #ffffff;
+      border-color: #0f172a;
+      box-shadow: 0 4px 12px rgba(15, 23, 42, 0.15);
+    }
     .tab-content { display: none; }
-    .tab-content.active { display: block; }
+    .tab-content.active { display: block; animation: fadeIn 0.25s ease-out; }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(4px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* 📊 數據統計儀表板卡片 */
+    .dashboard-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+    .stat-card {
+      background: #ffffff;
+      padding: 22px;
+      border-radius: 12px;
+      border: 1px solid #e2e8f0;
+      text-align: center;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.02);
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+    .stat-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 16px rgba(0,0,0,0.04);
+    }
+    .stat-card .label { font-size: 0.85rem; color: #64748b; font-weight: 600; letter-spacing: 0.02em; }
+    .stat-card .num { font-size: 1.75rem; font-weight: 800; color: #0284c7; margin-top: 8px; }
+
+    /* 🎨 規格組精緻卡片 */
+    .form-item-card {
+      background: #ffffff;
+      border: 1px solid #e2e8f0;
+      border-radius: 10px;
+      padding: 18px;
+      margin-bottom: 12px;
+      box-shadow: 0 1px 2px rgba(0,0,0,0.02);
+    }
+    .options-header-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+      border-bottom: 1px solid #f1f5f9;
+      padding-bottom: 8px;
+    }
+
+    /* 💵 現金輔助點鈔機表格樣式 (固定不晃動) */
+    .cashier-box {
+      background: #ffffff;
+      padding: 20px;
+      border-radius: 12px;
+      border: 1px solid #e2e8f0;
+      margin-bottom: 20px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.02);
+    }
+    .cashier-table {
+      width: 100%;
+      border-collapse: collapse;
+      table-layout: fixed; /* 🌟 鎖定寬度防止輸入跳動 */
+      font-size: 0.9rem;
+      margin-top: 10px;
+    }
+    .cashier-table th, .cashier-table td {
+      border: 1px solid #e2e8f0;
+      padding: 10px 12px;
+      vertical-align: middle;
+      box-sizing: border-box;
+    }
+    .cashier-table th {
+      background: #f8fafc;
+      color: #475569;
+      font-weight: 700;
+    }
+    .cashier-table th:nth-child(1), .cashier-table td:nth-child(1) { width: 36%; text-align: left; }
+    .cashier-table th:nth-child(2), .cashier-table td:nth-child(2) { width: 32%; text-align: center; }
+    .cashier-table th:nth-child(3), .cashier-table td:nth-child(3) { width: 32%; text-align: right; }
+
+    .cashier-table input[type="number"] {
+      width: 95px !important;
+      padding: 6px 8px !important;
+      text-align: center !important;
+      border: 1px solid #cbd5e1 !important;
+      border-radius: 6px !important;
+      font-size: 0.95rem !important;
+      outline: none !important;
+      background: #fff;
+    }
+    .cashier-table input[type="number"]:focus {
+      border-color: #2563eb !important;
+      box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+    }
+    .sub-cash {
+      display: inline-block;
+      min-width: 80px;
+      text-align: right;
+      font-weight: 600;
+      color: #0f172a;
+    }
+
+    /* 🔘 現代感簡潔按鈕群組 */
+    .btn-admin-action { background: #0f172a; color: #fff; border: none; padding: 9px 18px; border-radius: 8px; font-weight: 600; cursor: pointer; transition: background 0.2s, transform 0.1s; font-size: 0.9rem; }
+    .btn-admin-action:hover { background: #1e293b; }
     
-    .dashboard-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px; margin-bottom: 24px; }
-    .stat-card { background: #ffffff; padding: 20px; border-radius: 10px; border: 1px solid #e5e7eb; text-align: center; box-shadow: 0 1px 3px rgba(0,0,0,0.02); }
-    .stat-card .label { font-size: 0.85rem; color: #6b7280; font-weight: 600; }
-    .stat-card .num { font-size: 1.6rem; font-weight: bold; color: #0284c7; margin-top: 6px; }
-
-    /* 🎨 美化規格組卡片 */
-    .form-item-card { background: #ffffff; border: 1px solid #d1d5db; border-radius: 10px; padding: 16px; margin-bottom: 12px; box-shadow: 0 1px 2px rgba(0,0,0,0.02); }
-    .options-header-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; border-bottom: 2px solid #f1f5f9; padding-bottom: 8px; }
-
-    /* 💵 輕量化輔助點鈔機框架樣式 */
-    .cashier-box { background: #fafafa; padding: 12px 16px; border-radius: 8px; border: 1px solid #e2e8f0; margin-bottom: 16px; }
-    .cashier-table { width: 100%; border-collapse: collapse; font-size: 0.88rem; margin-top: 6px; }
-    .cashier-table th, .cashier-table td { border: 1px solid #e2e8f0; padding: 6px 8px; text-align: center; background: #fff; }
-    .cashier-table th { background: #f1f5f9; color: #374151; font-weight: 600; }
-    .cashier-table input[type="number"] { width: 65px; padding: 3px; text-align: center; border: 1px solid #d1d5db; border-radius: 4px; font-size: 0.9rem; }
-
-    /* 按鈕樣式統一升級 */
-    .btn-admin-action { background: #000; color: #fff; border: none; padding: 8px 16px; border-radius: 6px; font-weight: 600; cursor: pointer; transition: background 0.2s; font-size: 0.9rem; }
-    .btn-admin-action:hover { background: #333; }
-    .btn-admin-export { background: #16a34a; color: #fff; border: none; padding: 8px 16px; border-radius: 6px; font-weight: 600; cursor: pointer; transition: background 0.2s; font-size: 0.9rem; }
+    .btn-admin-export { background: #16a34a; color: #fff; border: none; padding: 9px 18px; border-radius: 8px; font-weight: 600; cursor: pointer; transition: background 0.2s; font-size: 0.9rem; }
     .btn-admin-export:hover { background: #15803d; }
-    .btn-admin-print { background: #2563eb; color: #fff; border: none; padding: 8px 16px; border-radius: 6px; font-weight: 600; cursor: pointer; transition: background 0.2s; font-size: 0.9rem; }
+    
+    .btn-admin-print { background: #2563eb; color: #fff; border: none; padding: 9px 18px; border-radius: 8px; font-weight: 600; cursor: pointer; transition: background 0.2s; font-size: 0.9rem; }
     .btn-admin-print:hover { background: #1d4ed8; }
-    .btn-admin-canva { background: #7c3aed; color: #fff; border: none; padding: 8px 16px; border-radius: 6px; font-weight: 600; cursor: pointer; transition: background 0.2s; font-size: 0.9rem; }
+    
+    .btn-admin-canva { background: #7c3aed; color: #fff; border: none; padding: 9px 18px; border-radius: 8px; font-weight: 600; cursor: pointer; transition: background 0.2s; font-size: 0.9rem; }
     .btn-admin-canva:hover { background: #6d28d9; }
 
-    /* 📱 手機側邊隱藏選單 (Mobile Drawer) 與漢堡按鈕 */
-    .mobile-menu-toggle { display: none; background: none; border: none; font-size: 1.5rem; cursor: pointer; color: #1f2937; padding: 4px 8px; }
-    .mobile-drawer-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1050; }
-    .mobile-drawer { position: fixed; top: 0; left: -280px; width: 280px; height: 100%; background: #ffffff; z-index: 1100; box-shadow: 4px 0 15px rgba(0,0,0,0.1); transition: left 0.3s ease; display: flex; flex-direction: column; padding: 20px; }
+    /* 📱 手機側邊滑出選單 (Drawer) */
+    .mobile-menu-toggle { display: none; background: none; border: none; font-size: 1.4rem; cursor: pointer; color: #0f172a; padding: 6px; }
+    .mobile-drawer-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.5); z-index: 1050; backdrop-filter: blur(2px); }
+    .mobile-drawer { position: fixed; top: 0; left: -280px; width: 280px; height: 100%; background: #ffffff; z-index: 1100; box-shadow: 10px 0 30px rgba(0,0,0,0.1); transition: left 0.3s cubic-bezier(0.16, 1, 0.3, 1); display: flex; flex-direction: column; padding: 24px; box-sizing: border-box; }
     .mobile-drawer.open { left: 0; }
-    .mobile-drawer-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #e5e7eb; padding-bottom: 12px; margin-bottom: 16px; }
-    .mobile-drawer-links { display: flex; flex-direction: column; gap: 12px; }
-    .mobile-drawer-links a { text-decoration: none; color: #374151; font-weight: 600; padding: 10px 12px; border-radius: 6px; transition: background 0.2s; }
-    .mobile-drawer-links a:hover, .mobile-drawer-links a.active { background: #f3f4f6; color: #2563eb; }
+    .mobile-drawer-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #e2e8f0; padding-bottom: 14px; margin-bottom: 16px; }
+    .mobile-drawer-links { display: flex; flex-direction: column; gap: 8px; }
+    .mobile-drawer-links a { text-decoration: none; color: #475569; font-weight: 600; padding: 12px 14px; border-radius: 8px; transition: background 0.2s, color 0.2s; }
+    .mobile-drawer-links a:hover, .mobile-drawer-links a.active { background: #f1f5f9; color: #2563eb; }
 
     @media (max-width: 768px) {
       .desktop-nav { display: none !important; }
       .mobile-menu-toggle { display: block !important; }
     }
 
+    /* 🔐 右上角登入狀態容器 */
     .nav-auth-container { display: flex; align-items: center; gap: 10px; background: #f8fafc; padding: 6px 12px; border-radius: 8px; border: 1px solid #e2e8f0; }
-    .nav-user-email { color: #166534; font-weight: bold; max-width: 140px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-    .btn-nav-logout { background: #ef4444; color: #fff; border: none; padding: 4px 10px; border-radius: 6px; cursor: pointer; font-size: 0.75rem; font-weight: bold; }
+    .nav-user-email { color: #166534; font-weight: 700; max-width: 140px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .btn-nav-logout { background: #ef4444; color: #fff; border: none; padding: 5px 12px; border-radius: 6px; cursor: pointer; font-size: 0.75rem; font-weight: 700; transition: background 0.2s; }
+    .btn-nav-logout:hover { background: #dc2626; }
   </style>
   
 </head>
@@ -202,20 +328,52 @@
         </div>
 
         <!-- 💵 輕量化輔助點鈔機框架 -->
-        <div class="cashier-box">
-          <h4 style="margin:0 0 6px 0; font-size:0.92rem; color:#1e293b;">💵 現金輔助點鈔計算機 (越南盾面額)</h4>
+        <div class="cashier-box" style="background:#f8fafc; padding:20px; border-radius:10px; border:1px solid #e2e8f0; margin-bottom:20px;">
+          <h4 style="margin:0 0 12px 0; font-size:1rem; color:#1e293b; font-weight:700;">💵 現金輔助點鈔計算機 (越南盾面額)</h4>
           <table class="cashier-table">
             <thead>
-              <tr><th>面額 (VND)</th><th>數量 (張/枚)</th><th>小計</th></tr>
+              <tr>
+                <th style="background:#f1f5f9; color:#374151; font-weight:bold;">面額 (VND)</th>
+                <th style="text-align:center; background:#f1f5f9; color:#374151; font-weight:bold;">數量 (張)</th>
+                <th style="text-align:right; background:#f1f5f9; color:#374151; font-weight:bold;">小計</th>
+              </tr>
             </thead>
             <tbody>
-              <tr><td>500,000 ₫</td><td><input type="number" min="0" value="0" data-val="500000" oninput="calculateCashierTotal()"></td><td class="sub-cash">0 ₫</td></tr>
-              <tr><td>200,000 ₫</td><td><input type="number" min="0" value="0" data-val="200000" oninput="calculateCashierTotal()"></td><td class="sub-cash">0 ₫</td></tr>
-              <tr><td>100,000 ₫</td><td><input type="number" min="0" value="0" data-val="100000" oninput="calculateCashierTotal()"></td><td class="sub-cash">0 ₫</td></tr>
-              <tr><td>50,000 ₫</td><td><input type="number" min="0" value="0" data-val="50000" oninput="calculateCashierTotal()"></td><td class="sub-cash">0 ₫</td></tr>
-              <tr><td>20,000 ₫</td><td><input type="number" min="0" value="0" data-val="20000" oninput="calculateCashierTotal()"></td><td class="sub-cash">0 ₫</td></tr>
-              <tr><td>10,000 ₫</td><td><input type="number" min="0" value="0" data-val="10000" oninput="calculateCashierTotal()"></td><td class="sub-cash">0 ₫</td></tr>
-              <tr><td>其他 / 零錢</td><td><input type="number" min="0" value="0" data-val="1" oninput="calculateCashierTotal()"></td><td class="sub-cash">0 ₫</td></tr>
+              <tr>
+                <td>500,000 ₫</td>
+                <td style="text-align:center;"><input type="number" min="0" value="0" data-val="500000" oninput="calculateCashierTotal()"></td>
+                <td style="text-align:right;"><span class="sub-cash">0 ₫</span></td>
+              </tr>
+              <tr>
+                <td>200,000 ₫</td>
+                <td style="text-align:center;"><input type="number" min="0" value="0" data-val="200000" oninput="calculateCashierTotal()"></td>
+                <td style="text-align:right;"><span class="sub-cash">0 ₫</span></td>
+              </tr>
+              <tr>
+                <td>100,000 ₫</td>
+                <td style="text-align:center;"><input type="number" min="0" value="0" data-val="100000" oninput="calculateCashierTotal()"></td>
+                <td style="text-align:right;"><span class="sub-cash">0 ₫</span></td>
+              </tr>
+              <tr>
+                <td>50,000 ₫</td>
+                <td style="text-align:center;"><input type="number" min="0" value="0" data-val="50000" oninput="calculateCashierTotal()"></td>
+                <td style="text-align:right;"><span class="sub-cash">0 ₫</span></td>
+              </tr>
+              <tr>
+                <td>20,000 ₫</td>
+                <td style="text-align:center;"><input type="number" min="0" value="0" data-val="20000" oninput="calculateCashierTotal()"></td>
+                <td style="text-align:right;"><span class="sub-cash">0 ₫</span></td>
+              </tr>
+              <tr>
+                <td>10,000 ₫</td>
+                <td style="text-align:center;"><input type="number" min="0" value="0" data-val="10000" oninput="calculateCashierTotal()"></td>
+                <td style="text-align:right;"><span class="sub-cash">0 ₫</span></td>
+              </tr>
+              <tr>
+                <td>其他 / 零錢</td>
+                <td style="text-align:center;"><input type="number" min="0" value="0" data-val="1" oninput="calculateCashierTotal()"></td>
+                <td style="text-align:right;"><span class="sub-cash">0 ₫</span></td>
+              </tr>
             </tbody>
           </table>
         </div>
