@@ -742,16 +742,16 @@
     }
 
     function initReconcileDropdown() {
-      let groups = {};
-      globalOrdersData.forEach(o => {
-        let m = o.name.match(/\(([^)]+)\)/);
-        let c = m ? m[1].trim().toUpperCase() : "未分類";
-        if (!groups[c]) groups[c] = [];
-        groups[c].push(o);
-      });
-      document.getElementById('reconcileClassSelect').innerHTML = Object.keys(groups).map(c => `<option value="${c}">${c}</option>`).join('');
-      updateReconcileExpected();
-    }
+  let groups = {};
+  globalOrdersData.forEach(o => {
+    // 直接讀取獨立的班級欄位 (若後端屬性為 class_name)
+    let c = (o.class_name || "未分類").trim().toUpperCase();
+    if (!groups[c]) groups[c] = [];
+    groups[c].push(o);
+  });
+  document.getElementById('previewClassSelect').innerHTML = Object.keys(groups).map(c => `<option value="${c}">${c}</option>`).join('');
+  renderPrintPreview();
+}
 
     function updateReconcileExpected() {
       let c = document.getElementById('reconcileClassSelect').value;
@@ -802,16 +802,16 @@
     }
 
     function initPrintPreviewDropdown() {
-      let groups = {};
-      globalOrdersData.forEach(o => {
-        let m = o.name.match(/\(([^)]+)\)/);
-        let c = m ? m[1].trim().toUpperCase() : "未分類";
-        if (!groups[c]) groups[c] = [];
-        groups[c].push(o);
-      });
-      document.getElementById('previewClassSelect').innerHTML = Object.keys(groups).map(c => `<option value="${c}">${c}</option>`).join('');
-      renderPrintPreview();
-    }
+  let groups = {};
+  globalOrdersData.forEach(o => {
+    // 直接讀取獨立的班級欄位 (若後端屬性為 class_name)
+    let c = (o.class_name || "未分類").trim().toUpperCase();
+    if (!groups[c]) groups[c] = [];
+    groups[c].push(o);
+  });
+  document.getElementById('previewClassSelect').innerHTML = Object.keys(groups).map(c => `<option value="${c}">${c}</option>`).join('');
+  renderPrintPreview();
+}
 
     // 🖨️ 渲染支援 4 個自訂欄位及自由位置插入的 PDF 報表
    // 🖨️ 渲染 PDF 報表並自動計算頁數與套用尺寸

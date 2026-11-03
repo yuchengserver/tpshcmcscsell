@@ -413,7 +413,8 @@
       renderCart();
     }
 
-    // 🚀 智慧結算：檢查庫存並彈窗詢問是否轉為候補
+    
+    // 🚀 智慧結算：檢查庫存並彈窗詢問是否轉為候補（配合獨立的班級、座號、姓名欄位）
     async function submitCheckout(e) {
       e.preventDefault();
       
@@ -422,10 +423,15 @@
         return;
       }
 
+      // 🌟 獨立抓取姓名、班級、座號，不再塞在同一個字串
       const nameVal = document.getElementById('inputName').value.trim();
       const classVal = document.getElementById('inputClass').value.trim();
       const seatVal = document.getElementById('inputSeat').value.trim();
-      const combinedName = `${nameVal} (${classVal} ${seatVal}號)`;
+
+      if (!nameVal || !classVal || !seatVal) {
+        alert('請完整填寫真實姓名、班級與座號！');
+        return;
+      }
 
       let cart = JSON.parse(localStorage.getItem('tss_cart') || '[]');
       if (cart.length === 0) {
@@ -460,20 +466,23 @@
 
       try {
         for (let item of cart) {
-          let itemStatus = orderStatus;
           let stock = parseInt(item.stock) || 0;
-          // 若該項商品庫存充足，可以維持待付款；若整車觸發候補，則全部以候補送出或依單品判定
+          let itemStatus = ((stock <= 0 || item.quantity > stock) ? "候補中" : "待付款");
+
+          // 🌟 嚴格對應後端所需的獨立欄位名稱 (className, seatNo, name)
           await fetch(GAS_API_URL, {
             method: "POST",
             body: JSON.stringify({
               action: "submitOrder",
               productId: item.product_id,
               email: authenticatedEmail,
-              name: combinedName,
+              className: classVal,  // 對應後端 data.className
+              seatNo: seatVal,      // 對應後端 data.seatNo
+              name: nameVal,        // 對應後端 data.name
               quantity: item.quantity,
               selected_option: item.selected_option || '預設',
               remark: "購物車批次結算",
-              status: ((stock <= 0 || item.quantity > stock) ? "候補中" : "待付款")
+              status: itemStatus
             })
           });
         }

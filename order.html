@@ -400,11 +400,15 @@
       const optionInput = document.getElementById('productOption');
       const selectedOption = optionInput ? optionInput.value : '預設';
 
-      // 取得三格輸入資料並自動組合成後台統一格式：「姓名 (班級 座號)」
+      // 🌟 獨立抓取真實姓名、班級與座號
       const nameVal = document.getElementById('inputName').value.trim();
       const classVal = document.getElementById('inputClass').value.trim();
       const seatVal = document.getElementById('inputSeat').value.trim();
-      const combinedName = `${nameVal} (${classVal} ${seatVal}號)`;
+
+      if (!nameVal || !classVal || !seatVal) {
+        alert('請完整填寫真實姓名、班級與座號！');
+        return;
+      }
 
       const quantity = parseInt(document.getElementById('quantity').value) || 1;
       const stock = parseInt(document.getElementById('productStock').value) || 0;
@@ -429,15 +433,18 @@
         return;
       }
 
+      // 🌟 嚴格對應後端所需的獨立欄位名稱 (className, seatNo, name)
       const orderData = {
         action: "submitOrder",
         productId: productId,
         email: authenticatedEmail,
-        name: combinedName,
+        className: classVal,   // 對應後端 data.className
+        seatNo: seatVal,       // 對應後端 data.seatNo
+        name: nameVal,         // 對應後端 data.name
         quantity: quantity,
         selected_option: selectedOption,
         remark: document.getElementById('remark').value,
-        status: orderStatus // 傳遞狀態（待付款或候補中）
+        status: orderStatus    // 傳遞狀態（待付款或候補中）
       };
 
       const btn = document.getElementById('submitBtn');
